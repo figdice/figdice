@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf8"?>
+<fig:template xmlns:fig="http://figdice.org">
+<!-- Let's make a "fig:*" Root node, so as to mute it automatically from the output. -->
+
+<!-- Let's use a CDATA sequence in our template, to
+     produce the DOCTYPE element in the output -->
+<![CDATA[
+<!DOCTYPE html>
+]]>
+<html lang="en">
+	<head>
+		<!-- The <title> tag below will not be rendered directly, because of its
+		     fig:slot attribute. It is here simply to declare a placeholder within
+				 the DOM, named "pageTitle". Anywhere in the template, or any
+				 subsequently included file, you can push content into this slot.
+				 The container tag (here <title>) will disappear, too, to make
+				 room for the pushed tag. Nevertheless, we can give it here arbitrary
+				 content, to be nice to our WYSIWYG editor. -->
+		<title fig:slot="pageTitle"> This is a placeholder for the real title </title>
+	</head>
+
+	<body>
+
+		<!-- This navbar div is shown on every page, unconditionally. -->
+		<div class="navbar">
+			<ul>
+				<li>Some navigation menu here</li>
+				<li>Repeated on every page</li>
+			</ul>
+		</div>
+
+
+		<!-- The following div (and its whole content) will stripped out of
+		     the output if the value of "/isLogged" is false. -->
+		<div fig:cond="/isLogged" class="welcome-box">
+			Welcome back, <span fig:mute="true" fig:text="/user/firstname" />
+		</div>
+
+		<!-- The following div (and its whole content) will stripped out of
+		     the output if the value of "/isLogged" is true. -->
+		<div fig:cond="not(/isLogged)" class="loginbar">
+			<a href="#">sign in</a> | <a href="#">register</a>
+		</div>
+
+
+		<!-- Let's decide that the proper location for our Blog article's content
+		     is exactly here in the DOM tree. -->
+		<div fig:slot="greatBlogPost">
+			Likewise, some meaningful content can be pushed here.
+		</div>
+
+
+		<!-- The template is an XML file, so every tag must be properly clsoed.
+		     Yet, in HTML5, we want to render here an unclosed, "void" <br> tag.
+				 The solution is fig:void. -->
+		<br fig:void="true" />
+
+		<div id="side-card">
+			<!-- Let's give this div a complex class attribute:
+			     a static part "span3" and an additive "disabled" on condition
+					 that the user is logged.
+					 The <fig:attr> tag creates (or replaces) an attribute to its
+					 immediate parent node. It is not rendered itself (just as any
+					 fig:* tag). -->
+			<fig:attr name="class">
+				<!-- that's the static part: -->
+				span3
+				<!-- and that's the conditional part:
+				     we render it using a mute tag, so as to place a fig:cond on it. -->
+				<fig:x fig:cond="not(/isLogged)">disabled</fig:x>
+			</fig:attr>
+			This area is disabled if the user is not logged.
+		</div>
+
+
+		<fig:cdata file="template-footer.html" />
+
+	</body>
+</html>
+
+</fig:template>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fig:template xmlns:fig="http://figdice.org/">
+
+<div fig:plug="greatBlogPost" class="article">
+  My blog post content is written in this file.
+  The exact node where it is going to be embedded,
+  depends on the position of the "greatBlogPost" slot
+  in the main container file.
+	The whole tag (including the div and its attributes) is
+	pasted in place of the placeholder.
+</div>
+
+<title fig:plug="pageTitle"> My pushed article's title! </title>
+
+<!-- We are including here a "sub-template". Keep in mind that, from the View
+		 object's point of view, this is a sub-template, but the DOM elements that
+		 the sub-template produce will end up being _parent_ objects for our tags
+		 above.
+		 This is no contradiction in FigDice: thanks to the Plug/Slot mechanism
+		 the templates do not need to be loaded/writted in a linear way. -->
+<fig:include file="template-page-generic.xml" />
+
+</fig:template>

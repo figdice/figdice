@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fig:template xmlns:fig="http://figdice.org">
+<html>
+	<fig:include file="FigXmlInclude2.xml" />
+</html>
+</fig:template>

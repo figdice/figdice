@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fig:template xmlns:fig="http://figdice.org/">
+
+<!-- Open the output file and locate where this <ul> is:
+     You can see that it has 3 <li> items. This is because
+     we loop over the 3 top-level elements of the "indexed" array.
+ -->
+<ul>
+	<!--  The loop is realized by the fig:walk directive.
+	      The value of this attribute is an expression evaluating
+	      to the data you mounted into the view.
+	      The data is an indexed array whose items are 
+	      associative arrays, all of them having the "name" and "link"
+	      keys.
+	      Here we use the "link" value inside an inline HTML attribute,
+	      with the { } notation (because it is an HTML attribute, the
+	      string it contains is unparsed, apart from the sections within { }
+	      which are treated as normal FigDice Expressions).
+	      The "name" key is used as the inner content of a <a> inner tag.
+	      -->
+	<li fig:walk="/indexed"><a href="{link}" fig:text="name"></a></li>
+</ul>
+
+<!-- We have seen that, from within a fig:walk loop,
+     the engine gives you direct access to the property of the current
+     item, in each iteration. This is similar to a
+     foreach($collection as $item) statement,
+     where the $item is understated and does not have to be explicity
+     mentioned inside the loop, in order to access its properties.
+     
+     In FigDice, this is called the "Context".
+     We will see in further tutorials how to access properties that are
+     outside your context anyway.
+      -->
+
+
+<!-- In the following section, we perform a nested loop:
+     our data structure is a collection of rows, and each row has
+     three cells.
+     
+     It is perfectly valid to operate a fig:walk INSIDE an outer fig:walk,
+     so as to loop over the inner collection (the cells).
+      -->
+
+<table>
+	<tr fig:walk="/nested">
+		<!-- First loop: the context is a row. We can access the properties of
+		     the row (its name, and its collection of cells (the "values" array). -->
+		<td fig:text="name"></td>
+		<!-- Here we use a special built-in function: "position()".
+		     This function is meaningful solely from withing a fig:walk iteration,
+		     and it returns the 1-based number of the current iteration. -->
+		<td>Row #<span fig:mute="true" fig:text="position()" /></td>
+		
+		<!-- Let's go for the inner loop: we will iterate on the "values" array
+		     of each row item, thus changing the Context, from the row to 
+		     individual cell. -->
+		<!-- Each cell is, in turn, a scalar value! In order to display it,
+		     we use the dot symbol, which means "the current item", whatever it is. -->
+		<td fig:walk="values" fig:text="."></td>
+	</tr>
+</table>
+
+</fig:template>
