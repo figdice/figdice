@@ -25,12 +25,15 @@ The **\figdice** namespace will automatically become available thanks to the **a
 
 **2. Phar**
 -----------
-Download the latest FigDice phar file to the location of your choice.
+Download the latest [FigDice phar](https://sourceforge.net/projects/figdice/files/) file to the location of your choice.
 Then, in your source files where you need to use FigDice features, write the line:
 
     require_once 'phar:///path/to/figdice.phar';
 
 The phar file's stub registers an **autoload** function for the classes in the **\figdice** namespace. Notice that, if you already have an old-style **__autoload** function, you must register it with [spl_autoload_register](http://php.net/manual/en/function.spl-autoload-register.php) before importing the phar.
+
+Your will also need to download and include a [PSR-3 Logger implementation](https://github.com/php-fig/log).
+
 
 
 **3. Zip**
@@ -53,29 +56,13 @@ Notice that some Exceptions and helper classes might need *require* despite you 
 Simply *require_once* the **autoload.php** file at the root of the FigDice folder.
 
 
+In both options, your will also need to download and include a [PSR-3 Logger implementation](https://github.com/php-fig/log).
+
+
 **Getting Started**
 ===================
 
-Instanciate a Fig View:
-
-    $figView = new \figdice\View();
-
-Register your Feed provider:
-
-    $feedFactory = new MyFeedFactory();
-    $figView->registerFeedFactory( $feedFactory );
-
-And load and render your XML template:
-
-    $figView->loadFile( 'my-template.xml' );
-    echo $figView->render();
-
-
-The Feed Factory is the class you define, which will provide an instance of the Feeds that your template pulls with instruction:
-
-    <fig:feed class="\your\FeedClass" target="mountPoint" />
-
-It is responsible for identifying which file needs loading, and for creating a new instance of the **\figdice\Feed** derived class of yours, which handles the data gathering as per the template's request.
+Browse the examples!
 
 See [Documentation](http://www.figdice.org/en/manual.html) for more details.
 
