@@ -38,7 +38,7 @@ Your will also need to download and include a [PSR-3 Logger implementation](http
 
 **3. Zip**
 ----------
-Download the latest Figdice zip file to the location of your choice and extract the archive. Then you have two options:
+Download the latest Figdice zip file to the location of your choice and extract the archive. Then you have two options. In both, your will also need to download and include a [PSR-3 Logger implementation](https://github.com/php-fig/log).
 
 ***3.1 Manual includes ***
 
@@ -56,13 +56,12 @@ Notice that some Exceptions and helper classes might need *require* despite you 
 Simply *require_once* the **autoload.php** file at the root of the FigDice folder.
 
 
-In both options, your will also need to download and include a [PSR-3 Logger implementation](https://github.com/php-fig/log).
 
 
 **Getting Started**
 ===================
 
-Browse the examples!
+Browse the [examples](https://github.com/gabrielzerbib/figdice/tree/master/examples)!
 
 See [Documentation](http://www.figdice.org/en/manual.html) for more details.
 
