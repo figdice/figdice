@@ -1,12 +1,11 @@
 Starting to work with FigDice in your project is simple.
 
-**Installation**
-================
+# Installation
 
 Choose among the 3 methods below, which suits better your needs: Composer, Phar, or Zip file.
 
-**1. Composer**
----------------
+## 1. Composer
+
 Simply add the following composer.json file to your project root, or append the "require" section to your existing composer.json file:
 
     {
@@ -23,8 +22,8 @@ The **\figdice** namespace will automatically become available thanks to the **a
 
 
 
-**2. Phar**
------------
+## 2. Phar
+
 Download the latest [FigDice phar](https://sourceforge.net/projects/figdice/files/) file to the location of your choice.
 Then, in your source files where you need to use FigDice features, write the line:
 
@@ -36,11 +35,11 @@ Your will also need to download and include a [PSR-3 Logger implementation](http
 
 
 
-**3. Zip**
-----------
+## 3. Zip
+
 Download the latest Figdice zip file to the location of your choice and extract the archive. Then you have two options. In both, your will also need to download and include a [PSR-3 Logger implementation](https://github.com/php-fig/log).
 
-***3.1 Manual includes ***
+### 3.1 Manual includes
 
 In the your source files where you need to use FigDice features, include the necessary files:
 
@@ -51,15 +50,14 @@ In the your source files where you need to use FigDice features, include the nec
 at the minimum.
 Notice that some Exceptions and helper classes might need *require* despite you don't use them explicitly in your code.
 
-***3.2 Autoload ***
+### 3.2 Autoload
 
 Simply *require_once* the **autoload.php** file at the root of the FigDice folder.
 
 
 
 
-**Getting Started**
-===================
+# Getting Started
 
 Browse the [examples](https://github.com/gabrielzerbib/figdice/tree/master/examples)!
 
