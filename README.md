@@ -1,4 +1,4 @@
-Starting to work with FigDice in your project is simple.
+www.figdice.org
 
 # Installation
 
