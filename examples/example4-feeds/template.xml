@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fig:template xmlns:fig="http://figdice.org/">
+
+<div>Some prime numbers below:</div>
+<!-- We indicate to the engine, with the help of the fig:feed tag below, 
+     that we want to instantiate and invoke the PrimeNumbersFeed feed class.
+     The engine will execute its run() method, and we capture the returned
+     value into our universe, at top-level "primeNumbers" key. 
+     -->
+<fig:feed class="PrimeNumbersFeed" target="primeNumbers" />
+<ul>
+	<!-- Since our primeNumber result, returned by the run() method
+	     of our Feed, is a plain indexed array, we can loop over it.
+	     At each iteration, the current context is the next array's item
+	     itself. It is a scalar (an int). We mention it with the 
+	     help of the "." symbol -->
+	<li fig:walk="primeNumbers" fig:text="."></li>
+</ul>
+
+</fig:template>
