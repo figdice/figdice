@@ -18,7 +18,7 @@ Then run the following command in your project folder:
 
     php composer.phar install
 
-The **\figdice** namespace will automatically become available thanks to the **autoload** Composer feature.
+The **\figdice** namespace is made available thanks to the **autoload** Composer feature.
 
 
 
