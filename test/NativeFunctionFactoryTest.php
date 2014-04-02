@@ -32,6 +32,14 @@ use figdice\classes\ViewElementTag;
  */
 class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 
+	/**
+	 * @var View
+	 */
+	private $view;
+	
+	protected function setUp() {
+		$this->view = new View();
+	}
 	private function lexExpr($expression) {
 		$lexer = new Lexer($expression);
 
@@ -43,7 +51,7 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 
 		// In this test, we need a real View object, because
 		// it embeds a real NativeFunctionFactory instance.
-		$view = new View();
+		$view = $this->view;
 
 		$viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
 		$viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
@@ -76,6 +84,25 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 	public function testIfFuncForNoOperand() {
 		$this->assertEquals('no', $this->lexExpr( " if(false, 'yes', 'no')  " ));
 	}
+	public function testCountOfEmptyIsZero() {
+		$this->assertEquals(0, $this->lexExpr(' count(/dummy/value) '));
+	}
+	public function testCountOfLiteralIsZero() {
+		$this->assertEquals(0, $this->lexExpr(' count( 12 ) '));
+	} 
+	public function testCountOfArrayIsCount() {
+		$this->view->mount('myArray', array(1,2,3));
+		$this->assertEquals(3, $this->lexExpr(' count( /myArray ) '));
+	} 
+	public function testSumOfArrayIsOk() {
+		$this->view->mount('myArray', array(1,2,3));
+		$this->assertEquals(6, $this->lexExpr(' sum( /myArray ) '));
+	}
+	public function testGlobalConst() {
+		define('MY_GLOBAL_TEST_CONST', 12);
+		$this->assertEquals(MY_GLOBAL_TEST_CONST, $this->lexExpr(" const( 'MY_GLOBAL_TEST_CONST' ) ") );
+	}
+	
 	/**
 	 * This test is not the same as the one in LexerTest which expects also
 	 * this exception. In the situation below, we DID register a NativeFunctionFactory.

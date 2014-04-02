@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2014, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -44,7 +44,7 @@ class DFAStateDot extends DFAState {
 			$lexer->pushPath(new PathElementCurrent());
 		}
 		else if(self::isDigit($char)) {
-			$lexer->setStateDecimal($char);
+			$lexer->setStateDecimal('0.'.$char);
 		}
 		else if($char == '.') {
 			$lexer->setStateDotdot();

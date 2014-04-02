@@ -177,15 +177,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse($this->lexExpr( ' somefunc(12) ' ));
 	}
 	
-	/**
-	 * @todo Currently the Lexer is not able to identify that
-	 * the literal .14 is in fact 0.14 and we are required
-	 * to explicity not omit the leading zero.
-	 * Thus this test should fail as soon as lexer fixed.
-	 */
 	public function testDecimalLiteralIsAllowedToStartWithDot()
 	{
-		$this->assertNotEquals(.14, $this->lexExpr('.14'));
+		$this->assertEquals(.14, $this->lexExpr('.14'));
 	}
 	
 	public function testDynamicPathParsing()
