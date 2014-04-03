@@ -103,6 +103,31 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(MY_GLOBAL_TEST_CONST, $this->lexExpr(" const( 'MY_GLOBAL_TEST_CONST' ) ") );
 	}
 	
+	public function testFunctionFirst() {
+		$this->view->mount('data',  array(1,2,3));
+		$this->view->source = <<<ENDXML
+<fig:x fig:walk="/data"><fig:y fig:text="if(first(), 't', 'f')"/></fig:x>
+ENDXML;
+		$expected = <<<ENDHTML
+tff
+ENDHTML;
+		$actual = $this->view->render();
+		$this->assertEquals($expected, $actual);
+	}
+
+	public function testFunctionLast() {
+		$this->view->mount('data',  array(1,2,3));
+		$this->view->source = <<<ENDXML
+<fig:x fig:walk="/data"><fig:y fig:text="if(last(), 't', 'f')"/></fig:x>
+ENDXML;
+		$expected = <<<ENDHTML
+fft
+ENDHTML;
+		$actual = $this->view->render();
+		$this->assertEquals($expected, $actual);
+	}
+	
+	
 	/**
 	 * This test is not the same as the one in LexerTest which expects also
 	 * this exception. In the situation below, we DID register a NativeFunctionFactory.

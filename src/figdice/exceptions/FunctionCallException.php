@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2014, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -27,7 +27,6 @@ class FunctionCallException extends \Exception {
 	private $funcName;
 	public function __construct($funcName, $message, $filename, $line) {
 		parent::__construct($funcName . ': ' . $message);
-		$this->classname = $tagname;
 		$this->file = $filename;
 		$this->line = $line;
 	}

@@ -26,7 +26,7 @@ namespace figdice\classes;
 use Psr\Log\LoggerIntergace;
 use figdice\View;
 use figdice\LoggerFactory;
-use figdice\exceptions\EndOfRenderingException;
+use figdice\exceptions\RenderingException;
 use figdice\exceptions\DictionaryDuplicateKeyException;
 use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\FeedClassNotFoundException;
@@ -107,6 +107,15 @@ class ViewElementTag extends ViewElement {
 	 */
 	public function getCurrentFile() {
 		return $this->currentFile;
+	}
+	/**
+	 * @return string
+	 */
+	protected function getCurrentFilename() {
+		if ( (null != $this->currentFile) && ($this->currentFile instanceof File) ) {
+			return $this->currentFile->getFilename();
+		}
+		return '(null)';
 	}
 	/**
 	 * @return string
@@ -547,7 +556,6 @@ class ViewElementTag extends ViewElement {
 
 		//================================================================
 		//fig:text
-		//(fig:content and fig:fill are deprecated)
 		//
 		//Instead of rendering current tag, replace its contents
 		//with expression.
@@ -559,7 +567,6 @@ class ViewElementTag extends ViewElement {
 		//Only the immediate Tag children of name fig:attr are parsed,
 		//so that it is still possible to have dynamic attributes to a tag bearing fig:text.
 		if(isset($this->attributes[$this->view->figNamespace . 'text'])) {
-			$output = '';
 			$content = & $this->attributes[$this->view->figNamespace . 'text'];
 
 			$output = $this->evaluate($content);
@@ -990,7 +997,13 @@ class ViewElementTag extends ViewElement {
 				$newIteration->iterate($key);
 				$nextContent = $this->render(/*bypassWalk*/true);
 				if($nextContent === false) {
-					throw new Exception();
+					throw new RenderingException($this->getTagName(),
+							$this->getCurrentFilename(),
+							$this->getLineNumber(),
+							"In file: " . $this->getCurrentFilename() . '(' . $this->getLineNumber() . '), '.
+							'tag <' . $this->getTagName() . '> : ' . PHP_EOL .
+							"Inner content of loop could not be rendered." . PHP_EOL .
+								"Have you used :walk and :text on the same tag?");
 				}
 
 				//Each rendered iteration start again
@@ -1147,7 +1160,7 @@ class ViewElementTag extends ViewElement {
 			$attributeName = $matches[1];
 			//If there is a corresponding fig:param, use it:
 			if(array_key_exists($attributeName, $arguments)) {
-				//Data coming from my database can contain accented ascii chars (like é : chr(233)),
+				//Data coming from my database can contain accented ascii chars (like ï¿½ : chr(233)),
 				//which may corrupt the subsequent: return utf8_decode($value) at the end of this function.
 				$attributeValue = utf8_encode($arguments[$attributeName]);
 			}
@@ -1158,8 +1171,8 @@ class ViewElementTag extends ViewElement {
 			$value = str_replace('{' . $attributeName . '}', $attributeValue, $value);
 		}
 
-		//TODO: les paramètres de traduction passés en fig:param plutôt.
-		//Ce mode est important pour passer des paramètres conditionnels, par exemple
+		//TODO: les paramï¿½tres de traduction passï¿½s en fig:param plutï¿½t.
+		//Ce mode est important pour passer des paramï¿½tres conditionnels, par exemple
 		//(bien que je suppose que pour des traductions c'est maladroit).
 
 		//If the translated value is empty (ie. we did find an entry in the proper dictionary file,

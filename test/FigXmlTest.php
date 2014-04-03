@@ -21,6 +21,7 @@
  * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 use figdice\View;
 use figdice\classes\File;
 use figdice\classes\ViewElementTag;
@@ -100,6 +101,19 @@ ENDHTML;
 ENDXML;
 		$this->view->mount('data', array('a', 'b', 'c'));
 		$this->assertEquals("a\nb\nc\n", $this->view->render());
+	}
+
+	public function testTODOCompactWalkWithIndexedArrayAndTextFails() {
+		//$this->markTestIncomplete("Don't know why this raises an exception...");
+		$this->view->mount('data',  array(1,2,3));
+		$this->view->source = <<<ENDXML
+<fig:x fig:walk="/data" fig:text="first()"/>
+ENDXML;
+		$expected = <<<ENDHTML
+1
+ENDHTML;
+		$actual = $this->view->render();
+		$this->assertEquals($expected, $actual);
 	}
 	
 }

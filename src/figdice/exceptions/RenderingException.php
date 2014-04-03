@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2014, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,8 +23,15 @@
 
 namespace figdice\exceptions;
 
-class EndOfRenderingException extends \Exception {
-	public function __construct() {
-		parent::__construct();
+class RenderingException extends \Exception {
+	private $tagname;
+	public function __construct($tagname, $filename, $line, $message) {
+		parent::__construct($message);
+		$this->tagname = $tagname;
+		$this->file = $filename;
+		$this->line = $line;
+	}
+	public function getTagName() {
+		return $this->tagname;
 	}
 }

@@ -31,6 +31,7 @@ use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\XMLParsingException;
 
 use Psr\Log\LoggerInterface;
+use figdice\exceptions\RenderingException;
 
 /**
  * Main component of the FigDice library.
@@ -365,20 +366,20 @@ class View {
 					'Â°' => '&deg;'
 				),
 				array(
-					'à'  => '&agrave;',
-					'â'  => '&acirc;',
-					'ç'	 => '&ccedil;',
-					'é'  => '&eacute;',
-					'è'  => '&egrave;',
-					'ê'  => '&ecirc;',
-					'ë'  => '&euml;',
-					'î'  => '&icirc;',
-					'ï'	 => '&iuml;',
-					'ô'	 => '&ocirc;',
-					'û'	 => '&ucirc;',
-					'ù'  => '&ugrave;',
-					'°'	 => '&deg;',
-					'€'  => '&euro;'
+					'ï¿½'  => '&agrave;',
+					'ï¿½'  => '&acirc;',
+					'ï¿½'	 => '&ccedil;',
+					'ï¿½'  => '&eacute;',
+					'ï¿½'  => '&egrave;',
+					'ï¿½'  => '&ecirc;',
+					'ï¿½'  => '&euml;',
+					'ï¿½'  => '&icirc;',
+					'ï¿½'	 => '&iuml;',
+					'ï¿½'	 => '&ocirc;',
+					'ï¿½'	 => '&ucirc;',
+					'ï¿½'  => '&ugrave;',
+					'ï¿½'	 => '&deg;',
+					'ï¿½'  => '&euro;'
 				)
 			);
 
@@ -458,46 +459,42 @@ class View {
 	 * using the data universe.
 	 *
 	 * @return string
+	 * @throws RenderingException
 	 */
 	public function render() {
-		try {
-			if(! $this->bParsed) {
-				$this->parse();
-			}
-
-			$header = '';
-
-			//Consider the processing instructions only when
-			//rendering a top-most view file (i.e. not an
-			//included file)
-			if (null == $this->parentViewElement) {
-				foreach ($this->processingInstructions as $processingIstruction) {
-					$header .= "$processingIstruction\n";
-				}
-			}
-			else {
-				$this->rootNode->view = & $this->parentViewElement->view;
-			}
-
-			if (! $this->rootNode) {
-				throw new XMLParsingException('No template file loaded', '', 0);
-			}
-			$result = $this->rootNode->render();
-
-			if($result === false) {
-				return false;
-			}
-
-
-			if(! $this->parentViewElement) {
-				$result = $this->plugIntoSlots($result);
-			}
-
-			return $header . $result;
+		if(! $this->bParsed) {
+			$this->parse();
 		}
-		catch (EndOfRenderingException $exception) {
-			return '';
+
+		$header = '';
+
+		//Consider the processing instructions only when
+		//rendering a top-most view file (i.e. not an
+		//included file)
+		if (null == $this->parentViewElement) {
+			foreach ($this->processingInstructions as $processingIstruction) {
+				$header .= "$processingIstruction\n";
+			}
 		}
+		else {
+			$this->rootNode->view = & $this->parentViewElement->view;
+		}
+
+		if (! $this->rootNode) {
+			throw new XMLParsingException('No template file loaded', '', 0);
+		}
+		$result = $this->rootNode->render();
+
+		if($result === false) {
+			return false;
+		}
+
+
+		if(! $this->parentViewElement) {
+			$result = $this->plugIntoSlots($result);
+		}
+
+		return $header . $result;
 	}
 
 	/**
@@ -749,7 +746,7 @@ class View {
 		if($name == '.') {
 			//TODO: Attention ce n'est pas le dernier de la pile,
 			//qu'il faut prendre, mais le contexte actuel !
-			//(gare aux boucles imbriquées).
+			//(gare aux boucles imbriquï¿½es).
 			return $this->callStackData[count($this->callStackData) - 1];
 		}
 		if($name == '..') {
@@ -760,7 +757,7 @@ class View {
 			}
 			//TODO: Attention ce n'est pas l'avant-dernier de la pile,
 			//qu'il faut prendre, mais le vrai parent du contexte actuel !
-			//(gare aux boucles imbriquées)
+			//(gare aux boucles imbriquï¿½es)
 			return $this->callStackData[count($this->callStackData) - 2];
 		}
 
@@ -768,7 +765,7 @@ class View {
 		for($i = $stackDepth - 1; $i >= 0; --$i) {
 
 			//If the piece of data is actually an object, rather than an array,
-			//then try to apply a Get method on the name of the property (à la Java Bean).
+			//then try to apply a Get method on the name of the property (ï¿½ la Java Bean).
 			//If the object does not expose such method, try to obtain the object's property directly.
 			if(is_object($this->callStackData[$i])) {
 				$getter = 'get' . strtoupper($name[0]) . substr($name, 1);
