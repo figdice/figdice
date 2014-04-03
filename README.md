@@ -1,4 +1,21 @@
-www.figdice.org
+
+# Abstract
+FigDice is a templating engine for PHP.
+It differs from most of the popular template systems, in the way the presentation data are made available to templates: instead of pushing the data from Controller to View, you build Views that pull the data they need.
+
+See **[figdice.org](http://www.figdice.org/)**
+
+## Features
+
+- **Fast, easy** and powerful Template Engine
+- **XML syntax** for your Templates: you gain built-in validation
+- Instructions are extended attributes inside your HTML tags: you can display your templates **WYSIWYG** in your browser/editor
+- Manipulate your data with the help of a simple and powerful **expression parser**
+- Built-in **i18n**, using keys/values from cached XML dictionaries
+- Inclusions, loops, conditions, with a **non-intrusive syntax** inside the document
+- No programming required, for the Template designers
+- Hermetic separation between the application's layers (Presentation / Logics)
+- Inversion of control: the Templates pull the data on-demand. The controllers need not know the templates by heart beforehand
 
 # Installation
 
