@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <fig:template xmlns:fig="http://figdice.org">
 <!-- Let's make a "fig:*" Root node, so as to mute it automatically from the output. -->
 
