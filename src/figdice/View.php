@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.2
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -218,14 +218,6 @@ class View {
 	 */
 	public $figNamespace = 'fig:';
 
-	/**
-	 * Indicates whether not to perform the escape strings replacements
-	 * (special characters and html entities)
-	 * while loading a file.
-	 * @var boolean
-	 */
-	private $noReplacements = false;
-
 	public function __construct() {
 		$this->source = '';
 		$this->result = '';
@@ -315,9 +307,6 @@ class View {
 
 		if(file_exists($filename)) {
 			$this->source = file_get_contents($filename);
-			if(! $this->noReplacements ) {
-				$this->performReplacements();
-			}
 		}
 		else {
 			$message = "File not found: $filename.";
@@ -326,80 +315,6 @@ class View {
 		}
 	}
 
-	/**
-	 * Call this method before load() in order to prevent the
-	 * string replacements of HTML entities and special characters,
-	 * if you wish to produce text output rather than HTML.
-	 * @param boolean $value
-	 * @return void
-	 */
-	public function setNoReplacements($value = true) {
-		$this->noReplacements = $value;
-	}
-
-	private function performReplacements() {
-			//If Source is encoded in UTF-8, then the following translations are relevant:
-			$replacements = array(
-				array(
-					'€' => '&euro;'
-				),
-				array(
-					"\xC3\xA0"  => '&agrave;',
-					'â' => '&acirc;',
-
-					'ç'  => '&ccedil;',
-
-					'é' => '&eacute;',
-					'è' => '&egrave;',
-					'ê' => '&ecirc;',
-					'ë' => '&euml;',
-					'Ê' => '&Ecirc;',
-
-					'î' => '&icirc;',
-					'ï' => '&iuml;',
-
-					'ô' => '&ocirc;',
-					'œ' => '&oelig;',
-
-					'û' => '&ucirc;',
-					'ù' => '&ugrave;',
-					'°' => '&deg;'
-				),
-				array(
-					'�'  => '&agrave;',
-					'�'  => '&acirc;',
-					'�'	 => '&ccedil;',
-					'�'  => '&eacute;',
-					'�'  => '&egrave;',
-					'�'  => '&ecirc;',
-					'�'  => '&euml;',
-					'�'  => '&icirc;',
-					'�'	 => '&iuml;',
-					'�'	 => '&ocirc;',
-					'�'	 => '&ucirc;',
-					'�'  => '&ugrave;',
-					'�'	 => '&deg;',
-					'�'  => '&euro;'
-				)
-			);
-
-			foreach($replacements as $repl) {
-				$this->source = str_replace(array_keys($repl), array_values($repl), $this->source);
-			}
-
-
-			//It's easier to write source HTML files containing regular
-			//entities, like "&eacute;" instead of "&amp;eacute;" which
-			//would be necessary as valid XML that would still render
-			//the HTML entity as desired.
-			//Therefore the following line performs the development of
-			//the "&" symbols in source, into "&amp;" entity
-			//(but only the "&" symbols that are not immediately followed by "amp;",
-			//because if the source already contains an "&amp;" sequence then,
-			//let's not convert it to "&amp;amp;".
-			//The following RexExp uses a "negative lookahead assertion".
-			$this->source = preg_replace('/&(?!amp;)/', '&amp;', $this->source);
-	}
 	/**
 	 * @return ViewElementTag
 	 */
@@ -449,7 +364,7 @@ class View {
 		if(! $bSuccess ) {
 			throw new XMLParsingException(
 					$errMsg,
-					$this->file->getFilename(),
+					($this->file ? $this->file->getFilename() : '(null)'),
 					$lineNumber);
 		}
 	}
@@ -675,7 +590,8 @@ class View {
 
 	function errorMessage($errorMessage) {
 		$lineNumber = xml_get_current_line_number($this->xmlParser);
-		$this->logger->error("{$this->file->getFilename()}($lineNumber): $errorMessage");
+		$filename = ($this->file) ? $this->file->getFilename() : '(null)';
+		$this->logger->error("$filename($lineNumber): $errorMessage");
 	}
 
 	/**

@@ -120,5 +120,39 @@ ENDXML;
 		$this->view->render();
 		$this->assertFalse(true);
 	}
+
+	public function testLoadXMLwithUTF8AccentsAndDeclaredEntities()
+	{
+		$this->view->source = <<<ENDXML
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE figdice [
+  <!ENTITY eacute "&eacute;">
+]>
+<xml fig:mute="true">
+  éà &eacute; €
+</xml>
+ENDXML;
+		$this->view->mount('data', array('a', 'b', 'c'));
+		$this->assertEquals("éà &eacute; €", trim($this->view->render()) );
+	}
+
+	/**
+	 * @expectedException figdice\exceptions\XMLParsingException
+	 */
+	public function testUndeclaredEntitiesRaiseException()
+	{
+		$this->view->source = <<<ENDXML
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE figdice [
+  <!ENTITY eacute "&eacute;">
+]>
+<xml fig:mute="true">
+  éà &eacute; € &ocirc;
+</xml>
+ENDXML;
+		$this->view->mount('data', array('a', 'b', 'c'));
+		$this->assertEquals("éà &eacute; € &ocirc;", trim($this->view->render()) );
+	}
 	
+
 }
