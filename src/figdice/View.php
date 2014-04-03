@@ -114,8 +114,6 @@ class View {
 	 */
 	private $bParsed;
 
-	public $processingInstructions;
-
 	/**
 	 * XML parser resource (domxml)
 	 *
@@ -222,7 +220,6 @@ class View {
 		$this->source = '';
 		$this->result = '';
 		$this->rootNode = null;
-		$this->processingInstructions = array();
 		$this->stack = array();
 		$this->logger = LoggerFactory::getLogger(get_class($this));
 		$this->parentViewElement = null;
@@ -339,7 +336,6 @@ class View {
 		xml_set_object($this->xmlParser, $this);
 		xml_set_element_handler($this->xmlParser, 'openTagHandler', 'closeTagHandler');
 		xml_set_character_data_handler($this->xmlParser,'cdataHandler');
-		xml_set_processing_instruction_handler($this->xmlParser, 'piHandler');
 
 		//Prepare the detection of the very first tag, in order to compute
 		//the offset in XML string as regarded by the parser.
@@ -381,17 +377,8 @@ class View {
 			$this->parse();
 		}
 
-		$header = '';
 
-		//Consider the processing instructions only when
-		//rendering a top-most view file (i.e. not an
-		//included file)
-		if (null == $this->parentViewElement) {
-			foreach ($this->processingInstructions as $processingIstruction) {
-				$header .= "$processingIstruction\n";
-			}
-		}
-		else {
+		if (null != $this->parentViewElement) {
 			$this->rootNode->view = & $this->parentViewElement->view;
 		}
 
@@ -409,7 +396,7 @@ class View {
 			$result = $this->plugIntoSlots($result);
 		}
 
-		return $header . $result;
+		return $result;
 	}
 
 	/**
@@ -471,18 +458,6 @@ class View {
 		$this->callStackData[0][$mountingName] = $data;
 	}
 
-	/**
-	 * XML parsing handler for Processing Instructions.
-	 *
-	 * @param domxml_parser $xmlParser
-	 * @param string $target
-	 * @param string $data
-	 */
-	function piHandler($xmlParser, $target, $data) {
-		//TODO: I don't remember why I wrote this replace below!
-		$target = str_replace('fig:', '', $target);
-		$this->processingInstructions[] = '<'.'?'."$target $data".'?'.'>'."\n";
-	}
 
 	private function openTagHandler($xmlParser, $tagName, $attributes) {
 		if($this->firstOpening) {
