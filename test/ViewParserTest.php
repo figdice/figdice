@@ -183,4 +183,15 @@ ENDHTML;
 		$result = $view->render();
 		$this->assertFalse(true);
 	}
+	
+	public function testParseAfterRenderHasNoEffect() {
+		$view = new View();
+		$view->source = <<<ENDXML
+<div>
+</div>
+ENDXML;
+		$output = $view->render();
+		$view->parse();
+		$this->assertEquals($output, $view->render());
+	}
 }

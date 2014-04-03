@@ -324,11 +324,8 @@ class View {
 	 * @throws XMLParsingException
 	 */
 	public function parse() {
-		if($this->result !== '') {
-			return $this->result;
-		}
-		if($this->source == '') {
-			return false;
+		if($this->bParsed) {
+			return;
 		}
 
 		$this->xmlParser = xml_parser_create('UTF-8');
@@ -386,10 +383,6 @@ class View {
 			throw new XMLParsingException('No template file loaded', '', 0);
 		}
 		$result = $this->rootNode->render();
-
-		if($result === false) {
-			return false;
-		}
 
 
 		if(! $this->parentViewElement) {
