@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fig:template xmlns:fig="http://figdice.org/">
+
+<!-- Let's define our macro in a separate file. -->
+<fig:include file="macro-definitions.xml" />
+
+<!-- Iterate over our data -->
+<div class="country-container" fig:walk="/countries">
+	<!-- And let's invoke our macro here, inside the loop!
+	     
+	     Macro arguments can be passed in two ways:
+	     - direct inline attributes,
+	     - or <fig:param> immediate child
+	     
+	     We will use here the inline attributes. Every attribute of
+	     our span tag (holding the fig:call attribute) is considered
+	     as an argument to the macro call.
+	     See in the macro definition how we use the "countryName" and
+	     "item" parameters as usual elements of the (local) universe within
+	     the macro execution.
+	     
+	     NB: the "class" argument below is also a macro argument!
+       CAUTION: a macro-invokation tag (i.e. a tag with a fig:call
+       attribute) is always mute. Therefore, you will not find the
+       following tag with class="dummy-macro-call" in the output.
+       The tag is solely used as a container for the arguments.
+       NB: in a macro call, the arguments are Expressions, which
+       are evaluated just before the call, and whose results are passed
+       to the macro. Therefore, if you need to pass a string, do not forget
+       to pass it as a string litteral (with single quotes)!
+	     -->
+	<span class="dummy-macro-call-tag" fig:call="CountryCard"
+	
+    countryName="key()"
+    item="."
+    my-string-litteral=" 'some string here' "
+	></span>
+</div>
+
+</fig:template>

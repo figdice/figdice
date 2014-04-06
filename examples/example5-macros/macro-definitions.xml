@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fig:template xmlns:fig="http://www.figdice.org/">
+
+<!-- Let's define our macro here.
+     A macro is a regular tag, on which you specify a fig:macro attribute
+     which defines the macro's name.
+     
+     When a macro is invoked, it runs a local context, and therefore
+     it "sees" the parent universe, but unaware of loop iterations.
+     However it also accepts custom parameters from the caller.
+     
+     A tag having the fig:macro attribute is never output directly.
+     It produces output solely when invoked by a subsequent fig:call
+     -->
+<div class="country-card" fig:macro="CountryCard">
+  <div class="country-name" fig:text="countryName"></div>
+  <a class="city-name" href="{item/wiki}" fig:text="item/capital"></a>
+  
+  <!-- The macro runs outside of any iteration context. Therefore,
+       despite we call it from within a loop, it is not legitimate
+       to invoke iteration-related functions, such as "position()".
+       The position() function, outside a loop, simply returns 0. -->
+  Position in loop: <span fig:text="position()"/>
+  An element of the universe above: <span fig:text="capital" />
+  <!-- the "capital" relative path happens to contain the same as 
+  our local item/capital but their natures are different:
+  item is a formal parameter, whose value received the "." current iteration
+  in the fig:walk loop from which we invoked the macro,
+  whereas "capital" is really found in the caller's context (as 
+  the current iteration's local context). 
+  It seems complicated but it's not :) -->
+</div>
+
+</fig:template>
