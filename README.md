@@ -1,9 +1,10 @@
-
 # Abstract
 FigDice is a templating engine for PHP.
 It differs from most of the popular template systems, in the way the presentation data are made available to templates: instead of pushing the data from Controller to View, you build Views that pull the data they need.
 
 See **[figdice.org](http://www.figdice.org/)**
+
+Presentation in French: [GLMF-158 : FigDice, un templating system efficace et original](http://connect.ed-diamond.com/GNU-Linux-Magazine/GLMF-158/FigDice-un-Templating-System-efficace-et-original)
 
 ## Features
 
