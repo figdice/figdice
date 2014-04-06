@@ -6,4 +6,8 @@ php:
   - 5.3
   - hhvm
 
-script: phpunit test
+before_script:
+  - composer install --dev
+
+script:
+  - phpunit test
