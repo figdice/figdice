@@ -1,3 +1,4 @@
+## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP
 # Abstract
 [![Build Status](https://travis-ci.org/gabrielzerbib/figdice.svg)](https://travis-ci.org/gabrielzerbib/figdice)
 
