@@ -1,6 +1,5 @@
-## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP
+## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP [![Build Status](https://travis-ci.org/gabrielzerbib/figdice.svg)](https://travis-ci.org/gabrielzerbib/figdice)
 # Abstract
-[![Build Status](https://travis-ci.org/gabrielzerbib/figdice.svg)](https://travis-ci.org/gabrielzerbib/figdice)
 
 FigDice is a templating engine for PHP.
 It differs from most of the popular template systems, in the way the presentation data are made available to templates: instead of pushing the data from Controller to View, you build Views that pull the data they need.
