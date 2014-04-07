@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2014, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,10 +23,7 @@
 
 namespace figdice\classes\lexer;
 
-class DFAStateDecimal extends DFAState {
-	function __construct() {
-		parent::__construct();
-	}
+class DFAStateDecimal extends DFAStateNumeric {
 	/**
 	 * @param Lexer $lexer
 	 * @param char $char
@@ -39,35 +36,26 @@ class DFAStateDecimal extends DFAState {
 			$this->closed = true;
 		}
 		else if($char == ')') {
-			$lexer->pushOperand(new TokenLiteral($this->buffer));
-			$lexer->closeParenthesis();
+		    $this->pushRParen($lexer);
 		}
 		else if($char == ',') {
 			$lexer->pushOperand(new TokenLiteral($this->buffer));
 			$lexer->incrementLastFunctionArity();
 		}
 		else if(self::isAlpha($char)) {
-			if(! $this->closed) {
-				$this->throwError($lexer, $char);
-			}
-			else {
-				$lexer->pushOperand(new TokenLiteral($this->buffer));
-				$lexer->setStateSymbol($char);
-			}
+		    $this->pushAlpha($lexer, $char);
 		}
 		else if('*' == $char) {
-			$lexer->pushOperand(new TokenLiteral($this->buffer));
-			$lexer->pushOperator(new TokenMul());
+			$this->pushStar($lexer);
 		}
 		else if (('+' == $char) || ('-' == $char) ) {
-			$lexer->pushOperand(new TokenLiteral($this->buffer));
-			$lexer->pushOperator(new TokenPlusMinus($char));
+		    $this->pushPlusMinus($lexer, $char);
+		}
+		else if ( ($char == '=') || ($char == '!') ) {
+		    $this->pushEqualsExclam($lexer, $char);
 		}
 		else {
 			$this->throwError($lexer, $char);
 		}
-	}
-	public function endOfInput($lexer) {
-		$lexer->pushOperand(new TokenLiteral($this->buffer));		
 	}
 }

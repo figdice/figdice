@@ -155,6 +155,11 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(true, $this->lexExpr( '(35 + 4) == 39 and 3 == (4 - 1)' ));
 	}
 
+
+	public function testDecimalCompare()
+	{
+		$this->assertTrue($this->lexExpr(" 3.14 == (3 + 0.14) "));
+	}
 	public function testPriorityOfArithmeticOverComparison()
 	{
 		$this->assertTrue($this->lexExpr(  ' 3 == 2 + 1' ));
