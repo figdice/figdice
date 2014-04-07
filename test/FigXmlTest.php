@@ -126,7 +126,7 @@ ENDXML;
 		$this->view->source = <<<ENDXML
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE figdice [
-  <!ENTITY eacute "&eacute;">
+  <!ENTITY eacute "&#233;">
 ]>
 <xml fig:mute="true">
   éà &eacute; €
@@ -134,7 +134,7 @@ ENDXML;
 ENDXML;
 		$this->view->mount('data', array('a', 'b', 'c'));
 		$this->view->setReplacements(false);
-		$this->assertEquals("éà &eacute; €", trim($this->view->render()) );
+		$this->assertEquals("éà é €", trim($this->view->render()) );
 	}
 
 	/**
