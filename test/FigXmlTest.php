@@ -133,6 +133,7 @@ ENDXML;
 </xml>
 ENDXML;
 		$this->view->mount('data', array('a', 'b', 'c'));
+		$this->view->setReplacements(false);
 		$this->assertEquals("éà &eacute; €", trim($this->view->render()) );
 	}
 
@@ -151,8 +152,31 @@ ENDXML;
 </xml>
 ENDXML;
 		$this->view->mount('data', array('a', 'b', 'c'));
+		$this->view->setReplacements(false);
 		$this->assertEquals("éà &eacute; € &ocirc;", trim($this->view->render()) );
 	}
 	
+	public function testHtmlEntitiesReplacementsByDefault() {
+	    $this->view->source = <<<ENDXML
+<?xml version="1.0" encoding="utf-8" ?>
+<xml fig:mute="true">
+  éà &eacute; € &ocirc;
+</xml>
+ENDXML;
+	    $this->view->mount('data', array('a', 'b', 'c'));
+	    $this->assertEquals("éà é € ô", trim($this->view->render()) );
+	}
 
+
+	public function testHtmlEntitiesReplacementsKeepsAmpersandAndLt() {
+	    $this->view->source = <<<ENDXML
+<?xml version="1.0" encoding="utf-8" ?>
+<xml fig:mute="true">
+&ocirc; &lt; &amp;lt;
+</xml>
+ENDXML;
+	    $this->view->mount('data', array('a', 'b', 'c'));
+	    $this->assertEquals("ô < &lt;", trim($this->view->render()) );
+	}
+	
 }

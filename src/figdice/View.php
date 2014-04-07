@@ -32,6 +32,7 @@ use figdice\exceptions\XMLParsingException;
 
 use Psr\Log\LoggerInterface;
 use figdice\exceptions\RenderingException;
+use figdice\classes\XMLEntityTransformer;
 
 /**
  * Main component of the FigDice library.
@@ -107,6 +108,11 @@ class View {
 	 * @var ViewElement
 	 */
 	private $rootNode;
+
+	/**
+	 * @var boolean
+	 */
+	private $replacements = true;
 
 	/**
 	 * Indicates whether the source file was successfully parsed.
@@ -259,6 +265,7 @@ class View {
 		$this->functionFactories = & $parentViewElement->view->functionFactories;
 		$this->feedFactories = & $parentViewElement->view->feedFactories;
 		$this->feedFactoryForClass = & $parentViewElement->view->feedFactoryForClass;
+		$this->replacements = $parentViewElement->view->replacements;
 	}
 
 	/**
@@ -318,6 +325,19 @@ class View {
 	public function getRootNode() {
 		return $this->rootNode;
 	}
+	
+	/**
+	 * Specifies whether the View should replace
+	 * the standard HTML entities with their special character equivalelent
+	 * in source before parsing. Default: true
+	 * You should not have to turn off the replacements, unless
+	 * working in HHVM and intending to produce non-HTML output, from a
+	 * source text which still contains HTML escape sequences (like &auml;)
+	 * @param boolean $bool
+	 */
+	public function setReplacements($bool) {
+	    $this->replacements = $bool;
+	}
 	/**
 	 * Parse source.
 	 * @return void
@@ -328,6 +348,15 @@ class View {
 			return;
 		}
 
+		if ($this->replacements) {
+        // We cannot rely of html_entity_decode,
+        // because it would replace &amp; and &lt; as well,
+        // whereas we need to keep them unmodified.
+        // We must do it manually, with a modified hardcopy 
+        // of PHP 5.4+ 's get_html_translation_table(ENT_XHTML)
+        $this->source = XMLEntityTransformer::replace($this->source);
+		}
+		
 		$this->xmlParser = xml_parser_create('UTF-8');
 		xml_parser_set_option($this->xmlParser, XML_OPTION_CASE_FOLDING, false);
 		xml_set_object($this->xmlParser, $this);
