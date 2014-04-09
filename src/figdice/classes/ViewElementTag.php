@@ -520,9 +520,10 @@ class ViewElementTag extends ViewElement {
 			//The callbacks are maintained as a chain. Several callbacks
 			//can enchain one after the other,
 			//in the order they were parsed.
-			$this->view->plugs[$slotName] [] = &$this;
+			$this->view->addPlug($slotName, $this);
 
 			//The slots are rendered at the end of the rendering of the View.
+			//A fig:plug tag does not produce any in-place output.
 			return '';
 		}
 

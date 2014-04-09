@@ -157,7 +157,7 @@ class View {
 	 * to fill in slots by the same name.
 	 * @var array (ViewElement)
 	 */
-	public $plugs;
+	private $plugs;
 
 	/**
 	 * Associative array of the named macros.
@@ -237,9 +237,11 @@ class View {
 	}
 
 	/**
-	 * Sets the language in which the view is to be translated
-	 * if any fig: translation resources are specified.
-	 * Set to null to specify that the view should not try any translation.
+	 * 
+	 * Specifies the target language code in which you wish to translate 
+	 * the fig:trans tags or your templates.
+	 * This language code must correspond to a subfolder of the Translation Path
+	 * Set to null in order to specify that the view should not try any translation.
 	 * @param $language string
 	 */
 	public function setLanguage($language) {
@@ -423,7 +425,10 @@ class View {
 	}
 
 	/**
-	 * Specifies the temporary folder to use for temp files.
+	 * Specifies the folder in which the engine will be able to produce 
+	 * temporary files, for JIT-compilation and caching purposes. The engine will 
+	 * not attempt to use cache-based optimization features if you leave 
+	 * this property blank.
 	 * @param string $path
 	 */
 	public function setTempPath($path) {
@@ -756,7 +761,17 @@ class View {
 		return (substr($attribute, 0, strlen($this->figNamespace)) == $this->figNamespace);
 	}
 
+	/**
+	 * This method is called by ViewElementTag objects, when processing
+	 * a fig:slot item.
+	 * @param string $slotName
+	 * @param Slot $slot
+	 */
   public function assignSlot($slotName, Slot & $slot) {
       $this->slots[$slotName] = & $slot;
-  }   
+  }
+
+  public function addPlug($slotName, ViewElementTag & $element) {
+    $this->plugs[$slotName] [] = & $element;
+  }
 }
