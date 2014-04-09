@@ -2,7 +2,7 @@
 <fig:template xmlns:fig="http://www.figdice.org/">
 <html>
   <head>
-    <title fig:slot="title"></title>
+    <title-dummy-tag fig:slot="title"></title-dummy-tag>
   </head>
 
   <title fig:plug="title">Title</title>
