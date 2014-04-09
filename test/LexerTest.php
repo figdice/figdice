@@ -90,9 +90,16 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->assertEquals(13, $this->lexExpr( '39 div 3' ));
 	}
-	
+
 	public function testDotAloneInUniverseIsNull() {
 	  $this->assertNull($this->lexExpr(' . '));
+	}
+	
+	/**
+	 * @expectedException figdice\exceptions\LexerUnexpectedCharException
+	 */
+	public function testDotInvalidlyDelimitedRaisesError() {
+	  $this->assertNull($this->lexExpr(' .x '));
 	}
 
 	public function testArithmeticPriority()
