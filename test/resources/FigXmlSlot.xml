@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fig:template xmlns:fig="http://www.figdice.org/">
+<html>
+  <head>
+    <title fig:slot="title"></title>
+  </head>
+
+  <title fig:plug="title">Title</title>
+</html>
+</fig:template>

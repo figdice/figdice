@@ -492,7 +492,7 @@ class ViewElementTag extends ViewElement {
 
 			$anchorString = '/==SLOT==' . $slotName . '==/';
 			$slot = new Slot($anchorString);
-			$this->view->slots[$slotName] = & $slot;
+			$this->view->assignSlot($slotName, $slot);
 
 			unset($this->attributes[$this->view->figNamespace . 'slot']);
 			$result = $this->render();

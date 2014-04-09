@@ -33,6 +33,7 @@ use figdice\exceptions\XMLParsingException;
 use Psr\Log\LoggerInterface;
 use figdice\exceptions\RenderingException;
 use figdice\classes\XMLEntityTransformer;
+use figdice\classes\Slot;
 
 /**
  * Main component of the FigDice library.
@@ -149,7 +150,7 @@ class View {
 	 * of the element that has been pushed (plugged) into the slot.
 	 * @var array ({@link Slot})
 	 */
-	public $slots;
+	private $slots;
 
 	/**
 	 * Array of named elements that are used as content providers
@@ -754,4 +755,8 @@ class View {
 	public function isFigAttribute($attribute) {
 		return (substr($attribute, 0, strlen($this->figNamespace)) == $this->figNamespace);
 	}
+
+  public function assignSlot($slotName, Slot & $slot) {
+      $this->slots[$slotName] = & $slot;
+  }   
 }

@@ -82,6 +82,15 @@ ENDHTML;
 		$this->assertEquals($expected, $this->view->render());
 	}
 
+	public function testFigSingleFileSlotAndPlug() {
+    $view = new View();
+    $view->loadFile(__DIR__.'/resources/FigXmlSlot.xml');
+    
+    $output = $view->render();
+    $expected = file_get_contents(__DIR__.'/resources/FigXmlSlotExpect.html');
+    $this->assertEquals(trim($expected), trim($output));
+	}
+	
 	public function testFigInclude()
 	{
 		$view = new View();
