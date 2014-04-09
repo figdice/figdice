@@ -81,7 +81,7 @@ Simply *require_once* the **autoload.php** file at the root of the FigDice folde
 
 Browse the [examples](https://github.com/gabrielzerbib/figdice/tree/master/examples)!
 
-See [Documentation](http://www.figdice.org/en/manual.html) for more details.
+See [Wiki](https://github.com/gabrielzerbib/figdice/wiki) for more details.
 
 
 
