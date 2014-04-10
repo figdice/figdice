@@ -598,7 +598,7 @@ class View {
 	 * @param string $input
 	 * @return string
 	 */
-	function plugIntoSlots($input) {
+	private function plugIntoSlots($input) {
 		if(count($this->slots) == 0)
 			return $input;
 
@@ -638,6 +638,9 @@ class View {
 				$result = substr_replace( $result, $plugOutput, $slotPos, strlen($slot->getAnchorString()) + $slot->getLength() );
 			}
 			else {
+			  // If a slot did not receive any plugged content, we use its
+			  // hardcoded template content as default. But we still need
+			  // to clear the placeholder that was used during slots/plugs reconciliation!
 				$result = substr_replace( $result, $plugOutput, $slotPos, strlen($slot->getAnchorString()) );
 			}
 			$slot->setLength(strlen($plugOutput));

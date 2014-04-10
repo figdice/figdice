@@ -6,5 +6,10 @@
   </head>
 
   <title fig:plug="title">Title</title>
+
+  <footer>
+    <div fig:slot="orphanSlot">This slot does not get contents, so this is the default content.</div>
+  </footer>
+  
 </html>
 </fig:template>
