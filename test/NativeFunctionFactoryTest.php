@@ -102,6 +102,9 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		define('MY_GLOBAL_TEST_CONST', 12);
 		$this->assertEquals(MY_GLOBAL_TEST_CONST, $this->lexExpr(" const( 'MY_GLOBAL_TEST_CONST' ) ") );
 	}
+	public function testDefaultFunc() {
+	  $this->assertEquals(12, $this->lexExpr(" default( /someDummyPath, 12 ) ") );
+	}
 	
 	public function testFunctionFirst() {
 		$this->view->mount('data',  array(1,2,3));

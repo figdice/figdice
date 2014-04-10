@@ -298,12 +298,6 @@ class View {
 	}
 
 	/**
-	 * @return LoggerInterface
-	 */
-	public function & getLogger() {
-		return $this->logger;
-	}
-	/**
 	 * Load from source file.
 	 *
 	 * @param string $filename
