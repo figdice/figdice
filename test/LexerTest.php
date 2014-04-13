@@ -198,8 +198,14 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(.14, $this->lexExpr('.14'));
 	}
 	
-	public function testDynamicPathParsing()
-	{
+	/**
+	 * @expectedException \figdice\exceptions\LexerSyntaxErrorException
+	 */
+	public function testTwoSymbolsOneAfterTheOtherSyntaxError() {
+	  $this->assertTrue ( $this->lexExpr(' symbol1 symbol2'));
+	}
+	
+	public function testDynamicPathParsing() {
 		//Null because the said path values don't exist in Universe.
 		$this->assertNull($this->lexExpr('/a/b/[c]'));
 	}

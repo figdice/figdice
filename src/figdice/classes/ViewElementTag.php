@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.3
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -825,6 +825,13 @@ class ViewElementTag extends ViewElement {
 	 */
 	private function fig_include() {
 		//Extract from the attributes the file to include.
+		if (! $this->hasAttribute('file')) {
+		  throw new RequiredAttributeException($this->name,
+		    $this->getCurrentFilename(),
+		    $this->getLineNumber(), 
+		    'Missing required attribute: "file" in tag: "'. $this->name .'"' .
+		      ' in file: ' .$this->getCurrentFilename(). '(' .$this->getLineNumber(). ')');
+		}
 		$file = $this->attributes['file'];
 
 		//Create a sub-view, attached to the current element.

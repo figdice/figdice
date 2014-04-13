@@ -187,5 +187,16 @@ ENDXML;
 	    $this->view->mount('data', array('a', 'b', 'c'));
 	    $this->assertEquals("ô < &lt;", trim($this->view->render()) );
 	}
-	
+
+	/**
+	 * @expectedException \figdice\exceptions\RequiredAttributeException
+	 */
+	public function testMissingRequiredAttributeException() {
+	  $this->view->source = <<<ENDXML
+<xml>
+  <fig:include />
+</xml>
+ENDXML;
+	  $this->assertNull( $this->view->render() );
+	}
 }
