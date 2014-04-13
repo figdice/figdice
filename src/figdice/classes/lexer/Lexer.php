@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.3
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -26,7 +26,7 @@ namespace figdice\classes\lexer;
 use \figdice\classes\ViewElementTag;
 use \figdice\exceptions\LexerUnexpectedCharException;
 use \figdice\exceptions\LexerSyntaxErrorException;
-use \figdice\exceptions\LexerUnbalancedParentheses;
+use \figdice\exceptions\LexerUnbalancedParenthesesException;
 use \figdice\LoggerFactory;
 use Psr\Log\LoggerInterface;
 
@@ -197,6 +197,18 @@ class Lexer {
 			throw new LexerSyntaxErrorException($message,
 					$this->getViewFile()->getFilename(),
 					$this->getViewLine());
+		}
+
+		// Check for unbalanced parentheses:
+		if( ($this->stackRP[0] instanceof TokenFunction) &&
+		    (! $this->stackRP[0]->isClosed())
+		)
+		{
+		  $message = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): Unbalanced parentheses in expression: ' . $this->expression;
+		  $this->getLogger()->error($message);
+		  throw new LexerUnbalancedParenthesesException($message,
+		    $this->getViewFile()->getFilename(),
+		    $this->getViewLine());
 		}
 
 		return true;

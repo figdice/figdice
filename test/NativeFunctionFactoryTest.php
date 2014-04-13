@@ -139,4 +139,26 @@ ENDHTML;
 	public function testUnfedinedFunc() {
 		$this->assertEquals(false, $this->lexExpr( " someUndefinedFunc(1, 2, 3)  " ));
 	}
+
+	/**
+	 * @expectedException \figdice\exceptions\FunctionCallException
+	 */
+	public function testSubstrFuncWithMissingArgumentsThrowsException() {
+	  $this->lexExpr(" substr('abcd') ");
+	  $this->assertFalse(true);
+	}
+	public function testSubstrFuncWith3Args() {
+	  $this->assertEquals('cd', $this->lexExpr( "substr('abcde', 2, 2)" ) );
+	}
+	
+	public function testSubstrFuncWithoutLengthReturnsRight() {
+	  $this->assertEquals('cd', $this->lexExpr( "substr('abcd', 2)" ) );
+	}
+	/**
+	 * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException
+	 */
+	public function testUnclosedFunctionThrowsException () {
+	  //missing closing parenth.
+	  $this->assertFalse($this->lexExpr( "substr('abcd', 2" ) );
+	}
 }
