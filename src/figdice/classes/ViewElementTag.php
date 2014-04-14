@@ -1121,6 +1121,7 @@ class ViewElementTag extends ViewElement {
 	  //source = view's language, in case of missing value,
 	  //so this is a good time to read it.
 	  $key = $this->getAttribute('key', null);
+	  $dictionaryName = $this->getAttribute('dict', null);
 
 		if($source == $this->getView()->getLanguage()) {
 			$value = $this->renderChildren(true /*Do not render fig:param immediate children */);
@@ -1135,7 +1136,6 @@ class ViewElementTag extends ViewElement {
 				$key = $this->renderChildren();
 			}
 			//Ask current file to translate key:
-			$dictionaryName = $this->getAttribute('dict', null);
 			try {
 				$value = $this->getCurrentFile()->translate($key, $dictionaryName);
 			} catch(DictionaryEntryNotFoundException $ex) {
