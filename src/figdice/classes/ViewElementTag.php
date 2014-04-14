@@ -1115,7 +1115,13 @@ class ViewElementTag extends ViewElement {
 		//If a @source attribute is specified, and is equal to
 		//the view's target language, then don't bother translating:
 		//just render the contents.
-		$source = $this->getAttribute('source', null);
+	  $source = $this->getAttribute('source', null);
+		
+	  //The $key is also needed in logging below, even if
+	  //source = view's language, in case of missing value,
+	  //so this is a good time to read it.
+	  $key = $this->getAttribute('key', null);
+
 		if($source == $this->getView()->getLanguage()) {
 			$value = $this->renderChildren(true /*Do not render fig:param immediate children */);
 		}
@@ -1123,7 +1129,6 @@ class ViewElementTag extends ViewElement {
 		else {
 			//Cross-language dictionary mechanism:
 
-			$key = $this->getAttribute('key', null);
 			if(null == $key) {
 				//Missing @key attribute : consider the text contents as the key.
 				//throw new SyntaxErrorException($this->getCurrentFile()->getFilename(), $this->xmlLineNumber, $this->name, 'Missing @key attribute.');
