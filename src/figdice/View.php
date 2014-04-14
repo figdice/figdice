@@ -310,7 +310,7 @@ class View {
 			$this->source = file_get_contents($filename);
 		}
 		else {
-			$message = "File not found: $filename.";
+			$message = "File not found: $filename";
 			$this->logger->error($message);
 			throw new FileNotFoundException($message, $filename);
 		}
