@@ -115,9 +115,14 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 	public function testClassConst() {
 		$this->assertEquals( self::SOME_CONST, $this->lexExpr(" const( 'NativeFunctionFactoryTest::SOME_CONST' ) ") );
 	}
-	public function testClassConstWithNamespaceNeedQuadBackslash() {
+	public function testClassConstWithNamespaceNeedDoubleBackslash() {
 	  require_once 'DummyNamespaceFile.php';
-		$this->assertEquals( 13, $this->lexExpr(" const( '\\\\some\\\\dummy\\\\ns\\\\SomeDummyClass::SOME_CONST' ) ") );
+	  // Use NowDoc string, so that PHP will not compile \\ into \,
+	  // but will pass the double \\ through the FigDice expression lexer.
+	  $expression = <<<'ENDSTRING'
+	  const( '\\some\\dummy\\ns\\SomeDummyClass::SOME_CONST' )
+ENDSTRING;
+		$this->assertEquals( 13, $this->lexExpr( $expression) );
 	}
 	public function testDefaultFunc() {
 	  $this->assertEquals(12, $this->lexExpr(" default( /someDummyPath, 12 ) ") );

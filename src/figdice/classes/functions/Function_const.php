@@ -40,7 +40,6 @@ class Function_const implements FigFunction {
 		$constantName = trim($arguments[0]);
 		
 		if(preg_match('#([^:]+)::#', $constantName, $matches)) {
-		  
 			$className = $matches[1];
 			if(! class_exists($className)) {
 				$logger = LoggerFactory::getLogger(__CLASS__);
