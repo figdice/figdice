@@ -204,10 +204,33 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 	public function testTwoSymbolsOneAfterTheOtherSyntaxError() {
 	  $this->assertTrue ( $this->lexExpr(' symbol1 symbol2'));
 	}
-	
+	public function testDotDotPathParsing() {
+	  //Null because the said path values don't exist in Universe.
+	  $this->assertNull($this->lexExpr('../nothing/here'));
+	}
+	/**
+	 * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+	 */
+	public function testDotDotAnyCharError() {
+	  //Null because the said path values don't exist in Universe.
+	  $this->assertNull($this->lexExpr('..invalid'));
+	}
+	/**
+	 * @expectedException \figdice\exceptions\LexerSyntaxErrorException
+	 */
+	public function testIllegalParenInPath() {
+	  $this->assertTrue( $this->lexExpr(" a/b/c(12)") );
+	}
 	public function testDynamicPathParsing() {
 		//Null because the said path values don't exist in Universe.
 		$this->assertNull($this->lexExpr('/a/b/[c]'));
+	}
+	/**
+	 * @expectedException \figdice\exceptions\LexerSyntaxErrorException
+	 */
+	public function testUnclosedDynamicPathError() {
+		//Null because the said path values don't exist in Universe.
+		$this->assertNull($this->lexExpr('/a/b/[c'));
 	}
 	/**
 	 * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException

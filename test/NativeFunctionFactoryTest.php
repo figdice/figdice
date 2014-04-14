@@ -182,4 +182,11 @@ ENDXML;
 ENDXML;
 	  $this->assertEquals('oeo', $this->view->render());
 	} 
+	public function testKeyFunc() {
+	  $this->view->mount('data', array('a' => 10, 'b' => 20, 'c' => 30));
+	  $this->view->source = <<<ENDXML
+<fig:x fig:walk="/data"><fig:y fig:text="key()"/><fig:y fig:text="."/></fig:x>
+ENDXML;
+	  $this->assertEquals('a10b20c30', $this->view->render());
+	} 
 }
