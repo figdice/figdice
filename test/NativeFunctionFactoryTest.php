@@ -108,6 +108,17 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		define('MY_GLOBAL_TEST_CONST', 12);
 		$this->assertEquals(MY_GLOBAL_TEST_CONST, $this->lexExpr(" const( 'MY_GLOBAL_TEST_CONST' ) ") );
 	}
+	public function testClassConstForUndefinedClassIsNull() {
+		$this->assertNull( $this->lexExpr(" const( 'MyTestUndefinedClass::someConst' ) ") );
+	}
+	const SOME_CONST = 12;
+	public function testClassConst() {
+		$this->assertEquals( self::SOME_CONST, $this->lexExpr(" const( 'NativeFunctionFactoryTest::SOME_CONST' ) ") );
+	}
+	public function testClassConstWithNamespaceNeedQuadBackslash() {
+	  require_once 'DummyNamespaceFile.php';
+		$this->assertEquals( 13, $this->lexExpr(" const( '\\\\some\\\\dummy\\\\ns\\\\SomeDummyClass::SOME_CONST' ) ") );
+	}
 	public function testDefaultFunc() {
 	  $this->assertEquals(12, $this->lexExpr(" default( /someDummyPath, 12 ) ") );
 	}
