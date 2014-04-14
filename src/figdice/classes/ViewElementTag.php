@@ -810,7 +810,7 @@ class ViewElementTag extends ViewElement {
 		$filename = $this->attributes['file'];
 		$realfilename = realpath(dirname($this->getCurrentFilename()).'/'.$filename);
 		if(! file_exists($realfilename)) {
-			$message = "File not found: $filename called from: " . $this->getCurrentFile()->getFilename(). '(' . $this->xmlLineNumber . ')';
+			$message = "File not found: $filename called from: " . $this->getCurrentFilename(). '(' . $this->xmlLineNumber . ')';
 			$this->getLogger()->error($message);
 			throw new FileNotFoundException($message, $filename);
 		}
