@@ -837,7 +837,7 @@ class ViewElementTag extends ViewElement {
 		//Create a sub-view, attached to the current element.
 		$view = new View();
 		$view->inherit($this);
-		$view->loadFile(dirname($this->getCurrentFile()->getFilename()).'/'.$file, $this->getCurrentFile());
+		$view->loadFile(dirname($this->getCurrentFilename()).'/'.$file, $this->getCurrentFile());
 
 		//Make the current node aware that it is being rendered
 		//as an include directive (therefore, it will be skipped
