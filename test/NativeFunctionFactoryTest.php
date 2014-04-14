@@ -160,11 +160,26 @@ ENDHTML;
 	public function testSubstrFuncWithoutLengthReturnsRight() {
 	  $this->assertEquals('cd', $this->lexExpr( "substr('abcd', 2)" ) );
 	}
-	/**
-	 * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException
-	 */
-	public function testUnclosedFunctionThrowsException () {
-	  //missing closing parenth.
-	  $this->assertFalse($this->lexExpr( "substr('abcd', 2" ) );
-	}
+	
+	public function testPositionFunc() {
+	  $this->view->mount('data', array(10, 20, 30));
+	  $this->view->source = <<<ENDXML
+<fig:x fig:walk="/data"><fig:y fig:text="position()"/></fig:x>
+ENDXML;
+	  $this->assertEquals('123', $this->view->render());
+	} 
+	public function testEvenFunc() {
+	  $this->view->mount('data', array(10, 20, 30));
+	  $this->view->source = <<<ENDXML
+<fig:x fig:walk="/data"><fig:y fig:text="if(even(), 'e', 'o')"/></fig:x>
+ENDXML;
+	  $this->assertEquals('oeo', $this->view->render());
+	} 
+	public function testOddFunc() {
+	  $this->view->mount('data', array(10, 20, 30));
+	  $this->view->source = <<<ENDXML
+<fig:x fig:walk="/data"><fig:y fig:text="if(odd(), 'o', 'e')"/></fig:x>
+ENDXML;
+	  $this->assertEquals('oeo', $this->view->render());
+	} 
 }

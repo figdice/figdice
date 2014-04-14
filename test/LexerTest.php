@@ -209,5 +209,12 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 		//Null because the said path values don't exist in Universe.
 		$this->assertNull($this->lexExpr('/a/b/[c]'));
 	}
+	/**
+	 * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException
+	 */
+	public function testUnclosedFunctionThrowsException () {
+	  //missing closing parenth.
+	  $this->assertFalse($this->lexExpr( "substr('abcd', 2" ) );
+	}
 }
 

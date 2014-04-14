@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2014, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -67,18 +67,6 @@ class Iteration {
 	 */
 	public function last() {
 		return $this->position == $this->count;
-	}
-	/**
-	 * @return boolean
-	 */
-	public function even() {
-		return (($this->position % 2) == 0);
-	}
-	/**
-	 * @return boolean
-	 */
-	public function odd() {
-		return (($this->position % 2) == 1);
 	}
 
 	/**

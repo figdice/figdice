@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2014, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -37,6 +37,7 @@ class Function_even implements FigFunction {
 	 */
 	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
 		$iteration = $viewElement->getIteration();
-		return $iteration->even();
+		$position = $iteration->getPosition();
+		return (($position % 2) == 0);
 	}
 }
