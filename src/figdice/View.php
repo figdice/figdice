@@ -718,7 +718,6 @@ class View {
 	}
 	/**
 	 * @param string $path
-	 * @return unknown_type
 	 */
 	public function setTranslationPath($path) {
 		$this->translationPath = $path;

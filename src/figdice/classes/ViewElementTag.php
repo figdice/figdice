@@ -1193,7 +1193,11 @@ class ViewElementTag extends ViewElement {
 		//So in the meantime we output the key.
 		if($value == '') {
 			$value = $key;
-			LoggerFactory::getLogger('Dictionary')->error('Empty translation: key=' . $key . ', dictionary=' . $dictionaryName . ', language=' . $this->getView()->getLanguage() . ', file=' . $this->getCurrentFile()->getFilename() . ', line=' . $this->xmlLineNumber);
+			LoggerFactory::getLogger('Dictionary')->error(
+			  'Empty translation: key=' . $key . 
+			  ', dictionary=' . $dictionaryName . 
+			  ', language=' . $this->getView()->getLanguage() . 
+			  ', file=' . $this->getCurrentFilename() . ', line=' . $this->xmlLineNumber);
 		}
 		//TODO: There are some situations where the resulting value must be decoded... Why??
 		//return utf8_decode($value);
