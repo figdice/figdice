@@ -44,7 +44,7 @@ class FigXmlTest extends PHPUnit_Framework_TestCase {
 
 	public function testFigVoid()
 	{
-		$this->view->source = <<<ENDXML
+		$source = <<<ENDXML
 <html>
 	<br fig:void="true" />
 	<hr fig:void="true"> discarded because forced void </hr>
@@ -52,6 +52,7 @@ class FigXmlTest extends PHPUnit_Framework_TestCase {
 </html>
 ENDXML;
 
+		$this->view->loadString($source);
 		$expected = <<<ENDHTML
 <html>
 	<br>
@@ -65,7 +66,7 @@ ENDHTML;
 
 	public function testFigAuto()
 	{
-		$this->view->source = <<<ENDXML
+		$source = <<<ENDXML
 <html>
 	<input name="name" fig:auto="true">
 		<fig:attr name="id">myId</fig:attr> Discarded because forced auto
@@ -73,6 +74,7 @@ ENDHTML;
 </html>
 ENDXML;
 
+		$this->view->loadString($source);
 		$expected = <<<ENDHTML
 <html>
 	<input name="name" id="myId" />
@@ -103,11 +105,12 @@ ENDHTML;
 	
 	public function testWalkIndexedArray()
 	{
-		$this->view->source = <<<ENDXML
+		$source = <<<ENDXML
 <fig:x fig:walk="/data">
   <fig:x fig:text="."/>
 </fig:x>
 ENDXML;
+		$this->view->loadString($source);
 		$this->view->mount('data', array('a', 'b', 'c'));
 		$this->assertEquals("a\nb\nc\n", $this->view->render());
 	}
@@ -123,16 +126,17 @@ ENDXML;
 	 */
 	public function testTODOCompactWalkWithIndexedArrayAndTextFails() {
 		$this->view->mount('data',  array(1,2,3));
-		$this->view->source = <<<ENDXML
+		$source = <<<ENDXML
 <fig:x fig:walk="/data" fig:text="first()"/>
 ENDXML;
+		$this->view->loadString($source);
 		$this->view->render();
 		$this->assertFalse(true);
 	}
 
 	public function testLoadXMLwithUTF8AccentsAndDeclaredEntities()
 	{
-		$this->view->source = <<<ENDXML
+		$source = <<<ENDXML
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE figdice [
   <!ENTITY eacute "&#233;">
@@ -141,6 +145,7 @@ ENDXML;
   éà &eacute; €
 </xml>
 ENDXML;
+		$this->view->loadString($source);
 		$this->view->mount('data', array('a', 'b', 'c'));
 		$this->view->setReplacements(false);
 		$this->assertEquals("éà é €", trim($this->view->render()) );
@@ -151,7 +156,7 @@ ENDXML;
 	 */
 	public function testUndeclaredEntitiesRaiseException()
 	{
-		$this->view->source = <<<ENDXML
+		$source = <<<ENDXML
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE figdice [
   <!ENTITY eacute "&eacute;">
@@ -160,30 +165,33 @@ ENDXML;
   éà &eacute; € &ocirc;
 </xml>
 ENDXML;
+		$this->view->loadString($source);
 		$this->view->mount('data', array('a', 'b', 'c'));
 		$this->view->setReplacements(false);
 		$this->assertEquals("éà &eacute; € &ocirc;", trim($this->view->render()) );
 	}
 	
 	public function testHtmlEntitiesReplacementsByDefault() {
-	    $this->view->source = <<<ENDXML
+	    $source = <<<ENDXML
 <?xml version="1.0" encoding="utf-8" ?>
 <xml fig:mute="true">
   éà &eacute; € &ocirc;
 </xml>
 ENDXML;
+	    $this->view->loadString($source);
 	    $this->view->mount('data', array('a', 'b', 'c'));
 	    $this->assertEquals("éà é € ô", trim($this->view->render()) );
 	}
 
 
 	public function testHtmlEntitiesReplacementsKeepsAmpersandAndLt() {
-	    $this->view->source = <<<ENDXML
+	    $source = <<<ENDXML
 <?xml version="1.0" encoding="utf-8" ?>
 <xml fig:mute="true">
 &ocirc; &lt; &amp;lt;
 </xml>
 ENDXML;
+	    $this->view->loadString($source);
 	    $this->view->mount('data', array('a', 'b', 'c'));
 	    $this->assertEquals("ô < &lt;", trim($this->view->render()) );
 	}
@@ -192,11 +200,12 @@ ENDXML;
 	 * @expectedException \figdice\exceptions\RequiredAttributeException
 	 */
 	public function testMissingRequiredAttributeException() {
-	  $this->view->source = <<<ENDXML
+	  $source = <<<ENDXML
 <xml>
   <fig:include />
 </xml>
 ENDXML;
+	  $this->view->loadString($source);
 	  $this->assertNull( $this->view->render() );
 	}
 }
