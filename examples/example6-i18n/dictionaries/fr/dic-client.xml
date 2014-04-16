@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fig:dictionary xmlns:fig="http://figdice.org/" language="fr" >
+  <entry key="title">titre</entry>
+  <entry key="address">adresse</entry>
+  <entry key="city">ville</entry>
+</fig:dictionary>

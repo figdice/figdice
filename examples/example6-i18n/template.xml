@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fig:template xmlns:fig="http://figdice.org/">
+
+	<!-- Import two dictionaries: one for the Product area,
+	     and one for the Customer area. -->
+ 
+  <fig:dictionary name="Client" file="dic-client.xml" />
+  <fig:dictionary name="Product" file="dic-product.xml" />
+
+  <!-- We gave a name to each dictionary, so as to refer
+       to it easily later on, when fetching the keys.  -->
+
+
+  <!-- Now, let's print the "city" label, translated! -->
+  <label><fig:trans dict="Client" key="city" /></label>
+
+  <!-- Now, let's print the "quantity" label, translated! -->
+  <label><fig:trans dict="Product" key="quantity" /></label>
+
+  <!-- Finally, let's pass parameters to a translated string:
+       any additional XML attribute to fig:trans tag (other than
+       dict and key) are Expressions whose evaluated value are
+       passed as named parameters to the string pattern.
+   -->
+  <span class="warning">
+    <fig:trans 
+      dict="Product" 
+      key="There remain X items in stock"
+      numberOfItems=" count(/stock/shoes/brown) "
+      />
+  </span>
+
+</fig:template>

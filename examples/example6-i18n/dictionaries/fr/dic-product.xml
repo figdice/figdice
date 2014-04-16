@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fig:dictionary xmlns:fig="http://figdice.org/" language="fr" >
+  <entry key="product">produit</entry>
+  <entry key="color">couleur</entry>
+  <entry key="quantity">quantité</entry>
+  
+  <!-- The following string contains a named placeholder. -->
+  <entry key="There remain X items in stock">Il reste {numberOfItems} articles en stock.</entry>
+</fig:dictionary>
