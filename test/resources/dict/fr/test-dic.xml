@@ -1,0 +1,4 @@
+<fig:dictionary xmlns:fig="http://figdice.org/" language="fr" >
+  <entry key="my-key">Ma chaîne traduite</entry>
+</fig:dictionary>
+

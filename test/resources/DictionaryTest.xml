@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<fig:template>
+  <fig:dictionary name="MyDic" file="test-dic.xml" />
+
+  <fig:trans dict="MyDic" key="my-key" />
+
+</fig:template>

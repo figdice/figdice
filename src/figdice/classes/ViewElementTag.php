@@ -1093,7 +1093,10 @@ class ViewElementTag extends ViewElement {
 					$dictionary->load();
 			}
 		} catch(FileNotFoundException $ex) {
-			throw new FileNotFoundException('Translation file not found: file=' . $filename . ', language=' . $this->getView()->getLanguage() . ', source=' . $this->getCurrentFile()->getFilename(), $this->getCurrentFile()->getFilename() );
+			throw new FileNotFoundException('Translation file not found: file=' . $filename . 
+				', language=' . $this->getView()->getLanguage() . 
+				', source=' . $this->getCurrentFilename(), 
+				$this->getCurrentFilename() );
 		} catch(DictionaryDuplicateKeyException $ddkex) {
 			$this->getLogger()->error('Duplicate key: "' . $ddkex->getKey() . '" in dictionary: ' . $ddkex->getFilename());
 		}

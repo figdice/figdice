@@ -1,0 +1,4 @@
+<fig:dictionary xmlns:fig="http://figdice.org/" language="en" >
+  <entry key="my-key">My translated string</entry>
+</fig:dictionary>
+
