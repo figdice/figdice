@@ -50,7 +50,7 @@ class View {
 	 *
 	 * @var string
 	 */
-	public $source;
+	private $source;
 
 	/**
 	 * The file of the view.

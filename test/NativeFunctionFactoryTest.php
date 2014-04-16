@@ -130,9 +130,10 @@ ENDSTRING;
 	
 	public function testFunctionFirst() {
 		$this->view->mount('data',  array(1,2,3));
-		$this->view->source = <<<ENDXML
+		$source = <<<ENDXML
 <fig:x fig:walk="/data"><fig:y fig:text="if(first(), 't', 'f')"/></fig:x>
 ENDXML;
+		$this->view->loadString($source);
 		$expected = <<<ENDHTML
 tff
 ENDHTML;
@@ -142,9 +143,10 @@ ENDHTML;
 
 	public function testFunctionLast() {
 		$this->view->mount('data',  array(1,2,3));
-		$this->view->source = <<<ENDXML
+		$source = <<<ENDXML
 <fig:x fig:walk="/data"><fig:y fig:text="if(last(), 't', 'f')"/></fig:x>
 ENDXML;
+		$this->view->loadString($source);
 		$expected = <<<ENDHTML
 fft
 ENDHTML;
@@ -179,30 +181,34 @@ ENDHTML;
 	
 	public function testPositionFunc() {
 	  $this->view->mount('data', array(10, 20, 30));
-	  $this->view->source = <<<ENDXML
+	  $source = <<<ENDXML
 <fig:x fig:walk="/data"><fig:y fig:text="position()"/></fig:x>
 ENDXML;
+	  $this->view->loadString($source);
 	  $this->assertEquals('123', $this->view->render());
 	} 
 	public function testEvenFunc() {
 	  $this->view->mount('data', array(10, 20, 30));
-	  $this->view->source = <<<ENDXML
+	  $source = <<<ENDXML
 <fig:x fig:walk="/data"><fig:y fig:text="if(even(), 'e', 'o')"/></fig:x>
 ENDXML;
+	  $this->view->loadString($source);
 	  $this->assertEquals('oeo', $this->view->render());
 	} 
 	public function testOddFunc() {
 	  $this->view->mount('data', array(10, 20, 30));
-	  $this->view->source = <<<ENDXML
+	  $source = <<<ENDXML
 <fig:x fig:walk="/data"><fig:y fig:text="if(odd(), 'o', 'e')"/></fig:x>
 ENDXML;
+	  $this->view->loadString($source);
 	  $this->assertEquals('oeo', $this->view->render());
 	} 
 	public function testKeyFunc() {
 	  $this->view->mount('data', array('a' => 10, 'b' => 20, 'c' => 30));
-	  $this->view->source = <<<ENDXML
+	  $source = <<<ENDXML
 <fig:x fig:walk="/data"><fig:y fig:text="key()"/><fig:y fig:text="."/></fig:x>
 ENDXML;
+	  $this->view->loadString($source);
 	  $this->assertEquals('a10b20c30', $this->view->render());
 	} 
 }
