@@ -317,6 +317,17 @@ class View {
 	}
 
 	/**
+	 * Instead of loading a file, you can load a string, and optionally pass
+	 * a "working directory" (mainly useful for incldues).
+	 * This creates a File object with no real filesystem location.
+	 * @internal
+	 * @param string $string
+	 */
+	public function loadString($string, $workingDirectory = null) {
+	  $this->file = new File($workingDirectory . '/(null)');
+	  $this->source = $string;
+	}
+	/**
 	 * @return ViewElementTag
 	 */
 	public function getRootNode() {

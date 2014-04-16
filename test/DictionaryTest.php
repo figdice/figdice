@@ -55,5 +55,19 @@ class DictionaryTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, trim($this->view->render()) );
 	}
 
+	public function testOmittedKeyUsesContents() {
+	  $xml = <<<ENDXML
+<fig:xml>
+  <fig:dictionary file="test-dic.xml" />
+	<fig:trans>my-key</fig:trans>
+</fig:xml>
+ENDXML;
+	  $this->view->loadString($xml);
+
+	  $this->view->setTranslationPath(dirname(__FILE__).'/resources/dict');
+	  $this->view->setLanguage('en');
+	  $expected = "My translated string";
+	  $this->assertEquals($expected, trim($this->view->render()) );
+	}
 }
 
