@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2014, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -52,7 +52,7 @@ abstract class Feed {
 	 *
 	 * @var array
 	 */
-	private $params;
+	private $params = array();
 
 	/**
 	 * The file currently being rendered by the calling View.
@@ -60,10 +60,8 @@ abstract class Feed {
 	 */
 	private $figFile;
 
-	public function __construct()
-	{
+	public function __construct()	{
 		$this->logger = LoggerFactory::getLogger(get_class($this));
-		$this->params = array();
 	}
 
 	/**

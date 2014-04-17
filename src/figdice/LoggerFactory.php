@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.3
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -26,6 +26,9 @@ namespace figdice;
 use Psr\Log\NullLogger;
 use Psr\Log\LoggerInterface;
 
+/**
+ * A bridge to the PSR3 LoggerInterface.
+ */
 class LoggerFactory {
 	private static $delegate = null;
 

@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2014, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -28,8 +28,6 @@ use \figdice\classes\ViewElementTag;
 use \figdice\LoggerFactory;
 
 class Function_xml implements FigFunction {
-	public function __construct() {
-	}
 
 	/**
 	 * @param {@link ViewElement} $viewElement
@@ -40,7 +38,7 @@ class Function_xml implements FigFunction {
 		$xmlString = '<xml>' . $arguments[0] . '</xml>';
 		$xml = new \DomDocument();
 		$xml->loadXML($xmlString, LIBXML_NOENT);
-		$xpath = new DOMXPath($xml);
+		$xpath = new \DOMXPath($xml);
 		return $xpath;
 	}
 }

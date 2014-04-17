@@ -211,4 +211,12 @@ ENDXML;
 	  $this->view->loadString($source);
 	  $this->assertEquals('a10b20c30', $this->view->render());
 	} 
+	public function testPhpFunc() {
+	  $source = <<<ENDXML
+<fig:x fig:text="php('strlen', 'string of 18 chars')" />
+ENDXML;
+	  $this->view->loadString($source);
+	  $this->assertEquals(18, $this->view->render());
+	}
+	
 }
