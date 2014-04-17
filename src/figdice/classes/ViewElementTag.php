@@ -575,14 +575,17 @@ class ViewElementTag extends ViewElement {
 				$this->outputBuffer = '';
 			}
 			else {
+
+			  // Unfortunately there is no auto __toString
+			  // for DOMNode objects (not even DOMText...)
+			  if (is_object($output)
+			      && ($output instanceof \DOMNode)) {
+			    $output = $output->nodeValue;
+			  }
+			  
 				$this->outputBuffer = $output;
 				
 				
-				// See comment below, about $innerResults
-				if (is_object($output) 
-				  && ($output instanceof \DOMText)) {
-				  $output = $output->nodeValue;
-				}
 				
 				if (trim($output) != '') {
 					//We clear the autoclose flag only if there is any meaningful
@@ -639,7 +642,7 @@ class ViewElementTag extends ViewElement {
 				// text for the object. Unfortunately there is no 
 				// native __toString() there :(
 				if (is_object($innerResults) 
-				    && ($innerResults instanceof \DOMText)) {
+				    && ($innerResults instanceof \DOMNode)) {
 				  $innerResults = $innerResults->nodeValue;
 				}
 				
