@@ -576,6 +576,14 @@ class ViewElementTag extends ViewElement {
 			}
 			else {
 				$this->outputBuffer = $output;
+				
+				
+				// See comment below, about $innerResults
+				if (is_object($output) 
+				  && ($output instanceof \DOMText)) {
+				  $output = $output->nodeValue;
+				}
+				
 				if (trim($output) != '') {
 					//We clear the autoclose flag only if there is any meaningful
 					//inner content.
@@ -625,6 +633,16 @@ class ViewElementTag extends ViewElement {
 				else {
 					$innerResults = $result;
 				}
+				
+				// If the inner content is the result of some XML XPath
+				// leading to a DOMText value, we can safely use the underlying
+				// text for the object. Unfortunately there is no 
+				// native __toString() there :(
+				if (is_object($innerResults) 
+				    && ($innerResults instanceof \DOMText)) {
+				  $innerResults = $innerResults->nodeValue;
+				}
+				
 				$result =
 					'<' . $this->name . $xmlAttributesString .
 					($this->autoclose ? ' /' : '') .
