@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+
+  <!-- We can fig:mount more than scalar values or 
+       arrays or bean-like objects:
+       see below how we mount a piece of XML...  -->
+
+  <!-- The value for the target is not provided inline with 
+       a "value" attribute. Instead, it is the inside of the fig:mount
+       tag that is stored into the target symbol. -->
+  <fig:mount target="someXml">
+  
+		<items>
+		  <item myattr="12">a</item>
+		  <item myattr="14">b</item>
+		</items>
+
+  </fig:mount>
+
+  <!-- We could use this "/someXml" data as a plain string, but
+       we can also ask FigDice to consider it as an XML document. 
+       This is done by calling the xml() function, and capturing
+       the returned value into yet another target: this time
+       this value is an internal handler: you won't print it as text. -->
+
+  <fig:mount target="myXml" value="xml(/someXml)" />  
+
+
+  <!-- Now, you can run any valid XPath query on this handler!
+       Look here how we display the value of the "myattr" attribute
+       of the second <item> element inside the <items> collection.
+       
+       Caution: the xml() function automatically wraps your piece
+       of XML into an <xml> root tag. Keep it in mind for your
+       XPath queries! -->
+  <span fig:text="xpath(myXml, '/xml/items/item[2]/@myattr')" />
+
+</html>
