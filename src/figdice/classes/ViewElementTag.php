@@ -803,16 +803,11 @@ class ViewElementTag extends ViewElement {
 
 		$feedInstance->setParameters($feedParameters);
 
-		$subUniverse = null;
-
-		try {
-			$subUniverse = $feedInstance->run();
-		}
-		catch(FeedRuntimeException $ex) {
-			//Do nothing: we certainly don't want
-			//to populate the data universe.
-			return '';
-		}
+		// The run method of the Feed might throw a FeedRuntimeException...
+		// It means that the problem encountered is severe enough, for the Feed to
+		// request that the View rendering should stop.
+		// In this case, the controller is responsible for treating accordingly.
+		$subUniverse = $feedInstance->run();
 
 		if($mountPoint !== null) {
 			$this->view->mount($mountPoint, $subUniverse);
