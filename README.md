@@ -30,7 +30,7 @@ Simply add the following composer.json file to your project root, or append the 
 
     {
       "require": {
-        "figdice/figdice": "*"
+        "figdice/figdice": "dev-master"
       }
     }
 
