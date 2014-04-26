@@ -6,6 +6,9 @@ It differs from most of the popular template systems, in the way the presentatio
 
 See **[figdice.org](http://www.figdice.org/)**
 
+# Try a [Live Demo](http://demo.figdice.org/) now!
+
+
 Presentation in French: [GLMF-158 : FigDice, un templating system efficace et original](http://connect.ed-diamond.com/GNU-Linux-Magazine/GLMF-158/FigDice-un-Templating-System-efficace-et-original)
 
 ## Features
