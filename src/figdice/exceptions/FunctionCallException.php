@@ -23,6 +23,18 @@
 
 namespace figdice\exceptions;
 
+/**
+ * In general, in FigDice, the Views should be waterproof most of the time,
+ * and you should handle properly any execution errors in your Functions.
+ * (such as missing arguments, database failures, filesystem errors and so on).
+ * The consumer of your functions should never have to worry about errors, and 
+ * it is recommended that your functions simply return an empty result 
+ * in case of failure.
+ * However, in some cases you may have to report a severe runtime error,
+ * which should cause the normal rendering workflow to break. Use this
+ * exception to indicate the rendering engine to stop. Your controller should
+ * catch this exception and propose an alternate output.
+ */
 class FunctionCallException extends \Exception {
 	private $funcName;
 	public function __construct($funcName, $message, $filename, $line) {
