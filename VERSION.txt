@@ -1,2 +1,2 @@
-FigDice 2.0.4
+FigDice 2.0-dev
 http://www.figdice.org/
