@@ -28,6 +28,7 @@
  * - get started with the library
  * - load a template by its outer container file (This is not the recommended FigDice way!)
  * - push some data into the template
+ * - pass objects to templates
  * - control the textual content of tags
  * - inline dynamic data into HTML attributes
  * - embed unparsed content
@@ -60,10 +61,23 @@ $view->mount('document', array(
 
 // Mount some more data into our View.
 //  They could come from a database, for example.
-$view->mount('userDetails', array(
-	'title' => 'Mr',
-	'firstname' => 'Gabriel'
-));
+//  NB:  You can mount Objects! provided that the properties you want to
+//  expose, have a getter method (or are public).
+class MyUser {
+  // This public property is accessible from your template
+  public $firstname;
+  // This provate property is automatically made accessible by the getTitle method.
+  private $title;
+  public function __construct($title, $firstname) {
+    $this->title = $title;
+    $this->firstname = $firstname;
+  }
+  public function getTitle() {
+    return $this->title;
+  }
+}
+
+$view->mount('userDetails', new MyUser('Mr', 'Gabriel') );
 
 
 // Render the template!
