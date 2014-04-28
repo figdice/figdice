@@ -66,7 +66,7 @@ $view->mount('document', array(
 class MyUser {
   // This public property is accessible from your template
   public $firstname;
-  // This provate property is automatically made accessible by the getTitle method.
+  // This private property is automatically made accessible by the getTitle method.
   private $title;
   public function __construct($title, $firstname) {
     $this->title = $title;
