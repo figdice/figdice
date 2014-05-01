@@ -304,7 +304,7 @@ class View {
 	 * @throws FileNotFoundException
 	 */
 	public function loadFile($filename, File $parent = null) {
-		$this->file = new File(realpath($filename), $parent);
+		$this->file = new File($filename, $parent);
 
 		if(file_exists($filename)) {
 			$this->source = file_get_contents($filename);

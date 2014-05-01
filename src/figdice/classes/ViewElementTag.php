@@ -824,7 +824,7 @@ class ViewElementTag extends ViewElement {
 	 */
 	private function fig_cdata() {
 		$filename = $this->attributes['file'];
-		$realfilename = realpath(dirname($this->getCurrentFilename()).'/'.$filename);
+		$realfilename = dirname($this->getCurrentFilename()).'/'.$filename;
 		if(! file_exists($realfilename)) {
 			$message = "File not found: $filename called from: " . $this->getCurrentFilename(). '(' . $this->xmlLineNumber . ')';
 			$this->getLogger()->error($message);
