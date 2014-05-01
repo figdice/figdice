@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
