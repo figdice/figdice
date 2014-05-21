@@ -1,4 +1,4 @@
-## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP [![Build Status](https://travis-ci.org/gabrielzerbib/figdice.svg)](https://travis-ci.org/gabrielzerbib/figdice)
+## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP [![Build Status](https://travis-ci.org/gabrielzerbib/figdice.svg?branch=master)](https://travis-ci.org/gabrielzerbib/figdice)
 # Abstract
 
 FigDice is a templating engine for PHP.
