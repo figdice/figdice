@@ -208,4 +208,27 @@ ENDXML;
 	  $this->view->loadString($source);
 	  $this->assertNull( $this->view->render() );
 	}
+	
+	public function testFilter()
+	{
+	  $source = <<<ENDXML
+<fig:xml>
+  <div fig:filter="TestFilter">
+    <a href="one.html">one</a>
+  </div>
+</fig:xml>
+ENDXML;
+	  $view = new View();
+	  $view->loadString($source);
+	  $view->setFilterPath(__DIR__.DIRECTORY_SEPARATOR.'resources');
+	  $output = $view->render();
+	  
+	  $expected = <<<ENDHTML
+<div>
+    <a href="two.html">two</a>
+  </div>
+
+ENDHTML;
+	  $this->assertEquals($expected, $output);
+	}
 }

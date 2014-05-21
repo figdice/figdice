@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -1279,7 +1279,7 @@ class ViewElementTag extends ViewElement {
 			if(! file_exists($classFile)) {
 				$message = 'Filter file not found: ' . $classFile . ' in Fig source: ' . $this->currentFile->getFilename() . "({$this->xmlLineNumber})";
 				$this->getLogger()->error($message);
-				throw new Exception($message);
+				throw new \Exception($message);
 			}
 
 			require_once $classFile;
@@ -1294,7 +1294,7 @@ class ViewElementTag extends ViewElement {
 		if($this->view->getFilterFactory())
 			return $this->view->getFilterFactory()->create($className);
 
-		$reflection = new ReflectionClass($className);
+		$reflection = new \ReflectionClass($className);
 		return $reflection->newInstance();
 	}
 
