@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.3
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -231,4 +231,22 @@ ENDXML;
 ENDHTML;
 	  $this->assertEquals($expected, $output);
 	}
+
+	public function testCase()
+	{
+	  $source = <<<ENDXML
+<fig:xml>
+	<fig:case>
+    <div fig:case="false">first</div>
+    <div fig:case="true">second</div>
+	</fig:case>
+</fig:xml>
+ENDXML;
+	  $view = new View();
+	  $view->loadString($source);
+	  $output = $view->render();
+	  $expected = "<div>second</div>";
+	  $this->assertEquals($expected, trim($output));
+	}
+	
 }
