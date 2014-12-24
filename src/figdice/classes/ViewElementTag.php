@@ -1079,7 +1079,13 @@ class ViewElementTag extends ViewElement {
 		$dictionary = new Dictionary($filename);
 		$source = $this->getAttribute('source', null);
 
-		if( $source == $this->getView()->getLanguage() ) {
+
+		if ( ($this->getView()->getLanguage() == '') || ($source == $this->getView()->getLanguage()) ) {
+			// If the current View does not specify a Language,
+			// or if the dictionary to load is same language as View,
+			// let's not care about i18n.
+			// We will activate i18n only if the dictionary explicitly specifies a source,
+			// which means that we cannot simply rely on contents of the fig:trans tags.
 			return '';
 		}
 
