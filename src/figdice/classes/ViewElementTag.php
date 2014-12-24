@@ -1154,10 +1154,13 @@ class ViewElementTag extends ViewElement {
 
 		// Do we have a dictionary ?
 		$dictionary = $this->getCurrentFile()->getDictionary($dictionaryName);
+		// Maybe not, but at this stage it is not important, I only need
+		// to know its source
+		$dicSource = ($dictionary ? $dictionary->getSource() : null);
 		if (
 
 			( (null == $source) &&	//no source on the trans tag
-			 ($dictionary->getSource() == $this->getView()->getLanguage()) )
+			 ($dicSource == $this->getView()->getLanguage()) )
 			||
 			($source == $this->getView()->getLanguage()) ) {
 			$value = $this->renderChildren(true /*Do not render fig:param immediate children */);
