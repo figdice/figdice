@@ -46,6 +46,18 @@ class Dictionary {
 	 */
 	private $filename;
 	/**
+	 * @var string
+	 */
+	private $source;
+
+	/**
+	 * @return string
+	 */
+	public function getSource()
+	{
+		return $this->source;
+	}
+	/**
 	 * @var DOMDocument
 	 */
 	private $domDocument;
@@ -57,8 +69,9 @@ class Dictionary {
 	 */
 	private $cache;
 
-	public function __construct($filename) {
+	public function __construct($filename, $source = null) {
 		$this->filename = $filename;
+		$this->source = $source;
 		$this->cache = array();
 	}
 

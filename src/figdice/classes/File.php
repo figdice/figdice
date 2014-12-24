@@ -155,19 +155,13 @@ class File {
 	public function translate($key, $dictionaryName = null) {
 		//If a dictionary name is specified,
 		if(null !== $dictionaryName) {
-			//and there is no dictionary by that name in the dictionaries attached to the current file,
-			if((0 == count($this->dictionaries)) || (! array_key_exists($dictionaryName, $this->dictionaries)) ) {
-				//if this file is root file (no parent), error!
-				if(null == $this->parentFile) {
-					throw new DictionaryNotFoundException($dictionaryName);
-				}
-				//otherwise, search the parent file's dictionaries for the dictionary with specified name.
-				return $this->parentFile->translate($key, $dictionaryName);
+			// Use the nearest dictionary by this name,
+			// in current file upwards.
+			$dictionary = $this->getDictionary($dictionaryName);
+			if (null == $dictionary) {
+				throw new DictionaryNotFoundException($dictionaryName);
 			}
-			//This will throw an exception if the entry is not found
-			//in the current file's named dictionary, instead of searching parent's hierarchy for
-			//dictionaries with the same name.
-			return $this->dictionaries[$dictionaryName]->translate($key);
+			return $dictionary->translate($key);
 		}
 
 		//Walk the array of dictionaries, to try the lookup in all of them.
@@ -183,6 +177,28 @@ class File {
 			throw new DictionaryEntryNotFoundException();
 		}
 		return $this->parentFile->translate($key, $dictionaryName);
+	}
+
+	/**
+	 * @param $name
+	 * @return Dictionary
+	 */
+	public function getDictionary($name)
+	{
+		// If there is no dictionary by that name in the dictionaries
+		// attached to the current file,
+		if((0 == count($this->dictionaries)) || (! array_key_exists($name, $this->dictionaries)) ) {
+			//if this file is root file (no parent), error!
+			if(null == $this->parentFile) {
+				return null;
+			}
+			//otherwise, search the parent file's dictionaries for the dictionary with specified name.
+			return $this->parentFile->getDictionary($name);
+		}
+		//This will throw an exception if the entry is not found
+		//in the current file's named dictionary, instead of searching parent's hierarchy for
+		//dictionaries with the same name.
+		return $this->dictionaries[$name];
 	}
 
 	/**

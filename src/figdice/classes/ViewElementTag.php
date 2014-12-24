@@ -1076,8 +1076,8 @@ class ViewElementTag extends ViewElement {
 		$filename = $this->getView()->getTranslationPath() . DIRECTORY_SEPARATOR . $this->getView()->getLanguage() . DIRECTORY_SEPARATOR . $file;
 
 		$name = $this->getAttribute('name', null);
-		$dictionary = new Dictionary($filename);
 		$source = $this->getAttribute('source', null);
+		$dictionary = new Dictionary($filename, $source);
 
 
 		if ( ($this->getView()->getLanguage() == '') || ($source == $this->getView()->getLanguage()) ) {
@@ -1086,6 +1086,10 @@ class ViewElementTag extends ViewElement {
 			// let's not care about i18n.
 			// We will activate i18n only if the dictionary explicitly specifies a source,
 			// which means that we cannot simply rely on contents of the fig:trans tags.
+			// However, we still need to hook the Dictionary object as a placeholder,
+			// so that subsequent trans tag for the given dic name and source will
+			// simply render their contents.
+			$this->getCurrentFile()->addDictionary($dictionary, $name);
 			return '';
 		}
 
@@ -1148,7 +1152,14 @@ class ViewElementTag extends ViewElement {
 	  $key = $this->getAttribute('key', null);
 	  $dictionaryName = $this->getAttribute('dict', null);
 
-		if($source == $this->getView()->getLanguage()) {
+		// Do we have a dictionary ?
+		$dictionary = $this->getCurrentFile()->getDictionary($dictionaryName);
+		if (
+
+			( (null == $source) &&	//no source on the trans tag
+			 ($dictionary->getSource() == $this->getView()->getLanguage()) )
+			||
+			($source == $this->getView()->getLanguage()) ) {
 			$value = $this->renderChildren(true /*Do not render fig:param immediate children */);
 		}
 
