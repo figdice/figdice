@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
+ * @copyright 2004-2015, Gabriel Zerbib.
  * @version 2.0.5
  * @package FigDice
  *
@@ -1212,9 +1212,7 @@ class ViewElementTag extends ViewElement {
 			$attributeName = $matches[1];
 			//If there is a corresponding fig:param, use it:
 			if(array_key_exists($attributeName, $arguments)) {
-				//Data coming from my database can contain accented ascii chars (like � : chr(233)),
-				//which may corrupt the subsequent: return utf8_decode($value) at the end of this function.
-				$attributeValue = utf8_encode($arguments[$attributeName]);
+				$attributeValue = $arguments[$attributeName];
 			}
 			//Otherwise, use the inline attribute.
 			else {
@@ -1222,10 +1220,6 @@ class ViewElementTag extends ViewElement {
 			}
 			$value = str_replace('{' . $attributeName . '}', $attributeValue, $value);
 		}
-
-		//TODO: les param�tres de traduction pass�s en fig:param plut�t.
-		//Ce mode est important pour passer des param�tres conditionnels, par exemple
-		//(bien que je suppose que pour des traductions c'est maladroit).
 
 		//If the translated value is empty (ie. we did find an entry in the proper dictionary file,
 		//but this entry has an empty value), it means that the entry remains to be translated by the person in charge.
@@ -1238,8 +1232,7 @@ class ViewElementTag extends ViewElement {
 			  ', language=' . $this->getView()->getLanguage() . 
 			  ', file=' . $this->getCurrentFilename() . ', line=' . $this->xmlLineNumber);
 		}
-		//TODO: There are some situations where the resulting value must be decoded... Why??
-		//return utf8_decode($value);
+		
 		return $value;
 	}
 
