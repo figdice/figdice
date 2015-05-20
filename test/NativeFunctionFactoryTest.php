@@ -218,5 +218,13 @@ ENDXML;
 	  $this->view->loadString($source);
 	  $this->assertEquals(18, $this->view->render());
 	}
-	
+
+  public function testRangeFunc() {
+    $source = <<<ENDXML
+<li fig:walk="range(5)" fig:text="."></li>
+ENDXML;
+    $this->view->loadString($source);
+    $this->assertEquals('<li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>', $this->view->render());
+  }
+
 }
