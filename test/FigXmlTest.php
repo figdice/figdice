@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
+ * @copyright 2004-2015, Gabriel Zerbib.
  * @version 2.0.5
  * @package FigDice
  *
@@ -41,6 +41,16 @@ class FigXmlTest extends PHPUnit_Framework_TestCase {
 		$this->view = null;
 	}
 
+  public function testFigFlag()
+  {
+    $source = <<<ENDXML
+<fig><fig:attr name="ng-app" flag="true">bla</fig:attr></fig>
+ENDXML;
+
+    $this->view->loadString($source);
+    $expected = '<fig ng-app></fig>';
+    $this->assertEquals($expected, $this->view->render());
+  }
 
 	public function testFigVoid()
 	{

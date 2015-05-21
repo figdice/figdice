@@ -195,7 +195,8 @@ class ViewElementTag extends ViewElement {
 				if($value instanceof ViewElementTag) {
 					$value = $value->render();
 				}
-				else {
+        // a flag attribute is to be processed differently because it isn't a key=value pair.
+				else if ( !($value instanceof Flag) ) {
 					if(preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
 						for($i = 0; $i < count($matches[0]); ++ $i) {
 							$expression = $matches[1][$i][0];
@@ -254,7 +255,13 @@ class ViewElementTag extends ViewElement {
 
 				}
 
-				$result .= " $attribute=\"$value\"";
+        if ($value instanceof Flag) {
+          // Flag attribute: there is no value. We print only the name of the flag.
+          $result .= " $attribute";
+        }
+        else {
+          $result .= " $attribute=\"$value\"";
+        }
 			}
 
 		}
@@ -429,30 +436,36 @@ class ViewElementTag extends ViewElement {
 				//name is a required attribute for fig:attr.
 				throw new RequiredAttributeException($this->view->figNamespace . 'attr', $this->currentFile->getFilename(), $this->xmlLineNumber, 'Missing required name attribute for attr tag.');
 			}
-			if(isset($this->attributes['value'])) {
-				$value = $this->evaluate($this->attributes['value']);
-				if(is_string($value)) {
-					$value = htmlspecialchars($value);
-				}
-				$this->parent->runtimeAttributes[$this->attributes['name']] = $value;
-			}
-			else {
-				$value = '';
-				/**
-				 * @var ViewElement
-				 */
-				$child = null;
-				foreach ($this->children as $child) {
-					$renderChild = $child->render();
-					if($renderChild === false) {
-						throw new Exception();
-					}
-					$value .= $renderChild;
-				}
-				//An XML attribute should not span accross several lines.
-				$value = trim(preg_replace("#[\n\r\t]+#", ' ', $value));
-				$this->parent->runtimeAttributes[$this->attributes['name']] = $value;
-			}
+      //flag attribute
+      // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
+      if(isset($this->attributes['flag']) && $this->evaluate($this->attributes['flag'])) {
+        $this->parent->runtimeAttributes[$this->attributes['name']] = new Flag();
+      }
+      else {
+        if (isset($this->attributes['value'])) {
+          $value = $this->evaluate($this->attributes['value']);
+          if (is_string($value)) {
+            $value = htmlspecialchars($value);
+          }
+          $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
+        } else {
+          $value = '';
+          /**
+           * @var ViewElement
+           */
+          $child = null;
+          foreach ($this->children as $child) {
+            $renderChild = $child->render();
+            if ($renderChild === false) {
+              throw new Exception();
+            }
+            $value .= $renderChild;
+          }
+          //An XML attribute should not span accross several lines.
+          $value = trim(preg_replace("#[\n\r\t]+#", ' ', $value));
+          $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
+        }
+      }
 			return '';
 		}
 
