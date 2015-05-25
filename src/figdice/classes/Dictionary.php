@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -58,7 +58,7 @@ class Dictionary {
 		return $this->source;
 	}
 	/**
-	 * @var DOMDocument
+	 * @var \DOMDocument
 	 */
 	private $domDocument;
 	/**
@@ -97,7 +97,7 @@ class Dictionary {
 		//First: check the cache:
 		if(isset($this->cache[$key])) {
 			if($this->cache[$key] instanceof DictionaryEntryNotFoundException) {
-				throw new DictionaryEntryNotFoundException();
+				throw $this->cache[$key];
 			}
 			return $this->cache[$key];
 		}
@@ -107,7 +107,7 @@ class Dictionary {
 		//initialized by restore rather than load)
 		//throw an Entry Not Found Exception.
 		if(null == $this->domDocument) {
-			throw ($this->cache[$key] = new DictionaryEntryNotFoundException());
+			throw ($this->cache[$key] = new DictionaryEntryNotFoundException($key));
 		}
 
 		$xpath = new \DOMXPath($this->domDocument);
@@ -117,7 +117,7 @@ class Dictionary {
 
 		if($domNodeList->length == 0) {
 			//The translation for this key was not found in the current dictionary.
-			throw ($this->cache[$key] = new DictionaryEntryNotFoundException());
+			throw ($this->cache[$key] = new DictionaryEntryNotFoundException($key));
 		}
 
 		//The Value part is the inner contents of the entry tag.

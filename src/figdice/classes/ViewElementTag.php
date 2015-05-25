@@ -1189,7 +1189,7 @@ class ViewElementTag extends ViewElement {
 			}
 			//Ask current file to translate key:
 			try {
-				$value = $this->getCurrentFile()->translate($key, $dictionaryName);
+				$value = $this->getCurrentFile()->translate($key, $dictionaryName, $this->xmlLineNumber);
 			} catch(DictionaryEntryNotFoundException $ex) {
 				LoggerFactory::getLogger('Dictionary')->error('Translation not found: key=' . $key . ', dictionary=' . $dictionaryName . ', language=' . $this->getView()->getLanguage() . ', file=' . $this->getCurrentFile()->getFilename() . ', line=' . $this->xmlLineNumber);
 				return $key;

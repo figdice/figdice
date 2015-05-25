@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,6 +23,7 @@
 
 namespace figdice\classes;
 
+use figdice\exceptions\DictionaryEntryNotFoundException;
 use figdice\exceptions\DictionaryNotFoundException;
 
 class File {
@@ -71,7 +72,7 @@ class File {
 	 * @return boolean
 	 */
 	private function tentativeAddDictionary(Dictionary & $dictionary, $name) {
-		//Do not overwrite! Stop the recusrion as soon as a dictionary by same name exists up in the hierarchy.
+		//Do not overwrite! Stop the recursion as soon as a dictionary by same name exists up in the hierarchy.
 		if(array_key_exists($name, $this->dictionaries)) {
 			//Returning false will cause the previous call in the recursion to store it in place.
 			return false;
@@ -85,6 +86,7 @@ class File {
 			$this->dictionaries[$name] = & $dictionary;
 			return true;
 		}
+    return false;
 	}
 
 	/**
@@ -152,7 +154,7 @@ class File {
 	 * @return string
 	 * @throws DictionaryEntryNotFoundException, DictionaryNotFoundException
 	 */
-	public function translate($key, $dictionaryName = null) {
+	public function translate($key, $dictionaryName = null, $xmlLineNumber = null) {
 		//If a dictionary name is specified,
 		if(null !== $dictionaryName) {
 			// Use the nearest dictionary by this name,
@@ -161,7 +163,13 @@ class File {
 			if (null == $dictionary) {
 				throw new DictionaryNotFoundException($dictionaryName);
 			}
-			return $dictionary->translate($key);
+      try {
+        return $dictionary->translate($key);
+      } catch (DictionaryEntryNotFoundException $ex) {
+        $ex->setDictionaryName($dictionaryName);
+        $ex->setTemplateFile($this->filename, $xmlLineNumber);
+        throw $ex;
+      }
 		}
 
 		//Walk the array of dictionaries, to try the lookup in all of them.
@@ -174,7 +182,7 @@ class File {
 			}
 		}
 		if(null == $this->parentFile) {
-			throw new DictionaryEntryNotFoundException();
+			throw new DictionaryEntryNotFoundException($key);
 		}
 		return $this->parentFile->translate($key, $dictionaryName);
 	}
