@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.2
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -103,6 +103,24 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 	public function testSumOfArrayIsOk() {
 		$this->view->mount('myArray', array(1,2,3));
 		$this->assertEquals(6, $this->lexExpr(' sum( /myArray ) '));
+	}
+
+  /**
+   * If you have an array of objects with a common property which you wish to sum up,
+   * you can use the sum( ) function, specifying the array slash the property.
+   * Those objects which don't have the prop, or whose said prop is not a number, won't be
+   * taken into account in the summation.
+   */
+	public function testSumOfProperties() {
+		$this->view->mount('myArray', array(
+      array('price' => 10.5), // adds up
+      array('price' => 14.6), // adds up
+      array('noPriceHere' => 10), // is discarded
+      array('price' => 'Some String'), // is discarded
+      array('price' => 7) // adds up
+    ));
+		$this->assertEquals(14.6, $this->lexExpr(' /myArray/1/price '));
+		$this->assertEquals(32.1, $this->lexExpr(' sum( /myArray/price ) '));
 	}
 	public function testGlobalConst() {
 		define('MY_GLOBAL_TEST_CONST', 12);
