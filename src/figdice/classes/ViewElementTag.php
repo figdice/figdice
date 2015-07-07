@@ -595,7 +595,19 @@ class ViewElementTag extends ViewElement {
 			      && ($output instanceof \DOMNode)) {
 			    $output = $output->nodeValue;
 			  }
-			  
+
+        if (is_object($output)) {
+          // Try to convert object to string, using PHP's cast mechanism (possibly involving __toString() method).
+          try {
+            $output = (string) $output;
+          } catch(\ErrorException $ex) {
+            throw new RenderingException($this->getTagName(),
+              $this->getCurrentFilename(),
+              $this->getLineNumber(),
+              $ex->getMessage()
+              );
+          }
+        }
 				$this->outputBuffer = $output;
 				
 				
