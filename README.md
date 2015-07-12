@@ -1,5 +1,6 @@
 ## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP 
 [![Build Status](https://travis-ci.org/gabrielzerbib/figdice.svg?branch=master)](https://travis-ci.org/gabrielzerbib/figdice)
+[![Coverage Status](https://coveralls.io/repos/gabrielzerbib/figdice/badge.svg?branch=master&service=github)](https://coveralls.io/github/gabrielzerbib/figdice?branch=master)
 [![@figdice on Twitter](https://img.shields.io/badge/twitter-%40figdice-5189c7.svg)](https://twitter.com/figdice)
 
 # Abstract
