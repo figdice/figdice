@@ -19,5 +19,6 @@ script:
   - vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml test
 
 after_script:
+  - composer require psr/log
   - composer require satooshi/php-coveralls dev-master
   - vendor/bin/coveralls -v --exclude-no-stmt
