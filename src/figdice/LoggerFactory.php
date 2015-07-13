@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,6 +23,7 @@
 
 namespace figdice;
 
+use figdice\classes\MockNullLogger;
 use Psr\Log\NullLogger;
 use Psr\Log\LoggerInterface;
 
@@ -52,7 +53,16 @@ class LoggerFactory {
 	 */
 	public static function getLogger($class) {
 		if(null == self::$delegate) {
-			return new NullLogger();
+      // We instantiate an actual psr\log object only if there is
+      // an implementation out there. In case there isn't one,
+      // don't bother with logging: we don't want the FigDice phar to fail loading
+      // just because logging dependency is not present.
+      if (class_exists('Psr\Log\NullLogger', false)) {
+        return new NullLogger();
+      }
+      else {
+        return new MockNullLogger();
+      }
 		}
 		return self::$delegate->getLogger($class);
 	}
