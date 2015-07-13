@@ -13,7 +13,8 @@ matrix:
     - php: hhvm
 
 before_script:
-  - composer install --dev
+  - composer self-update
+  - composer install
 
 script:
   - mkdir -p build/logs
