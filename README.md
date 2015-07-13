@@ -51,35 +51,18 @@ The **\figdice** namespace is made available thanks to the **autoload** Composer
 
 ## 2. Phar
 
-Download the latest [FigDice phar](https://github.com/gabrielzerbib/figdice/releases/download/2.0.4/figdice-2.0.4.phar) file to the location of your choice.
+Download the latest [FigDice phar](https://github.com/gabrielzerbib/figdice/releases/download/2.0.5/figdice-2.0.5.phar) file to the location of your choice.
 Then, in your source files where you need to use FigDice features, write the line:
 
     require_once 'phar:///path/to/figdice.phar';
 
 The phar file's stub registers an **autoload** function for the classes in the **\figdice** namespace. Notice that, if you already have an old-style **__autoload** function, you must register it with [spl_autoload_register](http://php.net/manual/en/function.spl-autoload-register.php) before importing the phar.
 
-Your will also need to download and include a [PSR-3 Logger implementation](https://github.com/php-fig/log).
-
 
 
 ## 3. Zip
 
-Download the latest Figdice zip file to the location of your choice and extract the archive. Then you have two options. In both, your will also need to download and include a [PSR-3 Logger implementation](https://github.com/php-fig/log).
-
-### 3.1 Manual includes
-
-In the your source files where you need to use FigDice features, include the necessary files:
-
-    require_once '/path/to/figdice/View.php';
-    require_once '/path/to/figdice/Feed.php';
-    require_once '/path/to/figdice/Filter.php';
-
-at the minimum.
-Notice that some Exceptions and helper classes might need *require* despite you don't use them explicitly in your code.
-
-### 3.2 Autoload
-
-Simply *require_once* the **autoload.php** file at the root of the FigDice folder.
+Download the latest Figdice zip file to the location of your choice and extract the archive. Then, *require_once* the **autoload.php** file at the root of the FigDice folder.
 
 
 
