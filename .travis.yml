@@ -23,4 +23,4 @@ script:
 after_script:
   - composer require psr/log
   - composer require satooshi/php-coveralls dev-master
-  - vendor/bin/coveralls -v --exclude-no-stmt
+  - if [ $(phpenv version-name) = "5.6" ]; then vendor/bin/coveralls -v --exclude-no-stmt ; fi
