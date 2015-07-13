@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.3
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -106,9 +106,11 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		//Register our nice factory
 		$view->registerFunctionFactory($functionFactory);
 
-		//and evaluate an expression wich invokes our function
-		$result = $this->lexExpr( "customFunc(12)" );
-		$this->assertEquals(12*2, $result);
+		//and evaluate an expression which invokes our function.
+		//We use the custom func twice, in order to check coverage for the caching mechanism
+		//of user-defined function instances.
+		$result = $this->lexExpr( "customFunc(12) + customFunc(13)" );
+		$this->assertEquals(12*2 + 13*2, $result);
 	}
 
 }

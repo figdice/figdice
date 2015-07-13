@@ -213,7 +213,7 @@ class View {
 	/**
 	 * Array of FunctionFactory, used to generate the Function handlers in the Lexer.
 	 *
-	 * @var array
+	 * @var FunctionFactory[]
 	 */
 	private $functionFactories;
 
@@ -283,7 +283,7 @@ class View {
 	/**
 	 * Returns the registered Function Factories.
 	 *
-	 * @return array
+	 * @return FunctionFactory[]
 	 */
 	public function getFunctionFactories() {
 		return $this->functionFactories;

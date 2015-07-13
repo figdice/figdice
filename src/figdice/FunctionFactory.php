@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.3
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -57,8 +57,9 @@ abstract class FunctionFactory {
 	 * @return FigFunction
 	 */
 	public final function lookup($funcName) {
-		if(isset(self::$functions[$funcName]))
+		if(isset(self::$functions[$funcName])) {
 			return self::$functions[$funcName];
+		}
 		//The assign-and-return is acceptable because isset(null) returns false.
 		return (self::$functions[$funcName] = $this->create($funcName));
 	}
@@ -74,5 +75,5 @@ abstract class FunctionFactory {
 	 * @param string $funcName
 	 * @return FigFunction
 	 */
-	abstract public function create($funcName);
+	abstract protected function create($funcName);
 }

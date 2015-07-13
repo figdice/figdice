@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -74,35 +74,19 @@ class TokenFunction extends TokenOperator {
 	}
 
 	/**
-	 * A Helper function to strong-type the items of functionFactories array.
-	 * @return FunctionFactory
-	 */
-	private function iterateFactory(& $factories) {
-		static $inProgress = false;
-		if(! $inProgress) {
-			$inProgress = true;
-			reset($factories);
-		}
-		$item = each($factories);
-		if(false === $item) {
-			$inProgress = false;
-			return null;
-		}
-		return $item['value'];
-	}
-
-	/**
 	 * @param ViewElement $viewElement
 	 */
 	public function evaluate(ViewElementTag $viewElement) {
 		if($this->function === null) {
-			//Instanciate the Function handler:
+			//Instantiate the Function handler:
+      /** @var FunctionFactory[] $factories */
 			$factories = $viewElement->getView()->getFunctionFactories();
 			if ( (null != $factories) && (is_array($factories) ) ) {
-				while(null != ($factory = $this->iterateFactory($factories)) ) {
-					if(null !== ($this->function = $factory->create($this->name)))
-						break;
-				}
+
+        foreach ($factories as $factory) {
+          if(null !== ($this->function = $factory->lookup($this->name)))
+            break;
+        }
 			}
 
 			if($this->function == null) {
