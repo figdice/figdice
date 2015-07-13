@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.2
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -64,6 +64,7 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 	public function testEmptyExpressionIsFalse()
 	{
 		$this->assertFalse($this->lexExpr( '' ));
+		$this->assertFalse($this->lexExpr( '   ' ));
 	}
 
 	/**
@@ -71,9 +72,33 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testParseErrorThrowsException()
 	{
-		$lexer = new Lexer('2 == true=');
 		$this->lexExpr( '2 == true=' );
 		$this->assertFalse(true, 'An expected exception was not thrown');
+	}
+
+	/**
+	 * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+	 */
+	public function testMissingOperatorException()
+	{
+		$this->lexExpr( '2 5' );
+		$this->assertFalse(true, 'An expected exception was not thrown');
+	}
+
+	/**
+	 * @expectedException \figdice\exceptions\LexerSyntaxErrorException
+	 */
+	public function testMissingOperandException()
+	{
+		$this->lexExpr( '2 div' );
+		$this->assertFalse(true, 'An expected exception was not thrown');
+	}
+	/**
+	 * @expectedException \figdice\exceptions\LexerSyntaxErrorException
+	 */
+	public function testTwoConsecutiveBinOperatorsException()
+	{
+		$this->assertEquals(2, $this->lexExpr( '* div' ));
 	}
 
 	public function test1Plus1()

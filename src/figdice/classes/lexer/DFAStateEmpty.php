@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -81,5 +81,14 @@ class DFAStateEmpty extends DFAState {
 			$this->throwError($lexer, $char);
 		}
 	}
-}
 
+  /**
+   * @param Lexer $lexer
+   */
+  public function endOfInput($lexer) {
+    // Method left blank on purpose.
+    // It is generally legal, parsing-wise, to meet end of input while in Empty state.
+    // However, the grammar can be wrong (missing operands etc.). But this it not the right place to check.
+  }
+
+}

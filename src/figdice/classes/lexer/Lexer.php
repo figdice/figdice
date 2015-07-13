@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,6 +23,7 @@
 
 namespace figdice\classes\lexer;
 
+use figdice\classes\File;
 use \figdice\classes\ViewElementTag;
 use \figdice\exceptions\LexerUnexpectedCharException;
 use \figdice\exceptions\LexerSyntaxErrorException;
@@ -153,7 +154,7 @@ class Lexer {
 		$this->viewElement = $viewElement;
 
 		//Interpret an empty expression as boolean false.
-		if(trim($this->expression == '')) {
+		if(trim($this->expression) == '') {
 		  $this->pushOperand(new TokenLiteral(false));
 		  return true;
 		}
@@ -173,6 +174,11 @@ class Lexer {
 				$operator = array_pop($this->stackOperators);
 				$nbOperands = $operator->getNumOperands();
 				if($nbOperands) {
+					// Check that we have enough operands on the stack.
+					if (sizeof($this->stackRP) < $nbOperands) {
+						$message = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): Missing operand in expression: ' . $this->expression;
+						throw new LexerSyntaxErrorException('', $this->getViewFile()->getFilename(), $this->getViewLine());
+					}
 					$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
 				}
 				$this->stackRP[] = $operator;
@@ -307,6 +313,11 @@ class Lexer {
 
 					$nbOperands = $operator->getNumOperands();
 					if($nbOperands) {
+            // Check that we have enough operands on the stack.
+            if (sizeof($this->stackRP) < $nbOperands) {
+              $message = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): Missing operand in expression: ' . $this->expression;
+              throw new LexerSyntaxErrorException('', $this->getViewFile()->getFilename(), $this->getViewLine());
+            }
 						$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
 					}
 					$this->stackRP[] = $operator;
