@@ -23,9 +23,7 @@
 
 
 use figdice\View;
-use figdice\classes\File;
-use figdice\classes\ViewElementTag;
-
+use figdice\exceptions\FileNotFoundException;
 
 /**
  * Unit Test Class for fig tags and attributes
@@ -258,5 +256,19 @@ ENDXML;
 	  $expected = "<div>second</div>";
 	  $this->assertEquals($expected, trim($output));
 	}
-	
+
+	public function testIncludeFileNotFoundException()
+	{
+		$source = <<<ENDXML
+<fig:xml><fig:include file="file-not-found.xml"/></fig:xml>
+ENDXML;
+		$view = new View();
+		$view->loadString($source);
+		try {
+			$view->render();
+		} catch (FileNotFoundException $ex) {
+			$this->assertEquals('//file-not-found.xml', $ex->getFilename());
+		}
+	}
+
 }
