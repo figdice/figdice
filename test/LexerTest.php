@@ -32,7 +32,7 @@ use figdice\classes\ViewElementTag;
  */
 class LexerTest extends PHPUnit_Framework_TestCase {
 
-	private function lexExpr($expression) {
+	private function lexExpr($expression, array $data = null) {
 		$lexer = new Lexer($expression);
 
 		// A Lexer object needs to live inside a View,
@@ -51,6 +51,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 		// before asserting stuff on its evaluation.
 		$parseResult = $lexer->parse($viewElement);
 		$this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
+
+		// Mock the mounting of root data universe into the view
+		$view->expects($this->any())->method('fetchData')->will($this->returnValue($data));
 
 		return $lexer->evaluate($viewElement);
 	}
@@ -263,6 +266,28 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 	public function testUnclosedFunctionThrowsException () {
 	  //missing closing parenth.
 	  $this->assertFalse($this->lexExpr( "substr('abcd', 2" ) );
+	}
+
+	/**
+	 * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+	 */
+	public function testMisuseOfLParen()
+	{
+		$this->assertTrue( $this->lexExpr(' 3 ( 7') );
+	}
+
+	public function testIndexedArraySubpath()
+	{
+    $myArr = [9, 11, 5];
+    $myIndex = 1;
+		$this->assertEquals( $myArr[$myIndex], $this->lexExpr('/myArr/[/myIndex]', ['myIndex' => $myIndex, 'myArr' => $myArr]) );
+
+    // The following two are equivalent: it doesn't make much sense to sub-evaluate [2],
+    // which worths the same as the literal 2, but it isn't illegal either.
+    // Of course, the real purpose of sub-path components, is when you don't know in advance
+    // the key or index of the value that you need to fetch.
+		$this->assertEquals( $myArr[2], $this->lexExpr('/myArr/2', ['myArr' => $myArr]) );
+		$this->assertEquals( $myArr[2], $this->lexExpr('/myArr/[2]', ['myArr' => $myArr]) );
 	}
 }
 

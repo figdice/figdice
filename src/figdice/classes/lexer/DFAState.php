@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.2
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -111,6 +111,7 @@ abstract class DFAState {
 	/**
 	 * @param Lexer $lexer
 	 * @param char $char
+	 * @throws LexerUnexpectedCharException
 	 */
 	protected function throwError($lexer, $char) {
 		$message = 'Unexpected char: ' . $char;

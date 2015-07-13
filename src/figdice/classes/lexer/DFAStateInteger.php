@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,10 +23,13 @@
 
 namespace figdice\classes\lexer;
 
+use figdice\exceptions\LexerUnexpectedCharException;
+
 class DFAStateInteger extends DFAStateNumeric {
 	/**
 	 * @param Lexer $lexer
 	 * @param char $char
+	 * @throws LexerUnexpectedCharException
 	 */
 	public function input(Lexer $lexer, $char) {
 		if(self::isDigit($char)) {
