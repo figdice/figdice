@@ -280,14 +280,14 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 	{
     $myArr = [9, 11, 5];
     $myIndex = 1;
-		$this->assertEquals( $myArr[$myIndex], $this->lexExpr('/myArr/[/myIndex]', ['myIndex' => $myIndex, 'myArr' => $myArr]) );
+		$this->assertEquals( $myArr[$myIndex], $this->lexExpr('/myArr/[/myIndex]', array('myIndex' => $myIndex, 'myArr' => $myArr)) );
 
     // The following two are equivalent: it doesn't make much sense to sub-evaluate [2],
     // which worths the same as the literal 2, but it isn't illegal either.
     // Of course, the real purpose of sub-path components, is when you don't know in advance
     // the key or index of the value that you need to fetch.
-		$this->assertEquals( $myArr[2], $this->lexExpr('/myArr/2', ['myArr' => $myArr]) );
-		$this->assertEquals( $myArr[2], $this->lexExpr('/myArr/[2]', ['myArr' => $myArr]) );
+		$this->assertEquals( $myArr[2], $this->lexExpr('/myArr/2', array('myArr' => $myArr)) );
+		$this->assertEquals( $myArr[2], $this->lexExpr('/myArr/[2]', array('myArr' => $myArr)) );
 	}
 }
 

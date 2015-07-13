@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.4
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -244,5 +244,10 @@ ENDXML;
     $this->view->loadString($source);
     $this->assertEquals('<li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>', $this->view->render());
   }
+
+	public function testInvalidPhpFuncReturnsFalse()
+	{
+		$this->assertFalse( $this->lexExpr("php('no_chance_that_this_function_exists_in_php', 12)") );
+	}
 
 }
