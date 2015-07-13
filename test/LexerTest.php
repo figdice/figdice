@@ -278,7 +278,7 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 
 	public function testIndexedArraySubpath()
 	{
-    $myArr = [9, 11, 5];
+    $myArr = array(9, 11, 5);
     $myIndex = 1;
 		$this->assertEquals( $myArr[$myIndex], $this->lexExpr('/myArr/[/myIndex]', array('myIndex' => $myIndex, 'myArr' => $myArr)) );
 
