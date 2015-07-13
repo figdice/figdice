@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.2
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.0.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -32,6 +32,25 @@ use figdice\classes\lexer\Lexer;
  */
 abstract class ViewElement {
 	public $outputBuffer;
+
+
+	/**
+	 * Indicates whether the XML element is to be rendered as self-closed (in case it has no content and is not muted).
+	 * Example:
+	 * <code>
+	 *   <br fig:auto="true" />
+	 * </code>
+	 * will ensure to render:
+	 * <code>
+	 *   <br />
+	 * </code>
+	 * instead of:
+	 * <code>
+	 *   <br></br>
+	 * </code>
+	 *
+	 * @var boolean
+	 */
 	public $autoclose;
 	/**
 	 * @var ViewElementTag
@@ -83,26 +102,6 @@ abstract class ViewElement {
 		$this->view = &$view;
 	}
 
-	/**
-	 * Indicates whether the XML element is to be rendered as self-closed (in case it has no content and is not muted).
-	 * Example:
-	 * <code>
-	 *   <br fig:auto="true" />
-	 * </code>
-	 * will ensure to render:
-	 * <code>
-	 *   <br />
-	 * </code>
-	 * instead of:
-	 * <code>
-	 *   <br></br>
-	 * </code>
-	 *
-	 * @return boolean
-	 */
-	public function getAutoClose() {
-		return $this->autoclose;
-	}
 
 	/**
 	 * Evaluate the XPath-like expression
