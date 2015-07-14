@@ -196,11 +196,7 @@ class ViewElementTag extends ViewElement {
 								else {
 									$message = 'Attribute ' . $attribute . '="' . $value . '" in tag "' . $this->name . '" evaluated to array.';
 									$message = get_class($this) . ': file: ' . $this->currentFile->getFilename() . '(' . $this->xmlLineNumber . '): ' . $message;
-									if(! $this->logger) {
-										$this->logger = LoggerFactory::getLogger(get_class($this));
-									}
-									$this->logger->error($message);
-									throw new Exception($message);
+									throw new RenderingException($this->getTagName(), $this->getCurrentFilename(), $this->getLineNumber(), $message);
 								}
 							}
 

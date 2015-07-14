@@ -298,4 +298,16 @@ ENDXML;
     $view->loadString($source);
     $this->assertEquals('', $view->render());
   }
+
+  /**
+   * @expectedException \figdice\exceptions\RenderingException
+   */
+  public function testAttributeEvalsToArrayException()
+  {
+    $source = '<xml attr="{myArray}"></xml>';
+    $view = new View();
+    $view->loadString($source);
+    $view->mount('myArray', array(4, 5, 6));
+    $this->assertEquals('dummy', $view->render());
+  }
 }
