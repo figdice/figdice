@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -68,10 +68,20 @@ class ViewElementTag extends ViewElement {
 
 
 	/**
-	 * Flag indicating whether the tag must be rendered as HTML-void
-	 * (example: <img>) which means: without a closing tag, and without
-	 * an ending / (unlike auto-close flag).
-	 * This behaviour is controlled by the fig:void attribute.
+	 * Indicates whether the XML tag must be rendered as html-void.
+	 * This is useful in order to comply to the various (x)HTML doctypes.
+	 * Example: br, hr, img, meta...
+	 * <code>
+	 *   <br fig:void="true" />
+	 * </code>
+	 * will ensure to render:
+	 * <code>
+	 *   <br>
+	 * </code>
+	 * with no closing tag, and no ending slash.
+	 *
+	 * @see http://www.456bereastreet.com/archive/201005/void_empty_elements_and_self-closing_start_tags_in_html/
+	 * @var boolean
 	 */
 	private $voidtag;
 
@@ -125,31 +135,6 @@ class ViewElementTag extends ViewElement {
 	}
 	public function setAttributes(array $attributes) {
 		$this->attributes = $attributes;
-	}
-	public function getAttributes() {
-		return $this->attributes;
-	}
-	/**
-	 * @return integer
-	 */
-	public function getChildrenCount() {
-		return count($this->children);
-	}
-	/**
-	 * @param integer $index
-	 * @return ViewElement
-	 */
-	public function getChildNode($index) {
-		return $this->children[$index];
-	}
-	/**
-	 * @return ViewElement
-	 */
-	public function & lastChild() {
-		if(count($this->children)) {
-			return $this->children[count($this->children) - 1];
-		}
-		return null;
 	}
 	public function clearAttribute($name) {
 		unset($this->attributes[$name]);
@@ -1354,25 +1339,5 @@ class ViewElementTag extends ViewElement {
 	 */
 	public function getName() {
 		return $this->name;
-	}
-
-	/**
-	 * Indicates whether the XML element is to be rendered as html-void.
-	 * This is useful in order to comply to the various (x)HTML doctypes.
-   * Example:
-   * <code>
-   *   <br fig:void="true" />
-   * </code>
-   * will ensure to render:
-   * <code>
-   *   <br>
-   * </code>
-   * with no closing tag, and no ending slash.
-   *
-	 * @see http://www.456bereastreet.com/archive/201005/void_empty_elements_and_self-closing_start_tags_in_html/
-   * @return boolean
-   */
-	public function getVoidTag() {
-		return $this->voidtag;
 	}
 }

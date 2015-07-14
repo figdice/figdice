@@ -271,4 +271,15 @@ ENDXML;
 		}
 	}
 
+  /**
+   * @expectedException figdice\exceptions\RequiredAttributeException
+   */
+	public function testMissingRequiredAttributeInFigAttr()
+  {
+    $source = '<xml><fig:attr value="12"/></xml>';
+    $view = new View();
+    $view->loadString($source);
+    $view->render();
+    $this->assertTrue(true);
+  }
 }
