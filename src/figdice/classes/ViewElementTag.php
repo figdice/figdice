@@ -177,16 +177,11 @@ class ViewElementTag extends ViewElement {
 		foreach($attributes as $attribute=>$value) {
 
 			if( ! $this->view->isFigAttribute($attribute)) {
-				if($value instanceof ViewElementTag) {
-					$value = $value->render();
-				}
         // a flag attribute is to be processed differently because it isn't a key=value pair.
-				else if ( !($value instanceof Flag) ) {
+				if ( !($value instanceof Flag) ) {
 					if(preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
 						for($i = 0; $i < count($matches[0]); ++ $i) {
 							$expression = $matches[1][$i][0];
-							$outerExpressionPosition = $matches[0][$i][1];
-							$outerExpressionLength = strlen($matches[0][$i][0]);
 
 							//Evaluate expression now:
 
@@ -442,7 +437,7 @@ class ViewElementTag extends ViewElement {
           foreach ($this->children as $child) {
             $renderChild = $child->render();
             if ($renderChild === false) {
-              throw new Exception();
+              throw new \Exception();
             }
             $value .= $renderChild;
           }
@@ -674,7 +669,7 @@ class ViewElementTag extends ViewElement {
 		}
 
 		if($this->view->error) {
-			throw new Exception();
+			throw new \Exception();
 		}
 
 		return $result;

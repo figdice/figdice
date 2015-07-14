@@ -205,4 +205,12 @@ ENDXML;
 		$view->parse();
 		$this->assertEquals($output, $view->render());
 	}
+
+	public function testAdHocEval()
+  {
+    $view = new View();
+    $view->loadString('<xml attr="some {adhoc} here"></xml>');
+    $view->mount('adhoc', 'test');
+    $this->assertEquals('<xml attr="some test here"></xml>', $view->render());
+  }
 }

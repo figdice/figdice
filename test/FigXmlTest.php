@@ -282,4 +282,12 @@ ENDXML;
     $view->render();
     $this->assertTrue(true);
   }
+
+  public function testMacro()
+  {
+    $source = '<xml><fig fig:macro="macro"><tag attr="{value}"/></fig><call fig:call="macro"><fig:param name="value"><b>test</b></fig:param></call></xml>';
+    $view = new View();
+    $view->loadString($source);
+    $this->assertEquals('<xml><fig><tag attr="&lt;b&gt;test&lt;/b&gt;" /></fig></xml>', $view->render() );
+  }
 }
