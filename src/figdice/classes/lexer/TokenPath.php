@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -36,8 +36,7 @@ class TokenPath extends Token {
 	 */
 	public function __construct($pathElement) {
 		parent::__construct();
-		if(null != $pathElement)
-			$this->path = array($pathElement);
+		$this->path = array($pathElement);
 	}
 
 	public function appendElement($pathElement) {
@@ -54,10 +53,7 @@ class TokenPath extends Token {
 	 * @return mixed
 	 */
 	public function evaluate(ViewElementTag $viewElement) {
-
-		if(0 == ($count = count($this->path))) {
-			return null;
-		}
+		$count = count($this->path);
 
 		$data = null;
 

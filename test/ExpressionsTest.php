@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.2
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -32,7 +32,7 @@ use figdice\classes\ViewElementTag;
  */
 class ExpressionsTest extends PHPUnit_Framework_TestCase {
 
-	private function lexExpr($expression) {
+	private function lexExpr($expression, array $data = null) {
 		$lexer = new Lexer($expression);
 
 		// A Lexer object needs to live inside a View,
@@ -52,7 +52,10 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
 		$parseResult = $lexer->parse($viewElement);
 		$this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
-		return $lexer->evaluate($viewElement);
+    // Mock the mounting of root data universe into the view
+    $view->expects($this->any())->method('fetchData')->will($this->returnValue($data));
+
+    return $lexer->evaluate($viewElement);
 	}
 
 
@@ -71,4 +74,27 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->assertEquals('a2', $this->lexExpr( "'a' + 2 " ));
 	}
+
+  /**
+   * This method and the following public property are used as a helper
+   * for testObjectAttributesInPath in which we tell the expression engine to
+   * access the bean-like property of an object.
+   * @return int
+   */
+  public function getSomeGetterValue()
+  {
+    return 13;
+  }
+  public $somePublicProperty = 21;
+  public function testObjectAttributesInPath()
+  {
+    $this->assertEquals($this->getSomeGetterValue(), $this->lexExpr( '/rootObj/someGetterValue', array('rootObj' => $this) ));
+    $this->assertEquals($this->somePublicProperty, $this->lexExpr( '/rootObj/somePublicProperty', array('rootObj' => $this) ));
+    $this->assertNull($this->lexExpr( '/rootObj/someInexistantProperty', array('rootObj' => $this) ));
+  }
+
+  public function testSubkeyOfAScalarValueIsNull()
+  {
+    $this->assertNull( $this->lexExpr('/rootObj/someGetterValue/subkey', array('rootObj' => $this)));
+  }
 }

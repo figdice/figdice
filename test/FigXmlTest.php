@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -267,7 +267,7 @@ ENDXML;
 		try {
 			$view->render();
 		} catch (FileNotFoundException $ex) {
-			$this->assertEquals('//file-not-found.xml', $ex->getFilename());
+			$this->assertEquals('file-not-found.xml', basename($ex->getFilename()));
 		}
 	}
 
