@@ -290,4 +290,12 @@ ENDXML;
     $view->loadString($source);
     $this->assertEquals('<xml><fig><tag attr="&lt;b&gt;test&lt;/b&gt;" /></fig></xml>', $view->render() );
   }
+
+  public function testWalkOnEmptyGivesNothing()
+  {
+    $source = '<xml fig:walk="/empty"></xml>';
+    $view = new View();
+    $view->loadString($source);
+    $this->assertEquals('', $view->render());
+  }
 }

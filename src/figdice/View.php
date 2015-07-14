@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -382,7 +382,7 @@ class View {
 			if(count($this->stack)) {
 				$lastElement = $this->stack[count($this->stack) - 1];
 				if($lastElement instanceof ViewElementTag) {
-					$errMsg .= '. Last element: ' . $lastElement->getName();
+					$errMsg .= '. Last element: ' . $lastElement->getTagName();
 				}
 			}
 			$this->errorMessage($errMsg);

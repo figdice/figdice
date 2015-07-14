@@ -832,7 +832,6 @@ class ViewElementTag extends ViewElement {
 		$realfilename = dirname($this->getCurrentFilename()).'/'.$filename;
 		if(! file_exists($realfilename)) {
 			$message = "File not found: $filename called from: " . $this->getCurrentFilename(). '(' . $this->xmlLineNumber . ')';
-			$this->getLogger()->error($message);
 			throw new FileNotFoundException($message, $filename);
 		}
 		$cdata = file_get_contents($realfilename);
@@ -993,7 +992,7 @@ class ViewElementTag extends ViewElement {
 		$dataset = $this->evaluate($figIterateAttribute);
 
 		//Walking on nothing gives no ouptut.
-		if(null === $dataset) {
+		if(null == $dataset) {
 			return '';
 		}
 
@@ -1296,17 +1295,21 @@ class ViewElementTag extends ViewElement {
 				$classFile = $this->view->getFilterPath() . '/' . $classFile;
 			if(! file_exists($classFile)) {
 				$message = 'Filter file not found: ' . $classFile . ' in Fig source: ' . $this->currentFile->getFilename() . "({$this->xmlLineNumber})";
-				$this->getLogger()->error($message);
-				throw new \Exception($message);
+				throw new FileNotFoundException($message, $classFile);
 			}
 
 			require_once $classFile;
 
 			//Check that the loaded file did declare the requested class:
 			if(! class_exists($className)) {
-				$this->getLogger()->error("Undefined filter class: $className in file: $classFile");
-				throw new Exception();
-			}
+				$message = "Undefined filter class: $className in file: $classFile";
+        throw new RenderingException($this->getTagName(),
+          $this->getCurrentFilename(),
+          $this->getLineNumber(),
+          $message
+        );
+
+      }
 		}
 
 		if($this->view->getFilterFactory())
@@ -1327,12 +1330,5 @@ class ViewElementTag extends ViewElement {
 			$this->logger = LoggerFactory::getLogger(get_class($this));
 		}
 		return $this->logger;
-	}
-	/**
-	 * The tag name. 
-	 * @return string
-	 */
-	public function getName() {
-		return $this->name;
 	}
 }
