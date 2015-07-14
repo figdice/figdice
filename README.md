@@ -37,7 +37,7 @@ Simply add the following composer.json file to your project root, or append the 
 
     {
       "require": {
-        "figdice/figdice": "2.0.4"
+        "figdice/figdice": "2.1.0"
       }
     }
 

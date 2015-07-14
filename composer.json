@@ -4,7 +4,7 @@
     "description": "Template Engine, XML-centric and attribute-driven",
     "keywords": ["template","templating","presentation","views","xml","html"],
     "homepage": "http://www.figdice.org/",
-    "version": "2.0-dev",
+    "version": "2.1-dev",
     "license": ["GPL-3.0"],
     "authors": [
     	{
