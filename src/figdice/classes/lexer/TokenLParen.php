@@ -31,6 +31,7 @@ class TokenLParen extends TokenOperator {
 
 	/**
 	 * @return integer
+	 * @codeCoverageIgnore
 	 */
 	public function getNumOperands() {
 		return 0;
@@ -38,6 +39,7 @@ class TokenLParen extends TokenOperator {
 
 	/**
 	 * @param ViewElement $viewElement
+	 * @codeCoverageIgnore
 	 * @return mixed
 	 */
 	public function evaluate(ViewElementTag $viewElement) {
