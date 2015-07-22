@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -26,7 +26,7 @@ namespace figdice\classes\lexer;
 class DFAStateSymbol extends DFAState
 {
 	static private $keywords = array(
-		'and', 'or', 'div', 'true', 'false', 'gt', 'gte', 'lt', 'lte', 'not'
+		'and', 'or', 'div', 'mod', 'true', 'false', 'gt', 'gte', 'lt', 'lte', 'not'
 	);
 	
 	/**
@@ -178,6 +178,9 @@ class DFAStateSymbol extends DFAState
 				break;
 			case 'div':
 				$lexer->pushOperator(new TokenDiv());
+				break;
+			case 'mod':
+				$lexer->pushOperator(new TokenMod());
 				break;
 			case 'true':
 				$lexer->pushOperand(new TokenLiteral(true));

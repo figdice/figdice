@@ -289,5 +289,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $myArr[2], $this->lexExpr('/myArr/2', array('myArr' => $myArr)) );
 		$this->assertEquals( $myArr[2], $this->lexExpr('/myArr/[2]', array('myArr' => $myArr)) );
 	}
-}
 
+	public function testMod()
+	{
+		$this->assertEquals( 13, $this->lexExpr("363 mod 50") );
+	}
+}
