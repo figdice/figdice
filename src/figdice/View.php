@@ -23,6 +23,7 @@
 
 namespace figdice;
 
+use figdice\classes\AutoloadFeedFactory;
 use figdice\classes\NativeFunctionFactory;
 use figdice\classes\TagFigAttr;
 use figdice\classes\File;
@@ -192,13 +193,13 @@ class View {
 	/**
 	 * The FeedFactory objects passed by the caller of the view,
 	 * which are used to instanciate the feeds.
-	 * @var array of FeedFactory
+	 * @var FeedFactory[]
 	 */
 	public $feedFactories = array();
 
 	/**
 	 * Cache mechanism for feed instanciation.
-	 * @var array of classname => factory object
+	 * @var FeedFactory[] classname => factory object
 	 */
 	private $feedFactoryForClass = array();
 
@@ -748,6 +749,12 @@ class View {
 			return $feedFactory->create($classname, $attributes);
 		}
 		else {
+			// If no factory is registered,
+      // let's use at least the Autoload factory
+      if (0 == count($this->feedFactories)) {
+        $this->registerFeedFactory(new AutoloadFeedFactory());
+      }
+
 			foreach ($this->feedFactories as $factory) {
 				if(null != ($feedInstance = $factory->create($classname, $attributes))) {
 					$this->feedFactoryForClass[$classname] = $factory;

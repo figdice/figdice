@@ -21,14 +21,17 @@
  * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace figdice\test;
 
+use figdice\Feed;
 use figdice\View;
 use figdice\exceptions\FileNotFoundException;
+
 
 /**
  * Unit Test Class for fig tags and attributes
  */
-class FigXmlTest extends PHPUnit_Framework_TestCase {
+class FigXmlTest extends \PHPUnit_Framework_TestCase {
 
 	protected $view;
 
@@ -309,5 +312,35 @@ ENDXML;
     $view->loadString($source);
     $view->mount('myArray', array(4, 5, 6));
     $this->assertEquals('dummy', $view->render());
+  }
+
+	public function testFeedWithParamWithoutFactoryWithPreloadedClass()
+	{
+		$view = new View();
+    $view->loadFile(__DIR__.'/resources/FigXmlFeed.xml');
+    $this->assertEquals(12, trim($view->render()));
+	}
+
+	public function testFeedWithoutFactoryWithAutoload()
+	{
+		$view = new View();
+    $view->loadFile(__DIR__.'/resources/FigXmlFeedAutoload.xml');
+
+    spl_autoload_register(function ($className) {
+      if ('some\figdice\test\ns\CustomAutoloadFeed' == $className) {
+        require_once __DIR__.'/resources/CustomAutoloadFeed.php';
+      }
+    });
+
+    $this->assertEquals(13, trim($view->render()));
+	}
+}
+
+
+class CustomFeed extends Feed
+{
+  public function run()
+  {
+    return ['value' => $this->getParameterInt('some-param')];
   }
 }

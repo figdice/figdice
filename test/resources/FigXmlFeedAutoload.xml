@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fig:template xmlns:fig="http://figdice.org">
+  <fig:feed class="some\figdice\test\ns\CustomAutoloadFeed" target="dummy" some-param="13" />
+  <div fig:mute="true" fig:text="/dummy/value"></div>
+</fig:template>
