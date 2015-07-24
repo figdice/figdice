@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
+ * @author https://github.com/jfrancr
  * @copyright 2004-2015, Gabriel Zerbib.
  * @version 2.1.1
  * @licenses GPL-v3
