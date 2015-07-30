@@ -89,6 +89,9 @@ class DFAStateSymbol extends DFAState
 			$lexer->pushOperator(new TokenMul());
 		}
 		else if($char == '!') {
+      if (! $this->closed) {
+        $lexer->pushOperand(new TokenSymbol($this->buffer));
+      }
 			$lexer->setStateComparison($char);
 		}
 		else if(self::isBlank($char)) {
