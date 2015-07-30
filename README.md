@@ -38,7 +38,7 @@ Simply add the following composer.json file to your project root, or append the 
 
     {
       "require": {
-        "figdice/figdice": "2.1.0"
+        "figdice/figdice": "~2.1"
       }
     }
 
@@ -52,7 +52,7 @@ The **\figdice** namespace is made available thanks to the **autoload** Composer
 
 ## 2. Phar
 
-Download the latest [FigDice phar](https://github.com/gabrielzerbib/figdice/releases/download/2.0.5/figdice-2.0.5.phar) file to the location of your choice.
+Download the latest [FigDice phar](https://github.com/gabrielzerbib/figdice/releases/download/2.1.0/figdice-2.1.0.phar) file to the location of your choice.
 Then, in your source files where you need to use FigDice features, write the line:
 
     require_once 'phar:///path/to/figdice.phar';
