@@ -148,7 +148,11 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->assertTrue($this->lexExpr( 'not(false)' ));
 	}
-	
+	public function testGreaterThan()
+	{
+		$this->assertTrue($this->lexExpr( '8 gt 5' ));
+	}
+
 	public function testLogicalOr()
 	{
 		$this->assertFalse($this->lexExpr( "false or 0 or '' " ));
@@ -294,4 +298,12 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->assertEquals( 13, $this->lexExpr("363 mod 50") );
 	}
+
+  /**
+   * @expectedException \figdice\exceptions\LexerArrayToStringConversionException
+   */
+  public function testArrayToStringException()
+  {
+    $this->assertFalse($this->lexExpr('aaa == 12', ['aaa' => [1, 2, 3]]));
+  }
 }
