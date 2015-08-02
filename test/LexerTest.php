@@ -306,4 +306,21 @@ class LexerTest extends PHPUnit_Framework_TestCase {
   {
     $this->assertFalse($this->lexExpr('aaa == 12', ['aaa' => [1, 2, 3]]));
   }
+
+  /**
+   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+   */
+  public function testOpeningParenForFuncAndEOI()
+  {
+    $this->assertEquals(12, $this->lexExpr('openFunc('));
+  }
+
+  /**
+   * @expectedException figdice\exceptions\FunctionNotFoundException
+   */
+  public function testParenInsideFunc()
+  {
+    //TODO: what should really be done is: register myFunc and check the result.
+    $this->assertTrue($this->lexExpr('myfunc((1))'));
+  }
 }

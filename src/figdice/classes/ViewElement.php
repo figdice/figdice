@@ -158,5 +158,5 @@ abstract class ViewElement {
 	/**
 	 * @return string
 	 */
-	abstract protected function render();
+	abstract public function render();
 }

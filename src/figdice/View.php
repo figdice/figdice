@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.1
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -27,6 +27,7 @@ use figdice\classes\AutoloadFeedFactory;
 use figdice\classes\NativeFunctionFactory;
 use figdice\classes\TagFigAttr;
 use figdice\classes\File;
+use figdice\classes\ViewElement;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\XMLParsingException;
@@ -149,14 +150,14 @@ class View {
 	 * A slot is a specific ViewElementTag identified
 	 * by a name, whose content is replaced by the content
 	 * of the element that has been pushed (plugged) into the slot.
-	 * @var array ({@link Slot})
+	 * @var Slot[]
 	 */
 	private $slots;
 
 	/**
 	 * Array of named elements that are used as content providers
 	 * to fill in slots by the same name.
-	 * @var array (ViewElement)
+	 * @var ViewElementTag[]
 	 */
 	private $plugs;
 
@@ -301,9 +302,10 @@ class View {
 	/**
 	 * Load from source file.
 	 *
-	 * @param string $filename
-	 * @throws FileNotFoundException
-	 */
+   * @param string $filename
+   * @param File|null $parent
+   * @throws FileNotFoundException
+   */
 	public function loadFile($filename, File $parent = null) {
 		$this->file = new File($filename, $parent);
 
@@ -323,6 +325,7 @@ class View {
 	 * This creates a File object with no real filesystem location.
 	 * @internal
 	 * @param string $string
+	 * @param string|null $workingDirectory
 	 */
 	public function loadString($string, $workingDirectory = null) {
 	  $this->file = new File($workingDirectory . '/(null)');
@@ -377,7 +380,10 @@ class View {
 		$this->firstOpening = true;
 		$bSuccess = xml_parse($this->xmlParser, $this->source);
 
-		if(!$bSuccess) {
+    if ($bSuccess) {
+      $errMsg = '';
+    }
+		else {
 			$errMsg = xml_error_string(xml_get_error_code($this->xmlParser));
 			$lineNumber = xml_get_current_line_number($this->xmlParser);
 			if(count($this->stack)) {
@@ -510,7 +516,6 @@ class View {
 			}
 		}
 
-		$pos = xml_get_current_byte_index($xmlParser);
 		$lineNumber = xml_get_current_line_number($xmlParser);
 
 		if($this->parentViewElement) {
@@ -537,6 +542,7 @@ class View {
 		}
 
 		if($this->rootNode) {
+      /** @var ViewElementTag $parentElement */
 			$parentElement = & $this->stack[count($this->stack)-1];
 			$newElement->parent = &$parentElement;
 
@@ -616,10 +622,6 @@ class View {
 
 		$result = $input;
 
-		/**
-		 * @var Slot
-		 */
-		$slot = null;
 		foreach($this->slots as $slotName => $slot) {
 			$plugOutput = '';
 			$slotPos = strpos($result, $slot->getAnchorString());

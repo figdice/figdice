@@ -51,7 +51,7 @@ class Slot {
 	 * Sets the length of the replacement contents.
 	 * @param integer $length
 	 */
-	function setLength($length)
+	public function setLength($length)
 	{
 		$this->length = $length;
 	}

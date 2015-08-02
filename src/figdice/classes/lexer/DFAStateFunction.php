@@ -54,6 +54,6 @@ class DFAStateFunction extends DFAState {
 	}
 
 	public function endOfInput($lexer) {
-		$this->throwErrorWithMessage($lexer, 'Unexpected end of expression inside function call');
+		return $this->throwErrorWithMessage($lexer, 'Unexpected end of expression inside function call');
 	}
 }

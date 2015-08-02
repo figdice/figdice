@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.1
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -42,6 +42,9 @@ class ViewElementTag extends ViewElement {
 	private $attributes;
 	private $runtimeAttributes;
 
+  /**
+   * @var ViewElement[]
+   */
 	private $children;
 
 	/**
@@ -814,7 +817,6 @@ class ViewElementTag extends ViewElement {
 			$this->view->mount($mountPoint, $subUniverse);
 		}
 
-		return '';
 	}
 
 	/**
@@ -995,7 +997,7 @@ class ViewElementTag extends ViewElement {
 		$dataBackup = $this->data;
 		$outputBuffer = '';
 
-		if(is_object($dataset) && ($dataset instanceof Iterable) ) {
+		if(is_object($dataset) && ($dataset instanceof \Countable) ) {
 			$datasetCount = $dataset->count();
 		}
 		else if(is_array($dataset)) {
@@ -1015,7 +1017,7 @@ class ViewElementTag extends ViewElement {
 		array_push($this->iteration, $newIteration);
 		$bFirstIteration = true;
 
-		if(is_array($dataset) || (is_object($dataset) && ($dataset instanceof Iterable)) ) {
+		if(is_array($dataset) || (is_object($dataset) && ($dataset instanceof \Countable)) ) {
 			foreach($dataset as $key => $data) {
 				$this->view->pushStackData($data);
 				$newIteration->iterate($key);
@@ -1216,7 +1218,7 @@ class ViewElementTag extends ViewElement {
 			}
 			//Otherwise, use the inline attribute.
 			else {
-				$attributeValue = $this->evalAttribute($attributeName, null);
+				$attributeValue = $this->evalAttribute($attributeName);
 			}
 			$value = str_replace('{' . $attributeName . '}', $attributeValue, $value);
 		}

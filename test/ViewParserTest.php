@@ -213,4 +213,16 @@ ENDXML;
     $view->mount('adhoc', 'test');
     $this->assertEquals('<xml attr="some test here"></xml>', $view->render());
   }
+
+	public function testWalkOnNonCountableObjectRunsOnArrayWithObject()
+	{
+		$view = new View();
+		$view->loadString(
+			'<test fig:walk="/obj"><fig:mute fig:text="property" /></test>'
+		);
+		$obj = new stdClass();
+		$obj->property = 12;
+		$view->mount('obj', $obj);
+		$this->assertEquals('<test>12</test>', $view->render());
+	}
 }
