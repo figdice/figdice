@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.1
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -163,7 +163,7 @@ ENDXML;
 	}
 
 	/**
-	 * @expectedException figdice\exceptions\XMLParsingException
+	 * @expectedException \figdice\exceptions\XMLParsingException
 	 */
 	public function testUndeclaredEntitiesRaiseException()
 	{
@@ -275,7 +275,7 @@ ENDXML;
 	}
 
   /**
-   * @expectedException figdice\exceptions\RequiredAttributeException
+   * @expectedException \figdice\exceptions\RequiredAttributeException
    */
 	public function testMissingRequiredAttributeInFigAttr()
   {
@@ -334,6 +334,34 @@ ENDXML;
 
     $this->assertEquals(13, trim($view->render()));
 	}
+
+  public function testFigMountValue()
+  {
+    $view = new View();
+    $view->loadString(
+      '<fig:template>' .
+        '<fig:mount target="mnt" value="12"/>' .
+        '<fig:mute fig:text="/mnt" />' .
+      '</fig:template>'
+    );
+
+    $this->assertEquals(12, $view->render());
+  }
+  public function testFigMountTree()
+  {
+    $view = new View();
+    $view->loadString(
+      '<fig:template>' .
+        '<fig:mount target="mnt">' .
+        '<tag fig:text="1 + 33"></tag>' .
+        '</fig:mount>' .
+        '<fig:mute fig:text="/mnt" />' .
+      '</fig:template>'
+    );
+
+    $this->assertEquals('<tag>34</tag>', $view->render());
+  }
+
 }
 
 
