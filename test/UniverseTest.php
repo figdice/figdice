@@ -72,4 +72,30 @@ class UniverseTest extends PHPUnit_Framework_TestCase {
   {
     $this->assertFalse($this->symbolize('dummy !=47', ['dummy' => 47]));
   }
+
+  public function testRelativePathDisambiguation()
+  {
+    //Check that heading dot is understated.
+    $view = new View();
+    $view->loadString(trim(
+      '<fig:template>' .
+        '<fig:mute fig:text="data"/>:' .
+        '<fig:mute fig:walk="lines" fig:text="data"/>:' .
+        '<fig:mute fig:walk="lines" fig:text="./data"/>' .
+      '</fig:template>'
+    ));
+    $view->mount('data', 12);
+    $view->mount('lines', [
+      ['data' => 13],
+      ['data' => 14]
+    ]);
+
+    $this->assertEquals('12:1314:1314', $view->render());
+  }
+
+  public function testDotInsideFunctionAndTopLevelDotIsFullUniverse()
+  {
+    $this->assertEquals(2, $this->symbolize('count(.)', ['a', 'b']));
+  }
+
 }

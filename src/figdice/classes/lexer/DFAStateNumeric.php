@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -33,7 +33,7 @@ abstract class DFAStateNumeric extends DFAState {
 
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	protected function pushEqualsExclam(Lexer $lexer, $char) {
     	$lexer->pushOperand(new TokenLiteral($this->buffer));
@@ -43,7 +43,7 @@ abstract class DFAStateNumeric extends DFAState {
 	
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	protected function pushPlusMinus(Lexer $lexer, $char) {
 	    $lexer->pushOperand(new TokenLiteral($this->buffer));
@@ -51,7 +51,7 @@ abstract class DFAStateNumeric extends DFAState {
 	}
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	protected function pushAlpha(Lexer $lexer, $char) {
 	    if(! $this->closed)

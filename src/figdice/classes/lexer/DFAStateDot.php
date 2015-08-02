@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -30,7 +30,7 @@ class DFAStateDot extends DFAState {
 
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	public function input(Lexer $lexer, $char) {
 		//Valid inputs in this state are:

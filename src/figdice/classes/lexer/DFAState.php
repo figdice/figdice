@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @version 2.1.1
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -60,12 +60,12 @@ abstract class DFAState {
 
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	abstract public function input(Lexer $lexer, $char);
 
 	/**
-	 * @param char $char
+	 * @param string $char
 	 * @return boolean
 	 */
 	protected static function isAlpha($char)
@@ -77,7 +77,7 @@ abstract class DFAState {
 		);
 	}
 	/**
-	 * @param char $char
+	 * @param string $char
 	 * @return boolean
 	 */
 	protected static function isAlphaNum($char) {
@@ -87,14 +87,14 @@ abstract class DFAState {
 		);
 	}
 	/**
-	 * @param char $char
+	 * @param string $char
 	 * @return boolean
 	 */
 	protected static function isDigit($char) {
 		return ( ($char >= '0') && ($char <= '9') );
 	}
 	/**
-	 * @param char $char
+	 * @param string $char
 	 * @return boolean
 	 */
 	protected static function isBlank($char) {
@@ -110,7 +110,7 @@ abstract class DFAState {
 
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 * @throws LexerUnexpectedCharException
 	 */
 	protected function throwError($lexer, $char) {
