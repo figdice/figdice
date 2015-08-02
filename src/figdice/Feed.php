@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -73,25 +73,6 @@ abstract class Feed {
 	 */
 	public function setParameters(&$params) {
 		$this->params = &$params;
-	}
-	public function setParameter($name, $value) {
-		$this->params[$name] = $value;
-	}
-	/**
-	 * Called by ViewElementTag after instanciation of the feed class,
-	 * and before calling the run( ) method.
-	 *
-	 * @param string $filename
-	 */
-	public function setFigFile($filename) {
-		$this->figFile = $filename;
-	}
-
-	/**
-	 * @return string
-	 */
-	function getFigFile() {
-		return $this->figFile;
 	}
 	function getParameterBool($paramName, $defaultValue = false) {
 		if(isset($this->params[$paramName])) {
