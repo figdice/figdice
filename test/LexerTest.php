@@ -323,4 +323,13 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     //TODO: what should really be done is: register myFunc and check the result.
     $this->assertTrue($this->lexExpr('myfunc((1))'));
   }
+
+  public function testPathAndComparatorWithoutSpace()
+  {
+    $this->assertTrue($this->lexExpr('/var/www==13', ['var'=>['www'=>13]]));
+  }
+  public function testPathAndPlusWithoutSpace()
+  {
+    $this->assertTrue($this->lexExpr('/var/www+13 == 26', ['var'=>['www'=>13]]));
+  }
 }
