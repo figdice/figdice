@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -363,6 +363,11 @@ class Lexer {
 		$this->setStateClosedExpression();
 	}
 
+	/**
+	 * Create a wrappable Expression out of what's inside the [],
+	 * and append it as a path element to current path.
+	 * @throws Exception
+	 */
 	public function closeSquareBracket() {
 		while(0 < count($this->stackOperators)) {
 			$operator = array_pop($this->stackOperators);
@@ -370,6 +375,7 @@ class Lexer {
 				break;
 			}
 
+			// The square bracket expression contains operators. ex: [i + 1]
 			$nbOperands = $operator->getNumOperands();
 			if($nbOperands) {
 				$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
@@ -391,12 +397,15 @@ class Lexer {
 		$this->pushOperand(new TokenPath($path));
 		$this->setStatePath();
 	}
+
+	/**
+	 * Prerequisite to this function: the last element in stack
+	 * MUST be a TokenPath. It is normally always the case, given the usage of
+	 * this function. If you think you need to call Lexer::pushPathElement by
+	 * yourself from somewhere, make sure your last stack elt is a TokenPath.
+	 * @param $buffer
+	 */
 	public function pushPathElement($buffer) {
-		if(! $this->stackRP[count($this->stackRP) - 1] instanceof TokenPath) {
-			$message = $this->getViewFile() . '(' . $this->getViewLine() . "): Syntax error in expression: {$this->expression}.";
-			$this->getLogger()->error($message);
-			throw new Exception($message);
-		}
 		$this->stackRP[count($this->stackRP) - 1]->appendElement($buffer);
 	}
 
@@ -405,7 +414,7 @@ class Lexer {
 		if ( ($funcStackCount = count($this->stackFunctions)) == 0) {
 			$errorMsg = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): Unbalanced parentheses in expression: "' . $this->expression . '"';
 			$this->getLogger()->error($errorMsg);
-			throw new LexerUnbalancedParentheses($errorMsg, 
+			throw new LexerUnbalancedParenthesesException($errorMsg,
 				$this->getViewFile()->getFilename(), 
 				$this->getViewLine());
 		}

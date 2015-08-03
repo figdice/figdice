@@ -53,6 +53,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
 		// Mock the mounting of root data universe into the view
+    // CAUTION: you cannot use relative paths in this test case,
+    // because relative path resolution involves full View class.
+    // Here we can only have top-level symbols in our mock.
 		$view->expects($this->any())->method('fetchData')->will($this->returnValue($data));
 
 		return $lexer->evaluate($viewElement);
@@ -331,5 +334,18 @@ class LexerTest extends PHPUnit_Framework_TestCase {
   public function testPathAndPlusWithoutSpace()
   {
     $this->assertTrue($this->lexExpr('/var/www+13 == 26', ['var'=>['www'=>13]]));
+  }
+
+  /**
+   * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException
+   */
+  public function testCommaWithoutFuncException()
+  {
+    $this->assertTrue($this->lexExpr('1, 2, 3'));
+  }
+
+  public function testDynamicSubpathWithOpertion()
+  {
+    $this->assertEquals(12, $this->lexExpr('/var/[/i + 1]', ['i' => 1, 'var' => ['2' => 12]]));
   }
 }
