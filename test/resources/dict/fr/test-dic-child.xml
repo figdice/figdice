@@ -1,0 +1,3 @@
+<fig:dictionary xmlns:fig="http://figdice.org/" language="fr" >
+    <entry key="key1">key1-child</entry>
+</fig:dictionary>

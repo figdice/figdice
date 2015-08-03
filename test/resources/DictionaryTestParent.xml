@@ -1,0 +1,17 @@
+<fig:template>
+
+  <!-- We load a dic with this name in both parent template and included template -->
+  <fig:dictionary name="inParent" file="test-dic-parent.xml" />
+
+
+  <fig:include file="DictionaryTestChild.xml" />
+
+  <!-- We loaded "inChild" dictionary in child template only,
+       buy we try to display a trans from parent temlpate:
+       it works. -->
+  <fig:trans dic="inChild" key="my-key" />
+
+  <!-- Now this trans must pick in the Parent dic -->
+  <fig:trans dic="inParent" key="key1" />
+
+</fig:template>

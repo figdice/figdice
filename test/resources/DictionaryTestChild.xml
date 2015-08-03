@@ -1,0 +1,7 @@
+<fig:template>
+    <fig:dictionary name="inChild" file="test-dic.xml" source="en" />
+    <fig:dictionary name="inParent" file="test-dic-child.xml" source="en" />
+
+    <!-- This trans must pick in the local version of inParent -->
+    <fig:trans dict="inParent" key="key1" />
+</fig:template>
