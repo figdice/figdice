@@ -14,4 +14,8 @@
   <!-- Now this trans must pick in the Parent dic -->
   <fig:trans dic="inParent" key="key1" />
 
+  <!-- Here I want to check the caching feature, by reusing a key -->
+  <!-- It requires some Reflection, because cache is private to Dictionary -->
+  <fig:trans dic="inParent" key="key1" />
+
 </fig:template>

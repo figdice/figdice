@@ -178,6 +178,9 @@ class File {
 				try {
 					return $dictionary->translate($key);
 				} catch(DictionaryEntryNotFoundException $ex) {
+          // It is perfectly legitimate to not find a key in the first few registered dictionaries.
+          // But if in the end, we still didn't find a translation, it will be time to
+          // throw the exception.
 				}
 			}
 		}
