@@ -29,24 +29,18 @@ class DFAStateSymbol extends DFAState
 		'and', 'or', 'div', 'mod', 'true', 'false', 'gt', 'gte', 'lt', 'lte', 'not'
 	);
 	
-	/**
-	 * @var boolean
-	 */
-	private $path;
 
 	public function __construct() {
 		parent::__construct();
-		$this->path = false;
 	}
 
 	public function setBuffer($string) {
 		parent::setBuffer($string);
-		$this->path = false;
 	}
 
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	public function input(Lexer $lexer, $char) {
 		if(self::isAlphaNum($char)) {
@@ -57,7 +51,6 @@ class DFAStateSymbol extends DFAState
 					$lexer->pushOperand(new TokenSymbol($this->buffer));
 				$this->closed = false;
 				$this->buffer = $char;
-				$this->path = false;
 			}
 			else {
 				$this->buffer .= $char;
@@ -65,11 +58,7 @@ class DFAStateSymbol extends DFAState
 		}
 		else if($char == '(')
 		{
-			if($this->path) {
-				$this->throwError($lexer, $char);
-			}
-			else if(in_array($this->buffer, self::$keywords))
-			{
+			if (in_array($this->buffer, self::$keywords)) {
 				$this->pushKeyword($lexer);
 				$lexer->pushOperator(new TokenLParen());
 			}
@@ -97,17 +86,14 @@ class DFAStateSymbol extends DFAState
 		else if(self::isBlank($char)) {
 			if(! $this->closed) {
 				$this->closed = true;
-				if(! $this->path) {
-					if(in_array($this->buffer, self::$keywords)) {
-						$this->pushKeyword($lexer);
-					}
-					else {
-						$lexer->pushOperand(new TokenSymbol($this->buffer));
-					}
+
+				if(in_array($this->buffer, self::$keywords)) {
+					$this->pushKeyword($lexer);
 				}
 				else {
 					$lexer->pushOperand(new TokenSymbol($this->buffer));
 				}
+
 			}
 		}
 		else if($char == ')') {
@@ -144,9 +130,6 @@ class DFAStateSymbol extends DFAState
 			$lexer->setStateClosedExpression();
 			$lexer->forwardInput($char);
 		}
-		else if($char == '[') {
-			$this->throwError($lexer, $char);
-		}
 		//Closing a sub-path expression:
 		else if($char == ']') {
 			$lexer->pushOperand(new TokenSymbol($this->buffer));
@@ -160,7 +143,7 @@ class DFAStateSymbol extends DFAState
 
 	public function endOfInput($lexer)
 	{
-		if( $this->path || ! in_array($this->buffer, self::$keywords) )
+		if( ! in_array($this->buffer, self::$keywords) )
 			$lexer->pushOperand(new TokenSymbol($this->buffer));
 		else
 			$this->pushKeyword($lexer);

@@ -49,6 +49,6 @@ class DFAStateComparison extends DFAState {
 		}
 	}
   public function endOfInput($lexer) {
-    $this->throwErrorWithMessage($lexer, 'Unexpected end of expression in comparator.');
+    return $this->throwErrorWithMessage($lexer, 'Unexpected end of expression in comparator.');
   }
 }
