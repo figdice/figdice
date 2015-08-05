@@ -1,7 +1,6 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @author https://github.com/jfrancr
  * @copyright 2004-2015, Gabriel Zerbib.
  * @version 2.1.1
  * @licenses GPL-v3
@@ -22,6 +21,13 @@ class AutoloadFeedFactory implements FeedFactory
     // Thanks to autoload, any feed can simply be invoked by
     // its full namespace+class, and then it will be automagically
     // loaded here.
-    return new $className;
+
+    // Attempt autoloading by calling class_exists
+    // and if autoloading did not bring the class, then return null.
+    if (class_exists($className, true)) {
+      return new $className;
+    }
+
+    return null;
   }
 }

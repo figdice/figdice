@@ -171,8 +171,6 @@ class View {
 	public $macros;
 
 
-	public $error;
-
 	/**
 	 * Used internally at parse-time to determine whether when the very
 	 * first tag opening occurs.

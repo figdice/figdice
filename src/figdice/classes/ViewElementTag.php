@@ -214,10 +214,6 @@ class ViewElementTag extends ViewElement {
 								$evaluatedValue = htmlspecialchars($evaluatedValue);
 							}
 	
-							if($this->view->error) {
-								return '';
-							}
-
 
 							//Store evaluated value in $matches structure:
 							$matches[0][$i][2] = $evaluatedValue;
@@ -665,10 +661,6 @@ class ViewElementTag extends ViewElement {
 			//because runtime attributes could be conditioned and the condition could eval differently
 			//in next iteration.
 			$this->runtimeAttributes = array();
-		}
-
-		if($this->view->error) {
-			throw new \Exception();
 		}
 
 		return $result;
