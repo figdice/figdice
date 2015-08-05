@@ -412,20 +412,24 @@ class Lexer {
 	public function incrementLastFunctionArity() {
 		 
 		if ( ($funcStackCount = count($this->stackFunctions)) == 0) {
+			// There isn't a function to which we're incrementing arity!
 			$errorMsg = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): Unbalanced parentheses in expression: "' . $this->expression . '"';
 			$this->getLogger()->error($errorMsg);
 			throw new LexerUnbalancedParenthesesException($errorMsg,
 				$this->getViewFile()->getFilename(), 
 				$this->getViewLine());
 		}
+
+    // Grab the topmost function on the stack. That's the one we're dealing with.
 		$tokenFunction = $this->stackFunctions[$funcStackCount - 1];
 		$this->setStateEmpty();
 		
 		//Pop operators up to the function:
-		//an intermediate operator to pop could be a function, provided that it is closed
-		//(although I think it can never happen, for when a function is closed, it becomes an operand
-		//and is no longer in the stack of operators... 
-		while( (! ($operator = $this->stackOperators[count($this->stackOperators) - 1]) instanceof TokenFunction) || $operator->isClosed()) { 
+    //the function of interest (the one to which we're pushing a comma) is the topmost TokenFunction
+    //in the stack of operators. Every other operator must be popped and his operands popped+attached.
+		//An intermediate function ( example: func2 in "func1(func2(x),y)"   ) is no longer a TokenFunction in
+		//the stack of operators at this stage. It already became an operand at the ")" before the ",".
+		while( (! ($this->stackOperators[count($this->stackOperators) - 1]) instanceof TokenFunction) ) {
 			$operator = array_pop($this->stackOperators);
 			$nbOperands = $operator->getNumOperands();
 			if($nbOperands) {

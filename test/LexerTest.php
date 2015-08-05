@@ -283,6 +283,38 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertFalse($this->lexExpr( "substr('abcd', 2" ) );
   }
 
+  public function testFuncArgIsOperator()
+  {
+    $tree = $this->lexParse('substr(1 + 3, 4)');
+
+    $this->assertInstanceOf('\figdice\classes\lexer\TokenFunction', $tree);
+
+    $reflector = new ReflectionClass(get_class($tree));
+    $property = $reflector->getProperty('operands');
+    $property->setAccessible(true);
+
+    $operands = $property->getValue($tree);
+    $this->assertEquals(2, count($operands));
+    $this->assertInstanceOf('\figdice\classes\lexer\TokenPlusMinus', $operands[0]);
+    $this->assertInstanceOf('\figdice\classes\lexer\TokenLiteral', $operands[1]);
+  }
+
+  public function testFuncArgIsFunc()
+  {
+    $tree = $this->lexParse('substr( myfunc(12), 4)');
+
+    $this->assertInstanceOf('\figdice\classes\lexer\TokenFunction', $tree);
+
+    $reflector = new ReflectionClass(get_class($tree));
+    $property = $reflector->getProperty('operands');
+    $property->setAccessible(true);
+
+    $operands = $property->getValue($tree);
+    $this->assertEquals(2, count($operands));
+    $this->assertInstanceOf('\figdice\classes\lexer\TokenFunction', $operands[0]);
+    $this->assertInstanceOf('\figdice\classes\lexer\TokenLiteral', $operands[1]);
+  }
+
   /**
    * @expectedException \figdice\exceptions\LexerUnexpectedCharException
    */
