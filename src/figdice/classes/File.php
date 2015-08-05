@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -106,14 +106,10 @@ class File {
 	public function addDictionary(Dictionary & $dictionary, $name) {
 		if($name) {
 			//If I already have a dictionary by this name,
+			//or if Root file: store in place.
 			//I am only requested to overwrite.
-			if(array_key_exists($name, $this->dictionaries)) {
-				$this->dictionaries[$name] = & $dictionary;
-				return true;
-			}
-
-			//Root file: store in place.
-			if(! $this->getParent()) {
+			if ((array_key_exists($name, $this->dictionaries)) ||
+				(! $this->getParent()) ) {
 				$this->dictionaries[$name] = & $dictionary;
 				return true;
 			}
@@ -123,6 +119,10 @@ class File {
 			if($this->getParent()->tentativeAddDictionary($dictionary, $name)) {
 				return true;
 			}
+
+			// If we couldn't store the named dic in any file above
+			// (ie every ancestor already owns a dic with same name),
+			// then do store it in place.
 			$this->dictionaries[$name] = & $dictionary;
 			return true;
 		}
@@ -178,6 +178,9 @@ class File {
 				try {
 					return $dictionary->translate($key);
 				} catch(DictionaryEntryNotFoundException $ex) {
+          // It is perfectly legitimate to not find a key in the first few registered dictionaries.
+          // But if in the end, we still didn't find a translation, it will be time to
+          // throw the exception.
 				}
 			}
 		}

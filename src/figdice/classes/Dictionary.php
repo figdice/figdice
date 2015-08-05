@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -64,7 +64,7 @@ class Dictionary {
 	/**
 	 * Associative array of key/value pairs,
 	 * maintained internally as a cache, to avoid repeating an xpath query that
-	 * was succesful earlier.
+	 * was successful earlier.
 	 * @var array
 	 */
 	private $cache;

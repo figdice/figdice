@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -32,6 +32,7 @@ use figdice\classes\ViewElementTag;
  */
 class DictionaryTest extends PHPUnit_Framework_TestCase {
 
+  /** @var  View */
 	protected $view;
 
 	protected function setUp() {
@@ -50,6 +51,9 @@ class DictionaryTest extends PHPUnit_Framework_TestCase {
 		$expected = "My translated string";
 		$this->assertEquals($expected, trim($this->view->render()) );
 
+    $this->view = new View();
+    $this->view->loadFile(dirname(__FILE__).'/resources/DictionaryTest.xml');
+    $this->view->setTranslationPath(dirname(__FILE__).'/resources/dict');
 		$this->view->setLanguage('fr');
 		$expected = "Ma chaîne traduite";
 		$this->assertEquals($expected, trim($this->view->render()) );
@@ -69,5 +73,29 @@ ENDXML;
 	  $expected = "My translated string";
 	  $this->assertEquals($expected, trim($this->view->render()) );
 	}
-}
 
+	public function testDictionaryLoadedFromIncludedTemplate()
+  {
+    $this->view->loadFile(__DIR__.'/resources/DictionaryTestParent.xml');
+    $this->view->setTranslationPath(__DIR__.'/resources/dict');
+    $this->view->setLanguage('fr');
+    $output = trim($this->view->render());
+    $output = preg_replace('#^[ \t]+#m', '', $output);
+    $output = preg_replace('#[ \t]+$#m', '', $output);
+    $output = preg_replace('#\n+#', ';', $output);
+    $this->assertEquals('key1-child;Ma chaîne traduite;key1-parent;key1-parent', $output);
+
+    // Now check that the key1-parent has been cached, because used twice
+    // But because the $cache array is private in Dictionary class,
+    // we use Reflection to break into it.
+    $reflector = new ReflectionClass(get_class(
+        // I know for a fact, that my test XML Parent template loads an "inParent" dic.
+      $dict = $this->view->getRootNode()->getCurrentFile()->getDictionary('inParent'))
+    );
+    $cacheProp = $reflector->getProperty('cache');
+    $cacheProp->setAccessible(true);
+    $cache = $cacheProp->getValue($dict);
+    // And I know for a fact that it translates twice the "key1" key.
+    $this->assertEquals('key1-parent', $cache['key1']);
+  }
+}
