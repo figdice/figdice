@@ -13,6 +13,7 @@ See **[figdice.org](http://www.figdice.org/)**
 
 # Try a [Live Demo](http://demo.figdice.org/) now!
 
+Presentation and Tutorial: [SitePoint | Getting Started With FigDice](http://www.sitepoint.com/?s=figdice)
 
 Presentation in French: [GLMF-158 : FigDice, un templating system efficace et original](http://connect.ed-diamond.com/GNU-Linux-Magazine/GLMF-158/FigDice-un-Templating-System-efficace-et-original)
 
