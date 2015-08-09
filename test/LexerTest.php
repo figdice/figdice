@@ -416,6 +416,49 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertInstanceOf('figdice\classes\lexer\TokenLiteral', $operands[1]);
 
   }
+  public function testDecimalAsNotLastArg()
+  {
+    $tree = $this->lexParse('func(3.25, 12)');
+    //Root of tree is a Function
+    $this->assertInstanceOf('\figdice\classes\lexer\TokenFunction', $tree);
+
+    $reflector = new ReflectionClass($tree);
+    $property = $reflector->getProperty('operands');
+    $property->setAccessible(true);
+    $operands = $property->getValue($tree);
+
+    // that has 2 operands
+    $this->assertEquals(2, count($operands));
+    // first one is decimal 3.25,
+    $this->assertInstanceOf('figdice\classes\lexer\TokenLiteral', $operands[0]);
+    $this->assertEquals(3.25, $operands[0]->value);
+    // second is literal
+    $this->assertInstanceOf('figdice\classes\lexer\TokenLiteral', $operands[1]);
+
+  }
+
+  /**
+   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+   */
+  public function testSymbolCannotStartByNumber()
+  {
+    $this->lexExpr( '123abc' );
+  }
+  /**
+   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+   */
+  public function testSymbolCannotStartByDecimal()
+  {
+    $this->lexExpr( '12.3abc' );
+  }
+  /**
+   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+   */
+  public function testDecimalFollowedByInvalid()
+  {
+    $this->lexExpr( '12.3:' );
+  }
+
 
   public function testSymbolPlusLiteralOk()
   {

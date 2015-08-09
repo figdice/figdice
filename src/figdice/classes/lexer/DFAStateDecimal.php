@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -43,7 +43,7 @@ class DFAStateDecimal extends DFAStateNumeric {
 			$lexer->incrementLastFunctionArity();
 		}
 		else if(self::isAlpha($char)) {
-		    $this->pushAlpha($lexer, $char);
+		    return $this->pushAlpha($lexer, $char);
 		}
 		else if('*' == $char) {
 			$this->pushStar($lexer);
