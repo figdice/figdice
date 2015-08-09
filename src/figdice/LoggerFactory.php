@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -57,7 +57,7 @@ class LoggerFactory {
       // an implementation out there. In case there isn't one,
       // don't bother with logging: we don't want the FigDice phar to fail loading
       // just because logging dependency is not present.
-      if (class_exists('Psr\Log\NullLogger', false)) {
+      if (class_exists('Psr\Log\NullLogger')) {
         return new NullLogger();
       }
       else {
@@ -67,4 +67,3 @@ class LoggerFactory {
 		return self::$delegate->getLogger($class);
 	}
 }
-
