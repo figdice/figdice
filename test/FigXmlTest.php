@@ -378,6 +378,32 @@ ENDXML;
     $this->assertTrue(false);
   }
 
+
+  public function testPlugAppend()
+  {
+    $view = new View();
+    $templateString = <<<ENDTEMPLATE
+<fig:template>
+<slot fig:slot="myslot"/>
+Hello
+<plug fig:plug="myslot">World</plug>
+Of
+<plug fig:plug="myslot" fig:append="true">Wonder</plug>
+</fig:template>
+ENDTEMPLATE;
+
+    $view->loadString($templateString);
+
+    $check = <<<ENDCHECK
+<plug>World</plug><plug>Wonder</plug>
+Hello
+
+Of
+ENDCHECK;
+
+    $this->assertEquals(trim( $check ), trim($view->render()) );
+  }
+
 }
 
 

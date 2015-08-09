@@ -625,7 +625,10 @@ class View {
 			$slotPos = strpos($result, $slot->getAnchorString());
 
 			if( isset($this->plugs[$slotName]) ) {
-				foreach ($this->plugs[$slotName] as $plugElement) {
+        /** @var ViewElementTag[] $plugsForSlot */
+				$plugsForSlot = $this->plugs[$slotName];
+
+				foreach ($plugsForSlot as $plugElement) {
 					$plugElement->clearAttribute($this->figNamespace . 'plug');
 
 					$plugRender = $plugElement->render();
@@ -633,13 +636,10 @@ class View {
 						return false;
 					}
 
-					if($plugElement->hasAttribute($this->figNamespace . 'append')) {
-						if($plugElement->evaluate($plugElement->getAttribute($this->figNamespace . 'append'))) {
+					if (($plugElement->hasAttribute($this->figNamespace . 'append')) &&
+            ($plugElement->evaluate($plugElement->getAttribute($this->figNamespace . 'append'))) ) {
+
 							$plugOutput .= $plugRender;
-						}
-						else {
-							$plugOutput = $plugRender;
-						}
 					}
 					else {
 						$plugOutput = $plugRender;
@@ -672,9 +672,6 @@ class View {
 			return $this->callStackData[0];
 		}
 		if($name == '.') {
-			//TODO: Attention ce n'est pas le dernier de la pile,
-			//qu'il faut prendre, mais le contexte actuel !
-			//(gare aux boucles imbriqu�es).
 			return $this->callStackData[count($this->callStackData) - 1];
 		}
 		if($name == '..') {
@@ -683,9 +680,7 @@ class View {
 			if(count($this->callStackData) - 2 < 0) {
 				return null;
 			}
-			//TODO: Attention ce n'est pas l'avant-dernier de la pile,
-			//qu'il faut prendre, mais le vrai parent du contexte actuel !
-			//(gare aux boucles imbriqu�es)
+
 			return $this->callStackData[count($this->callStackData) - 2];
 		}
 
@@ -693,7 +688,7 @@ class View {
 		for($i = $stackDepth - 1; $i >= 0; --$i) {
 
 			//If the piece of data is actually an object, rather than an array,
-			//then try to apply a Get method on the name of the property (� la Java Bean).
+			//then try to apply a Get method on the name of the property (a la Java Bean).
 			//If the object does not expose such method, try to obtain the object's property directly.
 			if(is_object($this->callStackData[$i])) {
 				$getter = 'get' . strtoupper($name[0]) . substr($name, 1);
