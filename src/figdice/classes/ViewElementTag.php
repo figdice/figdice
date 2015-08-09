@@ -1067,7 +1067,7 @@ class ViewElementTag extends ViewElement {
 		//then don't bother loading dictionary file, nor translating: just render the tag's children.
 
 		$file = $this->attributes['file'];
-		$filename = $this->getView()->getTranslationPath() . DIRECTORY_SEPARATOR . $this->getView()->getLanguage() . DIRECTORY_SEPARATOR . $file;
+		$filename = $this->getView()->getTranslationPath() . '/' . $this->getView()->getLanguage() . '/' . $file;
 
 		$name = $this->getAttribute('name', null);
 		$source = $this->getAttribute('source', null);

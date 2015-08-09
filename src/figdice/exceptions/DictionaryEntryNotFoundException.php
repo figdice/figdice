@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -41,10 +41,12 @@ class DictionaryEntryNotFoundException extends \Exception {
     }
     return $msg;
   }
-  public function __construct($key)
+  public function __construct($key, $filename = null, $lineNumber = null)
   {
-    parent::__construct(self::makeExceptionMessage($key));
+    parent::__construct(self::makeExceptionMessage($key, null, $filename, $lineNumber));
     $this->key = $key;
+    $this->fileName = $filename;
+    $this->lineNumber = $lineNumber;
   }
 
   public function getKey()

@@ -24,4 +24,15 @@
 namespace figdice\exceptions;
 
 class DictionaryNotFoundException extends \Exception {
+  private $dictionaryName;
+
+  public function __construct($dictionaryName)
+  {
+    $this->dictionaryName = $dictionaryName;
+  }
+
+  public function getDictionaryName()
+  {
+    return $this->dictionaryName;
+  }
 }

@@ -152,7 +152,8 @@ class File {
 	 * @param $key
 	 * @param string $dictionaryName
 	 * @return string
-	 * @throws DictionaryEntryNotFoundException, DictionaryNotFoundException
+	 * @throws DictionaryEntryNotFoundException
+	 * @throws DictionaryNotFoundException
 	 */
 	public function translate($key, $dictionaryName = null, $xmlLineNumber = null) {
 		//If a dictionary name is specified,
@@ -185,7 +186,7 @@ class File {
 			}
 		}
 		if(null == $this->parentFile) {
-			throw new DictionaryEntryNotFoundException($key);
+			throw new DictionaryEntryNotFoundException($key, $this->filename, $xmlLineNumber);
 		}
 		return $this->parentFile->translate($key, $dictionaryName);
 	}
@@ -212,13 +213,4 @@ class File {
 		return $this->dictionaries[$name];
 	}
 
-	/**
-	 * Returns true if there is a named dictionary with specified name
-	 * in the scope of the current file.
-	 * @param string $name
-	 * @return boolean
-	 */
-	public function hasDictionary($name) {
-		return array_key_exists($name, $this->dictionaries);
-	}
 }

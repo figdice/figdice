@@ -142,4 +142,90 @@ DIC;
 
     $this->assertEquals('a:2:{s:3:"foo";s:3:"bar";s:5:"David";s:5:"Bowie";}', file_get_contents($target));
   }
+
+  public function testWrongDicNameRaisesError()
+  {
+    $view = new View();
+    $str = <<<ENDTEMPLATE
+<fig:template>
+  <fig:dictionary file="dic.xml" source="fr" name="mydic" />
+  <fig:trans dict="anotherdic" key="somekey"/>
+</fig:template>
+ENDTEMPLATE;
+
+    $view->loadString($str);
+    $view->setLanguage('en');
+
+    vfsStream::setup('root');
+    $vDir = vfsStream::newDirectory('en')->at(vfsStreamWrapper::getRoot());
+    $vDicFile = vfsStream::newFile('dic.xml')->at($vDir);
+
+    $dicString = <<<ENDDIC
+<fig:dictionary xmlns:fig="http://figdice.org">
+</fig:dictionary>
+ENDDIC;
+
+    $vDicFile->withContent($dicString);
+
+    $view->setTranslationPath(vfsStream::url('root'));
+
+    try {
+      $view->render();
+      $this->assertTrue(false);
+    } catch (\figdice\exceptions\DictionaryNotFoundException $ex) {
+      $this->assertEquals('anotherdic', $ex->getDictionaryName());
+    }
+  }
+
+  /**
+   * @expectedException \figdice\exceptions\DictionaryEntryNotFoundException
+   */
+  public function testWrongKeyRaisesError()
+  {
+    $view = new View();
+    $str = <<<ENDTEMPLATE
+<fig:template>
+  <fig:dictionary file="dic.xml" source="fr" name="mydic" />
+  <fig:trans dict="mydic" key="somekey"/>
+</fig:template>
+ENDTEMPLATE;
+
+    $view->loadString($str);
+    $view->setLanguage('en');
+
+    vfsStream::setup('root');
+    $vDir = vfsStream::newDirectory('en')->at(vfsStreamWrapper::getRoot());
+    $vDicFile = vfsStream::newFile('dic.xml')->at($vDir);
+
+    $dicString = <<<ENDDIC
+<fig:dictionary xmlns:fig="http://figdice.org">
+</fig:dictionary>
+ENDDIC;
+
+    $vDicFile->withContent($dicString);
+
+    $view->setTranslationPath(vfsStream::url('root'));
+    $view->render();
+  }
+
+  /**
+   * @expectedException \figdice\exceptions\DictionaryEntryNotFoundException
+   */
+  public function testAnonTransWithoutLoadedDicRaisesError()
+  {
+    $view = new View();
+    $str = <<<ENDTEMPLATE
+<fig:template>
+  <fig:trans key="somekey"/>
+</fig:template>
+ENDTEMPLATE;
+
+    $view->loadString($str);
+    $view->setLanguage('en');
+
+    vfsStream::setup('root');
+
+    $view->setTranslationPath(vfsStream::url('root'));
+    $view->render();
+  }
 }
