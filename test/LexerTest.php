@@ -518,4 +518,29 @@ class LexerTest extends PHPUnit_Framework_TestCase {
   {
     $this->assertTrue( $this->lexExpr('/a != /b', ['a' => floatval(12.5), 'b' => floatval(11.5)]));
   }
+
+  /**
+   * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException
+   */
+  public function testCommaInEmptyRaisesError()
+  {
+    $this->lexExpr(',');
+  }
+
+  /**
+   * @expectedException \figdice\exceptions\LexerSyntaxErrorException
+   */
+  public function testClosingParenInEmptyRaisesError()
+  {
+    $this->lexExpr(' ) ');
+  }
+
+  /**
+   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+   */
+  public function testGarbageInEmptyRaisesError()
+  {
+    $this->lexExpr(' : ');
+  }
+
 }

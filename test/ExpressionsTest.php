@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.1
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -32,48 +32,48 @@ use figdice\classes\ViewElementTag;
  */
 class ExpressionsTest extends PHPUnit_Framework_TestCase {
 
-	private function lexExpr($expression, array $data = null) {
-		$lexer = new Lexer($expression);
+  private function lexExpr($expression, array $data = null) {
+    $lexer = new Lexer($expression);
 
-		// A Lexer object needs to live inside a View,
-		// and be bound to a ViewElementTag instance.
-		// They both need to be bound to a File object,
-		// which must respond to the getCurrentFile method.
+    // A Lexer object needs to live inside a View,
+    // and be bound to a ViewElementTag instance.
+    // They both need to be bound to a File object,
+    // which must respond to the getCurrentFile method.
 
-		$view = $this->getMock('\\figdice\\View');
-		$viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
-		$viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
-		$viewElement->expects($this->any())
-			->method('getCurrentFile')
-			->will($this->returnValue($viewFile));
+    $view = $this->getMock('\\figdice\\View');
+    $viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
+    $viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
+    $viewElement->expects($this->any())
+      ->method('getCurrentFile')
+      ->will($this->returnValue($viewFile));
 
-		// Make sure that the passed expression is successfully parsed,
-		// before asserting stuff on its evaluation.
-		$parseResult = $lexer->parse($viewElement);
-		$this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
+    // Make sure that the passed expression is successfully parsed,
+    // before asserting stuff on its evaluation.
+    $parseResult = $lexer->parse($viewElement);
+    $this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
     // Mock the mounting of root data universe into the view
     $view->expects($this->any())->method('fetchData')->will($this->returnValue($data));
 
     return $lexer->evaluate($viewElement);
-	}
+  }
 
 
 
-	public function testDivByZeroIsZero()
-	{
-		$this->assertEquals(0, $this->lexExpr( '39 div 0' ));
-	}
+  public function testDivByZeroIsZero()
+  {
+    $this->assertEquals(0, $this->lexExpr( '39 div 0' ));
+  }
 
-	public function testFalseAndShortcircuit()
-	{
-		$this->assertEquals(false, $this->lexExpr( 'false and 12' ));
-	}
+  public function testFalseAndShortcircuit()
+  {
+    $this->assertEquals(false, $this->lexExpr( 'false and 12' ));
+  }
 
-	public function testStringConcat()
-	{
-		$this->assertEquals('a2', $this->lexExpr( "'a' + 2 " ));
-	}
+  public function testStringConcat()
+  {
+    $this->assertEquals('a2', $this->lexExpr( "'a' + 2 " ));
+  }
 
   /**
    * This method and the following public property are used as a helper
@@ -96,5 +96,10 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
   public function testSubkeyOfAScalarValueIsNull()
   {
     $this->assertNull( $this->lexExpr('/rootObj/someGetterValue/subkey', array('rootObj' => $this)));
+  }
+
+  public function testModZeroIsZero()
+  {
+    $this->assertEquals(0, $this->lexExpr('3 mod 0'));
   }
 }
