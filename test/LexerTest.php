@@ -460,4 +460,19 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 
 
   }
+
+  public function testCompareEqualsToEmptyIsFalse()
+  {
+    $this->assertFalse( $this->lexExpr('/a == /b', ['a' => 12]));
+    $this->assertFalse( $this->lexExpr('/a == /b', ['b' => 12]));
+  }
+  public function testCompareEqualsFloats()
+  {
+    $this->assertTrue( $this->lexExpr('/a == /b', ['a' => 12.5, 'b' => 12.5]));
+  }
+
+  public function testCompareFloatsNotEqual()
+  {
+    $this->assertTrue( $this->lexExpr('/a != /b', ['a' => floatval(12.5), 'b' => floatval(11.5)]));
+  }
 }

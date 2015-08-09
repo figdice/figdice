@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -79,7 +79,16 @@ class TokenComparisonBinop extends TokenBinop {
 					return ($opL != $opR);
 				}
 
+      // the "default:" case is not a possible branch.
+      // I am required to write a default for the switch statement,
+      // but it can never happen because the TokenComparisonBinop is only valid
+      // for the above operators.
+      // @codeCoverageIgnoreStart
 			default: return false;
 		}
+    // @codeCoverageIgnoreEnd
+    // I place this end annotation after the } of the switch, otherwise the } is
+    // considered not covered!
+    // I hate these hacks, but so far this is all what PHPUnit Coverage as to offer.
 	}
 }
