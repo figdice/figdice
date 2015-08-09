@@ -1060,6 +1060,10 @@ class ViewElementTag extends ViewElement {
 
 	/**
 	 * Loads a language XML file, to be used within the current view.
+	 *
+	 * If a Temp path was specified in the View,
+	 * we try to compile (serialize) the XML key-value collection and store
+	 * the serialized form in a 'Dictionary/(langcode)' subfolder of the temp path.
 	 */
 	private function fig_dictionary() {
 		//If a @source attribute is specified,
@@ -1094,7 +1098,7 @@ class ViewElementTag extends ViewElement {
 		try {
 			//Determine whether this dictionary was pre-compiled:
 			if($this->getView()->getTempPath()) {
-				$tmpFile = $this->getView()->getTempPath() . DIRECTORY_SEPARATOR . 'Dictionary' . DIRECTORY_SEPARATOR . $this->getView()->getLanguage() . DIRECTORY_SEPARATOR . $file . '.php';
+				$tmpFile = $this->getView()->getTempPath() . '/' . 'Dictionary' . '/' . $this->getView()->getLanguage() . '/' . $file . '.php';
 				//If the tmp file already exists,
 				if(file_exists($tmpFile)) {
 					//but is older than the source file,

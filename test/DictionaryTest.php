@@ -129,18 +129,39 @@ ENDXML;
 </fig:dictionary>
 DIC;
 
-    $vDicFile = vfsStream::newFile('dic.xml')
+    $vDicFile = vfsStream::newFile('en/dic.xml')
       ->at(vfsStreamWrapper::getRoot());
 
     $vDicFile->withContent($dic);
 
-    $target = vfsStream::url('root/dic.xml.php');
+    $target = vfsStream::url('root/Dictionary/en/dic.xml.php');
     $compilationResult = Dictionary::compile(vfsStream::url($vDicFile->path()), $target);
 
     $this->assertTrue($compilationResult);
     $this->assertFileExists($target);
 
     $this->assertEquals('a:2:{s:3:"foo";s:3:"bar";s:5:"David";s:5:"Bowie";}', file_get_contents($target));
+
+
+    // Test the loading of a pre-compiled dictionary:
+
+    $view = new View();
+    // Indicate where the source dictionary is located
+    $view->setTranslationPath(vfsStream::url('root'));
+    // Indicate where the compiled dictionaries are located.
+    $view->setTempPath(vfsStream::url('root'));
+
+    $viewString = <<<ENDTEMPLATE
+<fig:template>
+  <fig:dictionary file="dic.xml" />
+  <fig:trans key="David"/>
+</fig:template>
+ENDTEMPLATE;
+
+    $view->loadString($viewString);
+    $view->setLanguage('en');
+    $this->assertEquals('Bowie', trim( $view->render() ));
+
   }
 
   public function testWrongDicNameRaisesError()
