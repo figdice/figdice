@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2015, Gabriel Zerbib.
+ * @version 2.1.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,12 +23,17 @@
 
 namespace figdice\exceptions;
 
+use figdice\classes\File;
+
 class DictionaryNotFoundException extends \Exception {
   private $dictionaryName;
 
-  public function __construct($dictionaryName)
+  public function __construct($dictionaryName, File $file, $xmlLineNumber)
   {
+    parent::__construct('Dictionary "' . $dictionaryName . '" not found in template: ' . $file->getFilename() . '('.$xmlLineNumber.')');
     $this->dictionaryName = $dictionaryName;
+    $this->file = $file->getFilename();
+    $this->line = $xmlLineNumber;
   }
 
   public function getDictionaryName()

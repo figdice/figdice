@@ -162,7 +162,7 @@ class File {
 			// in current file upwards.
 			$dictionary = $this->getDictionary($dictionaryName);
 			if (null == $dictionary) {
-				throw new DictionaryNotFoundException($dictionaryName);
+				throw new DictionaryNotFoundException($dictionaryName, $this, $xmlLineNumber);
 			}
       try {
         return $dictionary->translate($key);
