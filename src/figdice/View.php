@@ -615,8 +615,10 @@ class View {
 	 * @return string
 	 */
 	private function plugIntoSlots($input) {
-		if(count($this->slots) == 0)
+		if(count($this->slots) == 0) {
+			// Nothing to do.
 			return $input;
+		}
 
 		$result = $input;
 
@@ -632,9 +634,6 @@ class View {
 					$plugElement->clearAttribute($this->figNamespace . 'plug');
 
 					$plugRender = $plugElement->render();
-					if($plugRender === false) {
-						return false;
-					}
 
 					if (($plugElement->hasAttribute($this->figNamespace . 'append')) &&
             ($plugElement->evaluate($plugElement->getAttribute($this->figNamespace . 'append'))) ) {

@@ -404,6 +404,36 @@ ENDCHECK;
     $this->assertEquals(trim( $check ), trim($view->render()) );
   }
 
+  public function testNestedLoops()
+  {
+    $template = <<<ENDTEMPLATE
+<fig:mute fig:walk="/outer">
+  <fig:mute fig:walk="inner">
+    <fig:mute fig:text="../page"/>-<fig:mute fig:text="x"/>
+  </fig:mute>
+</fig:mute>
+ENDTEMPLATE;
+
+    $data = [];
+    for ($i = 1; $i <= 5; ++ $i) {
+      $inner = [];
+      for ($j = 0; $j < 3; ++ $j) {
+        $inner []= [ 'x' => $j ];
+      }
+      $data []= [
+        'page' => 10 * $i,
+        'inner' => $inner
+      ];
+    }
+    $view = new View();
+    $view->loadString($template);
+    $view->mount('outer', $data);
+
+    $result = preg_replace('# +#', ' ', str_replace("\n", ' ', trim($view->render())));
+
+    $this->assertEquals('10-0 10-1 10-2 20-0 20-1 20-2 30-0 30-1 30-2 40-0 40-1 40-2 50-0 50-1 50-2', $result);
+  }
+
 }
 
 

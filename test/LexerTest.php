@@ -248,8 +248,17 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue ( $this->lexExpr(' symbol1 symbol2'));
   }
   public function testDotDotPathParsing() {
-    //Null because the said path values don't exist in Universe.
-    $this->assertNull($this->lexExpr('../nothing/here'));
+
+    $tree = $this->lexParse('../nothing/here');
+
+    $this->assertInstanceOf('figdice\classes\lexer\TokenPath', $tree);
+    $reflector = new ReflectionClass($tree);
+    $prop = $reflector->getProperty('path');
+    $prop->setAccessible(true);
+    $path = $prop->getValue($tree);
+
+    $this->assertInstanceOf('figdice\classes\lexer\PathElementParent', $path[0]);
+
   }
   /**
    * @expectedException \figdice\exceptions\LexerUnexpectedCharException
