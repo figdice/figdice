@@ -28,121 +28,121 @@ use figdice\View;
  */
 class ViewParserTest extends PHPUnit_Framework_TestCase {
 
-	/**
-	 * @expectedException \figdice\exceptions\XMLParsingException
-	 */
-	public function testRenderBeforeLoadFails() {
-		$view = new View();
-		$result = $view->render();
-		$this->assertFail();
-	}
+  /**
+   * @expectedException \figdice\exceptions\XMLParsingException
+   */
+  public function testRenderBeforeLoadFails() {
+    $view = new View();
+    $result = $view->render();
+    $this->assertFail();
+  }
 
-	public function testSourceWithSimpleXml() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testSourceWithSimpleXml() {
+    $view = new View();
+    $source = <<<ENDXML
 <xml></xml>
 ENDXML;
-		$view->loadString($source);
-		$result = $view->render();
-		$this->assertEquals('<xml></xml>', $result);
-	}
+    $view->loadString($source);
+    $result = $view->render();
+    $this->assertEquals('<xml></xml>', $result);
+  }
 
-	public function testAutoClosingTagGetsSpaceBeforeSlash() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testAutoClosingTagGetsSpaceBeforeSlash() {
+    $view = new View();
+    $source = <<<ENDXML
 <xml><node attr="12"/></xml>
 ENDXML;
-		$view->loadString($source);
-		$result = $view->render();
-		$this->assertEquals('<xml><node attr="12" /></xml>', $result);
-	}
+    $view->loadString($source);
+    $result = $view->render();
+    $this->assertEquals('<xml><node attr="12" /></xml>', $result);
+  }
 
-	public function testFigMuteRemovesTag() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testFigMuteRemovesTag() {
+    $view = new View();
+    $source = <<<ENDXML
 <xml><node fig:mute="true"/></xml>
 ENDXML;
-		$view->loadString($source);
-		$result = $view->render();
-		$this->assertEquals('<xml></xml>', $result);
-	}
+    $view->loadString($source);
+    $result = $view->render();
+    $this->assertEquals('<xml></xml>', $result);
+  }
 
-	public function testFigTextStatic() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testFigTextStatic() {
+    $view = new View();
+    $source = <<<ENDXML
 <xml><node fig:text="12"/></xml>
 ENDXML;
-		$view->loadString($source);
-		$result = $view->render();
-		$this->assertEquals('<xml><node>12</node></xml>', $result);
-	}
+    $view->loadString($source);
+    $result = $view->render();
+    $this->assertEquals('<xml><node>12</node></xml>', $result);
+  }
 
-	public function testFigTextWithSimpleExpression() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testFigTextWithSimpleExpression() {
+    $view = new View();
+    $source = <<<ENDXML
 <xml><node fig:text="12 + 3"/></xml>
 ENDXML;
-		$view->loadString($source);
-		$result = $view->render();
-		$this->assertEquals('<xml><node>15</node></xml>', $result);
-	}
+    $view->loadString($source);
+    $result = $view->render();
+    $this->assertEquals('<xml><node>15</node></xml>', $result);
+  }
 
 
-	public function testMountRoot() {
-		$view = new View();
-		$view->mount('someKey', '12');
-		$source = <<<ENDXML
+  public function testMountRoot() {
+    $view = new View();
+    $view->mount('someKey', '12');
+    $source = <<<ENDXML
 <xml><node fig:text="/someKey + 4"/></xml>
 ENDXML;
-		$view->loadString($source);
-		$result = $view->render();
-		$this->assertEquals('<xml><node>16</node></xml>', $result);
-	}
+    $view->loadString($source);
+    $result = $view->render();
+    $this->assertEquals('<xml><node>16</node></xml>', $result);
+  }
 
-	public function testMountWithSubpath() {
-		$view = new View();
-		$view->mount('someKey', array( 'sub' => 'value') );
-		$source = <<<ENDXML
+  public function testMountWithSubpath() {
+    $view = new View();
+    $view->mount('someKey', array( 'sub' => 'value') );
+    $source = <<<ENDXML
 <xml><node fig:text="'cool' + /someKey/sub" /></xml>
 ENDXML;
-		$view->loadString($source);
-		$result = $view->render();
-		$this->assertEquals('<xml><node>coolvalue</node></xml>', $result);
-	}
+    $view->loadString($source);
+    $result = $view->render();
+    $this->assertEquals('<xml><node>coolvalue</node></xml>', $result);
+  }
 
-	public function testMountWithRelativeAtRootContext() {
-		$view = new View();
-		$view->mount('someKey', array( 'sub' => 'value') );
-		$source = <<<ENDXML
+  public function testMountWithRelativeAtRootContext() {
+    $view = new View();
+    $view->mount('someKey', array( 'sub' => 'value') );
+    $source = <<<ENDXML
 <xml><node fig:text="'cool' + someKey/sub" /></xml>
 ENDXML;
-		$view->loadString($source);
-		$result = $view->render();
-		$this->assertEquals('<xml><node>coolvalue</node></xml>', $result);
-	}
+    $view->loadString($source);
+    $result = $view->render();
+    $this->assertEquals('<xml><node>coolvalue</node></xml>', $result);
+  }
 
-	public function testSimpleVoidTag() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testSimpleVoidTag() {
+    $view = new View();
+    $source = <<<ENDXML
 <div>
   <img src="image.jpg" fig:void="true"/>
 </div>
 ENDXML;
 
-		$view->loadString($source);
-		$result = $view->render();
-		$expected = <<<ENDHTML
+    $view->loadString($source);
+    $result = $view->render();
+    $expected = <<<ENDHTML
 <div>
   <img src="image.jpg">
 </div>
 ENDHTML;
 
-		$this->assertEquals($expected, $result);
-	}
+    $this->assertEquals($expected, $result);
+  }
 
-	public function testVoidTagWithInnerAttributes() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testVoidTagWithInnerAttributes() {
+    $view = new View();
+    $source = <<<ENDXML
 <div>
   <img src="image.jpg" fig:void="true">
 		<fig:attr name="border" value="1 + 1" />
@@ -150,63 +150,63 @@ ENDHTML;
 </div>
 ENDXML;
 
-		$view->loadString($source);
-		$result = $view->render();
-		$expected = <<<ENDHTML
+    $view->loadString($source);
+    $result = $view->render();
+    $expected = <<<ENDHTML
 <div>
   <img src="image.jpg" border="2">
 </div>
 ENDHTML;
 
-		$this->assertEquals($expected, $result);
-	}
+    $this->assertEquals($expected, $result);
+  }
 
-	public function testFigTagIsAlwaysMute() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testFigTagIsAlwaysMute() {
+    $view = new View();
+    $source = <<<ENDXML
 <div>
   <fig:sometag someattr="1">sometext</fig:sometag>
 </div>
 ENDXML;
 
-		$view->loadString($source);
-		$result = $view->render();
-		$expected = <<<ENDHTML
+    $view->loadString($source);
+    $result = $view->render();
+    $expected = <<<ENDHTML
 <div>
   sometext
 </div>
 ENDHTML;
 
-		$this->assertEquals($expected, $result);
-	}
+    $this->assertEquals($expected, $result);
+  }
 
-	/**
-	 * @expectedException figdice\exceptions\FileNotFoundException
-	 */
-	public function testIncludeWithFileNotFoundThrowsException()
-	{
+  /**
+   * @expectedException figdice\exceptions\FileNotFoundException
+   */
+  public function testIncludeWithFileNotFoundThrowsException()
+  {
 
-		$view = new View();
-		$view->loadFile('resources/FigXmlIncludeNotFound.xml');
+    $view = new View();
+    $view->loadFile('resources/FigXmlIncludeNotFound.xml');
 		
-		// will raise an exception
-		$result = $view->render();
-		$this->assertFalse(true);
-	}
+    // will raise an exception
+    $result = $view->render();
+    $this->assertFalse(true);
+  }
 	
-	public function testParseAfterRenderHasNoEffect() {
-		$view = new View();
-		$source = <<<ENDXML
+  public function testParseAfterRenderHasNoEffect() {
+    $view = new View();
+    $source = <<<ENDXML
 <div>
 </div>
 ENDXML;
-		$view->loadString($source);
-		$output = $view->render();
-		$view->parse();
-		$this->assertEquals($output, $view->render());
-	}
+    $view->loadString($source);
+    $output = $view->render();
+    $view->parse();
+    $this->assertEquals($output, $view->render());
+  }
 
-	public function testAdHocEval()
+  public function testAdHocEval()
   {
     $view = new View();
     $view->loadString('<xml attr="some {adhoc} here"></xml>');
@@ -214,15 +214,15 @@ ENDXML;
     $this->assertEquals('<xml attr="some test here"></xml>', $view->render());
   }
 
-	public function testWalkOnNonCountableObjectRunsOnArrayWithObject()
-	{
-		$view = new View();
-		$view->loadString(
-			'<test fig:walk="/obj"><fig:mute fig:text="property" /></test>'
-		);
-		$obj = new stdClass();
-		$obj->property = 12;
-		$view->mount('obj', $obj);
-		$this->assertEquals('<test>12</test>', $view->render());
-	}
+  public function testWalkOnNonCountableObjectRunsOnArrayWithObject()
+  {
+    $view = new View();
+    $view->loadString(
+      '<test fig:walk="/obj"><fig:mute fig:text="property" /></test>'
+    );
+    $obj = new stdClass();
+    $obj->property = 12;
+    $view->mount('obj', $obj);
+    $this->assertEquals('<test>12</test>', $view->render());
+  }
 }
