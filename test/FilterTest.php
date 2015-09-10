@@ -33,6 +33,16 @@ class FilterTest extends PHPUnit_Framework_TestCase
     $view->mount('data', '<TAG>');
     $this->assertEquals('<test><span>&lt;TAG&gt;</span></test>', $view->render());
   }
+
+  public function testHtmlEntitiesBuiltin()
+  {
+    $view = new View();
+    $view->loadString(
+      '<test><span fig:text="htmlentities(/data)"/></test>'
+    );
+    $view->mount('data', '<TAG>');
+    $this->assertEquals('<test><span>&lt;TAG&gt;</span></test>', $view->render());
+  }
 }
 
 class EscapeHtmlFilter implements Filter
