@@ -71,8 +71,8 @@ abstract class Feed {
 	 *
 	 * @param array $params
 	 */
-	public function setParameters(&$params) {
-		$this->params = &$params;
+	public function setParameters($params) {
+		$this->params = $params;
 	}
 	function getParameterBool($paramName, $defaultValue = false) {
 		if(isset($this->params[$paramName])) {

@@ -68,7 +68,7 @@ abstract class FunctionFactory {
 	 * handles the requested function.
 	 * The framework will not call your create function more than once per
 	 * function name, per View (and all its sub-templates). A caching mechanism
-	 * holds your instance across multiple invokations of the function.
+	 * holds your instance across multiple invocations of the function.
 	 * You MUST return null if your FunctionFactory does not handle the 
 	 * specified function name.
 	 *
