@@ -244,4 +244,21 @@ EXPECTED;
 
     $this->assertEquals($expected, $view->render());
   }
+  public function testDoctypeIsIgnoredOnNonRootNode()
+  {
+    $view = new View();
+    $templateSource = <<<ENDXML
+<fig:template>
+<html fig:doctype="html"></html>
+</fig:template>
+ENDXML;
+    $view->loadString($templateSource);
+
+    $expected = <<<EXPECTED
+<html></html>
+
+EXPECTED;
+
+    $this->assertEquals($expected, $view->render());
+  }
 }
