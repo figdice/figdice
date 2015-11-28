@@ -155,6 +155,18 @@ class ViewElementTag extends ViewElement {
 	public function hasAttribute($name) {
 		return array_key_exists($name, $this->attributes);
 	}
+
+	/**
+	 * Indicates whether the current tag carries the specified attribute within
+	 * the fig: namespace (where "fig:" is soft-coded according the xmlns:fig).
+	 * @param $name
+	 * @return bool
+	 */
+	private function hasFigAttribute($name)
+	{
+		return $this->hasAttribute($this->view->figNamespace . $name);
+	}
+
 	public function appendChild(ViewElement & $child) {
 		if(0 < count($this->children)) {
 			$this->children[count($this->children) - 1]->nextSibling = & $child;
@@ -329,6 +341,8 @@ class ViewElementTag extends ViewElement {
 		//so that its immediate children can run the fig:case attribute form fresh.
 		$this->caseSwitched = false;
 
+
+
 		//================================================================
 		//fig:cond
 		//(fig:condition is deprecated)
@@ -417,7 +431,7 @@ class ViewElementTag extends ViewElement {
         $this->parent->runtimeAttributes[$this->attributes['name']] = new Flag();
       }
       else {
-        if (isset($this->attributes['value'])) {
+        if ($this->hasAttribute('value')) {
           $value = $this->evaluate($this->attributes['value']);
           if (is_string($value)) {
             $value = htmlspecialchars($value);
@@ -450,7 +464,7 @@ class ViewElementTag extends ViewElement {
 		//fig:walk
 		//Loop over evaluated dataset.
 		if(! $bypassWalk) {
-			if($this->hasAttribute($this->view->figNamespace . 'walk')) {
+			if($this->hasFigAttribute('walk')) {
 				return $this->fig_walk();
 			}
 		}
@@ -459,7 +473,7 @@ class ViewElementTag extends ViewElement {
 		//fig:call
 		//A tag with the fig:call directive is necessarily mute.
 		//It is used as a placeholder only for the directive.
-		if(isset($this->attributes[$this->view->figNamespace . 'call'])) {
+		if($this->hasFigAttribute('call')) {
 			return $this->fig_call();
 		}
 
@@ -663,6 +677,14 @@ class ViewElementTag extends ViewElement {
 			$this->runtimeAttributes = array();
 		}
 
+
+		//================================================================
+		// If we're dealing with rootnode, trean doctype directive
+		// fig:doctype
+		if ((null == $this->parent) && ($this->hasFigAttribute('doctype'))) {
+			$result = '<!doctype ' . $this->getFigAttribute('doctype') . '>' . PHP_EOL . $result;
+		}
+
 		return $result;
 	}
 
@@ -727,6 +749,9 @@ class ViewElementTag extends ViewElement {
 			return $this->attributes[$name];
 		}
 		return $default;
+	}
+	private function getFigAttribute($name, $default = null) {
+		return $this->getAttribute($this->view->figNamespace . $name, $default);
 	}
 
 	private function fig_mount() {

@@ -1,11 +1,8 @@
-<fig:template xmlns:fig="http://figdice.org">
+<fig:template xmlns:fig="http://figdice.org" fig:doctype="html">
 <!-- Let's make a "fig:*" Root node, so as to mute it automatically from the output. -->
+<!-- the root node can carry the fig:doctype attribute, to instruct the engine to
+     generate a <!DOCTYPE > directive. -->
 
-<!-- Let's use a CDATA sequence in our template, to
-     produce the DOCTYPE element in the output -->
-<![CDATA[
-<!DOCTYPE html>
-]]>
 <html lang="en">
 	<head>
 		<!-- You can use any expression, including 'paths and symbols' in the

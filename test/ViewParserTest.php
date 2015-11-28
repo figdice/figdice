@@ -225,4 +225,23 @@ ENDXML;
     $view->mount('obj', $obj);
     $this->assertEquals('<test>12</test>', $view->render());
   }
+
+  public function testDoctype()
+  {
+    $view = new View();
+    $templateSource = <<<ENDXML
+<tpl:template xmlns:tpl="http://figdice.org" tpl:doctype="html">
+<html></html>
+</tpl:template>
+ENDXML;
+    $view->loadString($templateSource);
+
+    $expected = <<<EXPECTED
+<!doctype html>
+<html></html>
+
+EXPECTED;
+
+    $this->assertEquals($expected, $view->render());
+  }
 }
