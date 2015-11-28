@@ -349,6 +349,7 @@ class ViewElementTag extends ViewElement {
 		//If the tag holds a fig:walk directive as well as the fig:cond,
 		//do not take into account this fig:cond unless the rendering is inside the looping phase,
 		//because the condition pertains to every single iteration, rather than to the global loop.
+		// TODO: contradictory with the Wiki doc. Missing a unit test here to prove the point.
 		if($this->hasAttribute($this->view->figNamespace . 'cond')) {
 			if(! ($this->hasAttribute($this->view->figNamespace . 'walk') && $bypassWalk) ) {
 				if(! $this->evalCondition()) {
