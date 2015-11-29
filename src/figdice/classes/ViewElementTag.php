@@ -680,10 +680,9 @@ class ViewElementTag extends ViewElement {
 
 
 		//================================================================
-		// If we're dealing with rootnode, trean doctype directive
 		// fig:doctype
-		if ((null == $this->parent) && ($this->hasFigAttribute('doctype'))) {
-			$result = '<!doctype ' . $this->getFigAttribute('doctype') . '>' . PHP_EOL . $result;
+		if ($this->hasFigAttribute('doctype')) {
+			$this->getView()->setDoctype($this->getFigAttribute('doctype'));
 		}
 
 		return $result;

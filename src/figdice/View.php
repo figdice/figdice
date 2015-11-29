@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.2
+ * @version 2.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -223,6 +223,8 @@ class View {
 	 */
 	public $figNamespace = 'fig:';
 
+	private $doctype = null;
+
 	public function __construct() {
 		$this->source = '';
 		$this->result = '';
@@ -431,6 +433,11 @@ class View {
 			$result = $this->plugIntoSlots($result);
 		}
 
+		// Take care of the doctype at top of output
+		if ($this->doctype) {
+			$result = '<!doctype ' . $this->doctype . '>' . PHP_EOL . $result;
+		}
+
 		return $result;
 	}
 
@@ -494,6 +501,14 @@ class View {
 	 */
 	function mount($mountingName, $data) {
 		$this->callStackData[0][$mountingName] = $data;
+	}
+
+	/**
+	 * @param $doctype string
+	 */
+	public function setDoctype($doctype)
+	{
+		$this->doctype = $doctype;
 	}
 
 

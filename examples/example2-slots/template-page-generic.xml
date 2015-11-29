@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fig:template xmlns:fig="http://figdice.org">
-<!-- Let's make a "fig:*" Root node, so as to mute it automatically from the output. -->
-
-<!-- Let's use a CDATA sequence in our template, to
-     produce the DOCTYPE element in the output -->
-<![CDATA[
-<!DOCTYPE html>
-]]>
-<html lang="en">
+<html lang="en" fig:doctype="html">
 	<head>
 		<!-- The <title> tag below will not be rendered directly, because of its
 		     fig:slot attribute. It is here simply to declare a placeholder within
@@ -77,5 +69,3 @@
 
 	</body>
 </html>
-
-</fig:template>
