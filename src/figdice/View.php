@@ -435,7 +435,7 @@ class View {
 
 		// Take care of the doctype at top of output
 		if ($this->doctype) {
-			$result = '<!doctype ' . $this->doctype . '>' . PHP_EOL . $result;
+			$result = '<!doctype ' . $this->doctype . '>' . "\n" . $result;
 		}
 
 		return $result;

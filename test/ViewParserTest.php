@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
+ * @copyright 2004-2015, Gabriel Zerbib.
  * @version 2.2
  * @package FigDice
  *
@@ -244,21 +244,27 @@ EXPECTED;
 
     $this->assertEquals($expected, $view->render());
   }
-  public function testDoctypeIsIgnoredOnNonRootNode()
+  public function testDoctypeOnNonRootNodeReplacesExisting()
   {
     $view = new View();
     $templateSource = <<<ENDXML
 <fig:template>
-<html fig:doctype="html"></html>
+<html fig:doctype="html">
+  <head fig:doctype="dummy"></head>
+</html>
 </fig:template>
 ENDXML;
     $view->loadString($templateSource);
 
     $expected = <<<EXPECTED
-<html></html>
+<!doctype dummy>
+<html>
+  <head></head>
+</html>
 
 EXPECTED;
 
-    $this->assertEquals($expected, $view->render());
+    $rendered = $view->render();
+    $this->assertEquals($expected, $rendered);
   }
 }

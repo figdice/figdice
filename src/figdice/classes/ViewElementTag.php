@@ -341,6 +341,16 @@ class ViewElementTag extends ViewElement {
 		//so that its immediate children can run the fig:case attribute form fresh.
 		$this->caseSwitched = false;
 
+    //================================================================
+    // fig:doctype
+    // Take care of it before rendering the children, so as to replace existing doctype definition
+    // in view in an intuitive way (what comes later in the doc, overrides what was earlier).
+    // Otherwise, because of recursion, the outmost doctype declaration would be the final one.
+    // TODO: performance issue with checking the doctype attribute on every tag. I would like to check only the
+    // root node of each template file (includes).
+    if ($this->hasFigAttribute('doctype')) {
+      $this->getView()->setDoctype($this->getFigAttribute('doctype'));
+    }
 
 
 		//================================================================
@@ -678,12 +688,6 @@ class ViewElementTag extends ViewElement {
 			$this->runtimeAttributes = array();
 		}
 
-
-		//================================================================
-		// fig:doctype
-		if ($this->hasFigAttribute('doctype')) {
-			$this->getView()->setDoctype($this->getFigAttribute('doctype'));
-		}
 
 		return $result;
 	}
