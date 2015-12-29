@@ -653,6 +653,8 @@ class View {
 					if (($plugElement->hasAttribute($this->figNamespace . 'append')) &&
             ($plugElement->evaluate($plugElement->getAttribute($this->figNamespace . 'append'))) ) {
 
+				$orginal = substr($result, $slotPos + strlen($slot->getAnchorString()), $slot->getLength());
+				$plugOutput .= $orginal;
 							$plugOutput .= $plugRender;
 					}
 					else {
