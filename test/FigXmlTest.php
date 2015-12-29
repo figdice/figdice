@@ -407,7 +407,7 @@ ENDCHECK;
     $view = new View();
     $templateString = <<<ENDTEMPLATE
 <fig:template>
-<slot fig:slot="myslot"/>
+<slot fig:slot="myslot" fig:mute="true"/>
 Hello
 <plug fig:plug="myslot">World</plug>
 Of
@@ -418,10 +418,31 @@ ENDTEMPLATE;
     $view->loadString($templateString);
 
     $check = <<<ENDCHECK
-<plug>World</plug><slot /><plug>Wonder</plug>
+<plug>World</plug><plug>Wonder</plug>
 Hello
 
 Of
+ENDCHECK;
+    $this->assertEquals(trim( $check ), trim($view->render()) );
+  }
+
+    public function testPlugSubsequentAppend()
+  {
+    $view = new View();
+    $templateString = <<<ENDTEMPLATE
+<fig:template>
+  <!-- default content for the slot -->
+  <span><fig:mute fig:slot="myslot">Hello, </fig:mute></span>
+  <fig:mute fig:plug="myslot" fig:append="true">John</fig:mute>
+  <!-- second plug: appending again -->
+  <fig:mute fig:plug="myslot" fig:append="true">, Doe</fig:mute>
+</fig:template>
+ENDTEMPLATE;
+
+    $view->loadString($templateString);
+
+    $check = <<<ENDCHECK
+<span>Hello, John, Doe</span>
 ENDCHECK;
     $this->assertEquals(trim( $check ), trim($view->render()) );
   }

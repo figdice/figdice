@@ -636,6 +636,7 @@ class View {
 		}
 
 		$result = $input;
+		$orginals = [];
 
 		foreach($this->slots as $slotName => $slot) {
 			$plugOutput = '';
@@ -653,8 +654,7 @@ class View {
 					if (($plugElement->hasAttribute($this->figNamespace . 'append')) &&
             ($plugElement->evaluate($plugElement->getAttribute($this->figNamespace . 'append'))) ) {
 
-				$orginal = substr($result, $slotPos + strlen($slot->getAnchorString()), $slot->getLength());
-				$plugOutput .= $orginal;
+				$orginals[$slotName] = substr($result, $slotPos + strlen($slot->getAnchorString()), $slot->getLength());
 							$plugOutput .= $plugRender;
 					}
 					else {
@@ -663,7 +663,8 @@ class View {
 
 					$plugElement->setAttribute($this->figNamespace . 'plug', $slotName);
 				}
-				$result = substr_replace( $result, $plugOutput, $slotPos, strlen($slot->getAnchorString()) + $slot->getLength() );
+				$origin = array_key_exists($slotName, $orginals) ? $orginals[$slotName] : '';
+				$result = substr_replace( $result, $origin . $plugOutput, $slotPos, strlen($slot->getAnchorString()) + $slot->getLength() );
 			}
 			else {
 			  // If a slot did not receive any plugged content, we use its
