@@ -402,6 +402,22 @@ ENDCHECK;
     $this->assertEquals(trim( $check ), trim($view->render()) );
   }
 
+  public function testPlugWithoutAppendRemovesSlotTag()
+  {
+    $view = new View();
+    $templateString = <<<ENDTEMPLATE
+<fig:template>
+<slot fig:slot="myslot">slot, would get removed</slot>
+<fig:mute fig:plug="myslot">Plugged!</fig:mute>
+</fig:template>
+ENDTEMPLATE;
+
+    $view->loadString($templateString);
+
+    $check = "Plugged!";
+    $this->assertEquals(trim( $check ), trim($view->render()) );
+  }
+
   public function testPlugAppend()
   {
     $view = new View();
