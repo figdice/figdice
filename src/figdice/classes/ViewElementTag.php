@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.2
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,6 +23,7 @@
 
 namespace figdice\classes;
 
+use figdice\Filter;
 use Psr\Log\LoggerIntergace;
 use figdice\View;
 use figdice\LoggerFactory;
@@ -33,6 +34,8 @@ use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
 
 class ViewElementTag extends ViewElement {
+
+
 	/**
 	 * Tag name.
 	 * @var string
@@ -87,6 +90,12 @@ class ViewElementTag extends ViewElement {
 	 * @var boolean
 	 */
 	private $voidtag;
+
+	/**
+	 * @var array of flags that indicate things to be bypassed during one specific rendering,
+	 * such as macros, plugs, cases etc.
+	 */
+	private $transientFlags = [];
 
 	/**
 	 * 
@@ -333,7 +342,11 @@ class ViewElementTag extends ViewElement {
 			return $this->fig_macro();
 		}
 
-		return $this->renderNoMacro($bypassWalk);
+		$result = $this->renderNoMacro($bypassWalk);
+
+		// Clear transient flags
+		$this->transientFlags = [];
+		return $result;
 	}
 	private function renderNoMacro($bypassWalk = false) {
 
@@ -498,9 +511,7 @@ class ViewElementTag extends ViewElement {
 		//Then, render the slot element, as a default content in case
 		//nothing is plugged into it.
 		//In case of plug for this slot, the complete slot tag (outer) is replaced.
-		if(isset($this->attributes[$this->view->figNamespace . 'slot'])) {
-			//Extract name of slot
-			$slotName = $this->attributes[$this->view->figNamespace . 'slot'];
+		if($slotName = $this->getFigAttribute('slot')) {
 			//Store a reference to current node, into the View's map of slots
 
 			$anchorString = '/==SLOT==' . $slotName . '==/';
@@ -526,16 +537,23 @@ class ViewElementTag extends ViewElement {
 		//its content is appended to whatever was already filled into the slot.
 		//The entire plug+append tag (outer) is appended to the slot placeholder
 		//(the slot's outer tag being removed).
-		if(isset($this->attributes[$this->view->figNamespace . 'plug'])) {
-			$slotName = $this->attributes[$this->view->figNamespace . 'plug'];
+		if(($slotName = $this->getFigAttribute('plug')) && ! $this->isTransient(self::TRANSIENT_PLUG_RENDERING)) {
 
 			//Keep track of the callback node (the fig:plug node).
 			//The callbacks are maintained as a chain. Several callbacks
 			//can enchain one after the other,
 			//in the order they were parsed.
-			$this->view->addPlug($slotName, $this);
+			if ($this->view->hasOption(View::GLOBAL_PLUGS)) {
+				//The plugs are rendered at the end of the rendering of the View.
+				$this->view->addPlug($slotName, $this);
+			}
+			else {
+				// The plugs are rendered in their local context
+				// (but still, remain stuffed at the end of the template rendering)
+				$this->transient(self::TRANSIENT_PLUG_RENDERING);
+				$this->view->addPlug($slotName, $this, $this->render(), $this->evalFigAttribute('append'));
+			}
 
-			//The slots are rendered at the end of the rendering of the View.
 			//A fig:plug tag does not produce any in-place output.
 			return '';
 		}
@@ -746,6 +764,15 @@ class ViewElementTag extends ViewElement {
 			return $this->evaluate($expression);
 		}
 		return false;
+	}
+
+	/**
+	 * @param string $name the fig attribute to evaluate
+	 * @return mixed or false if attribute not found.
+	 */
+	public function evalFigAttribute($name)
+	{
+		return $this->evalAttribute($this->view->figNamespace . $name);
 	}
 
 	public function getAttribute($name, $default = null) {
@@ -1354,4 +1381,25 @@ class ViewElementTag extends ViewElement {
 		}
 		return $this->logger;
 	}
+
+
+	/**
+	 * Checks whether the current object has a specified rendering flag.
+	 * Transient flags are automatically cleared at the end of the tag's rendering loop.
+	 * @param $flag
+	 * @return bool
+	 */
+	private function isTransient($flag)
+	{
+		return isset($this->transientFlags[$flag]);
+	}
+	private function transient($flag)
+	{
+		$this->transientFlags[$flag] = true;
+	}
+
+	/**
+	 * This const is used internally to indicate that the object is currently being rendered as a local plug.
+	 */
+	const TRANSIENT_PLUG_RENDERING = 'TRANSIENT_PLUG_RENDERING';
 }

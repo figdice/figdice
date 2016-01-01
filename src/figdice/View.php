@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.2
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -25,6 +25,7 @@ namespace figdice;
 
 use figdice\classes\AutoloadFeedFactory;
 use figdice\classes\NativeFunctionFactory;
+use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
 use figdice\classes\File;
 use figdice\classes\ViewElement;
@@ -47,6 +48,9 @@ use figdice\classes\Slot;
  * Then you would {@see loadFile} an XML source file, and finally {@see render} it to obtain its final result (which you would typically output to the browser).
  */
 class View {
+
+	const GLOBAL_PLUGS = 'GLOBAL_PLUGS';
+
 	/**
 	 * Textual source of the transformation.
 	 *
@@ -157,7 +161,7 @@ class View {
 	/**
 	 * Array of named elements that are used as content providers
 	 * to fill in slots by the same name.
-	 * @var ViewElementTag[]
+	 * @var Plug[]
 	 */
 	private $plugs;
 
@@ -166,7 +170,7 @@ class View {
 	 * A Macro is a ViewElementTag that is rendered
 	 * only upon calling from within another element.
 	 *
-	 * @var array ( ViewElementTag )
+	 * @var ViewElementTag[]
 	 */
 	public $macros;
 
@@ -225,7 +229,15 @@ class View {
 
 	private $doctype = null;
 
-	public function __construct() {
+	private $options = [];
+
+	/**
+	 * View constructor.
+	 * @param array $options Optional indexed array of options, for specific behavior of the library.
+	 * Introduced in 2.3 for the remodeling of the plug execution context.
+	 */
+	public function __construct(array $options = []) {
+		$this->options = $options;
 		$this->source = '';
 		$this->result = '';
 		$this->rootNode = null;
@@ -236,6 +248,16 @@ class View {
 		$this->callStackData = array(array());
 		$this->functionFactories = array(new NativeFunctionFactory());
 		$this->language = null;
+	}
+
+	/**
+	 * Checks whether the View has the specified option configured at construction.
+	 * @param $option
+	 * @return bool
+	 */
+	public function hasOption($option)
+	{
+		return in_array($option, $this->options);
 	}
 
 	/**
@@ -642,27 +664,43 @@ class View {
 			$slotPos = strpos($result, $slot->getAnchorString());
 
 			if( isset($this->plugs[$slotName]) ) {
-        /** @var ViewElementTag[] $plugsForSlot */
+        /** @var Plug[] $plugsForSlot */
 				$plugsForSlot = $this->plugs[$slotName];
 
-				foreach ($plugsForSlot as $plugElement) {
-					$plugElement->clearAttribute($this->figNamespace . 'plug');
+				foreach ($plugsForSlot as $plug) {
 
-					$plugRender = $plugElement->render();
+					if ($this->hasOption(self::GLOBAL_PLUGS)) {
+						$plugElement = $plug->getTag();
+						$plugElement->clearAttribute($this->figNamespace . 'plug');
 
-					if (($plugElement->hasAttribute($this->figNamespace . 'append')) &&
-            ($plugElement->evaluate($plugElement->getAttribute($this->figNamespace . 'append'))) ) {
+						$plugRender = $plugElement->render();
 
+						if ($plugElement->evalFigAttribute('append')) {
 							$plugOutput .= $plugRender;
-					}
-					else {
-						$plugOutput = $plugRender;
+						}
+						else {
+							$plugOutput = $plugRender;
+						}
+
+						$plugElement->setAttribute($this->figNamespace . 'plug', $slotName);
 					}
 
-					$plugElement->setAttribute($this->figNamespace . 'plug', $slotName);
+					else {
+						$plugRender = $plug->getRenderedString();
+						if ($plug->isAppend()) {
+							$plugOutput .= $plugRender;
+						}
+						else {
+							$plugOutput = $plugRender;
+						}
+					}
+
+
 				}
 				$result = substr_replace( $result, $plugOutput, $slotPos, strlen($slot->getAnchorString()) + $slot->getLength() );
 			}
+
+
 			else {
 			  // If a slot did not receive any plugged content, we use its
 			  // hardcoded template content as default. But we still need
@@ -794,7 +832,7 @@ class View {
       $this->slots[$slotName] = & $slot;
   }
 
-  public function addPlug($slotName, ViewElementTag & $element) {
-    $this->plugs[$slotName] [] = & $element;
+  public function addPlug($slotName, ViewElementTag $element, $renderedString = null, $isAppend = false) {
+    $this->plugs[$slotName] [] = new Plug($element, $renderedString, $isAppend);
   }
 }
