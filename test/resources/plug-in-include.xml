@@ -1,0 +1,3 @@
+<fig:mute xmlns:fig="http://figdice.org">
+    <tag fig:mute="true" fig:plug="slot1" fig:text="/someData"/>
+</fig:mute>

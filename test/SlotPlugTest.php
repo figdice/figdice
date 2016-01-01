@@ -47,4 +47,23 @@ ENDTEMPLATE;
     $rendered = $view->render();
     $this->assertEquals(1, trim($rendered));
   }
+
+  public function testPlugInIncludedFileUsesParentViewOption()
+  {
+    // New behaviour for plugs: rendered in local context.
+    $view = new View();
+    $view->loadFile(__DIR__.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'slot-in-parent.xml');
+    $output = trim($view->render());
+
+    $this->assertEquals(11, $output);
+
+    // Legacy behaviour: rendered in final global context
+    // What we are trying to test is: the plug is defined in an included template, and yet its rendering process
+    // checks properly that the top view has the GLOBAL_PLUGS defined.
+    $view = new View([View::GLOBAL_PLUGS]);
+    $view->loadFile(__DIR__.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'slot-in-parent.xml');
+    $output = trim($view->render());
+
+    $this->assertEquals(12, $output);
+  }
 }

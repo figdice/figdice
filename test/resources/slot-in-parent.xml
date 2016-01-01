@@ -1,0 +1,11 @@
+<fig:template xmlns:fig="http://figdice.org">
+
+    <dummy-tag fig:slot="slot1" />
+
+    <!-- give some local data to the included template -->
+    <fig:mount target="someData" value="11" />
+    <fig:include file="plug-in-include.xml" />
+
+    <!-- overwrite the same key, with new data, which is available in the terminal global context. -->
+    <fig:mount target="someData" value="12" />
+</fig:template>
