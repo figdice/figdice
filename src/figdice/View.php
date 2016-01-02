@@ -181,11 +181,6 @@ class View {
 	 * @var boolean
 	 */
 	private $firstOpening;
-	/**
-	 * Used internally with $firstOpening, to help detecting the auto-closing tags.
-	 * @var integer
-	 */
-	private $firstTagOffset;
 
 	/**
 	 * Cache of Lexers.
@@ -537,8 +532,6 @@ class View {
 	private function openTagHandler($xmlParser, $tagName, $attributes) {
 		if($this->firstOpening) {
 			$this->firstOpening = false;
-			$positionOfFirstTag = xml_get_current_byte_index($xmlParser);
-			$this->firstTagOffset = strpos($this->source, "<$tagName") - $positionOfFirstTag;
 
 			//Position the namespace:
 			$matches = null;
@@ -611,10 +604,7 @@ class View {
 				return;
 			}
 			//Find the opening bracket < of the closing tag:
-			$latestOpeningBracket = strrpos(substr($this->source, 0, $pos + $this->firstTagOffset+1), '<');
-			//Very risky. Work with libxml 2.6.26 on Windows XP Pro 32bit.
-			//Unsure for any other platform...
-			//TODO: Anyway it works only for top-level fig file. Not for included files, it seems.
+			$latestOpeningBracket = strrpos(substr($this->source, 0, $pos + 1), '<');
 			if(!preg_match('#^<[^>]+/>#', substr($this->source, $latestOpeningBracket))) {
 				$element->autoclose = false;
 			}
