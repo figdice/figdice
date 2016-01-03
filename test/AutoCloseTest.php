@@ -50,7 +50,7 @@ TEMPLATE;
     $this->assertEquals(trim($expected), trim($output));
   }
 
-  public function testScriptTatWithoutContentInIncludedFile()
+  public function testScriptTagWithoutContentInIncludedFile()
   {
     vfsStream::setup('root');
 
@@ -63,8 +63,9 @@ TEMPLATE;
 
 
     vfsStream::newFile('outer.html')
+      ->withContent($template)
       ->at(vfsStreamWrapper::getRoot())
-      ->withContent($template);
+      ;
 
     $template = <<<TEMPLATE
 <fig:template>
@@ -72,9 +73,10 @@ TEMPLATE;
 </fig:template>
 TEMPLATE;
 
-    vfsStream::newFile('inner.html')
-      ->at(vfsStreamWrapper::getRoot())
-      ->withContent($template);
+
+    $innerVFile = vfsStream::newFile('inner.html');
+    $innerVFile->withContent($template)
+      ->at(vfsStreamWrapper::getRoot());
 
 
     $filename = vfsStream::url('root/outer.html');
@@ -89,6 +91,33 @@ EXPECTED;
 
 
     $this->assertEquals(trim($expected), trim($output));
+
+
+
+
+    // Now test by inverting the script and link, so that the script is no longer
+    // the last tag in the template (Bolek's test)
+    $template = <<<TEMPLATE
+<fig:template>
+  <script src="/assets/require.js"></script>
+  <link href="/assets/style.css" rel="stylesheet" />
+</fig:template>
+TEMPLATE;
+
+
+    $innerVFile->setContent($template);
+
+    $expected = <<<EXPECTED
+  <link href="/assets/style.css" rel="stylesheet" />
+  <script src="/assets/require.js"></script>
+  <link href="/assets/style.css" rel="stylesheet" />
+EXPECTED;
+
+    $view = new View();
+    $view->loadFile($filename);
+    $output = $view->render();
+    $this->assertEquals(trim($expected), trim($output));
+
 
   }
 }
