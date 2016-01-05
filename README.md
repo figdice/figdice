@@ -53,7 +53,7 @@ The **\figdice** namespace is made available thanks to the **autoload** Composer
 
 ## 2. Phar
 
-Download the latest [FigDice phar](https://github.com/gabrielzerbib/figdice/releases/download/2.3/figdice-2.3.phar) file to the location of your choice.
+Download the latest [FigDice phar](https://github.com/figdice/figdice/releases/download/2.3.1/figdice-2.3.1.phar) file to the location of your choice.
 Then, in your source files where you need to use FigDice features, write the line:
 
     require_once 'phar:///path/to/figdice.phar';
@@ -71,9 +71,9 @@ Download the latest Figdice zip file to the location of your choice and extract 
 
 # Getting Started
 
-Browse the [examples](https://github.com/gabrielzerbib/figdice/tree/master/examples)!
+Browse the [examples](https://github.com/figdice/figdice/tree/master/examples)!
 
-See [Wiki](https://github.com/gabrielzerbib/figdice/wiki) for more details.
+See [Wiki](https://github.com/figdice/figdice/wiki) for more details.
 
 
 
