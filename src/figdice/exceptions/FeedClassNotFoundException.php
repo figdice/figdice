@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.4
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -36,6 +36,13 @@ use \Exception;
  */
 class FeedClassNotFoundException extends Exception {
 	private $classname;
+
+	/**
+	 * FeedClassNotFoundException constructor.
+	 * @param string $classname
+	 * @param string $filename
+	 * @param int $line
+   */
 	public function __construct($classname, $filename, $line) {
 		parent::__construct('Could not find factory for feed: ' . $classname);
 		$this->classname = $classname;

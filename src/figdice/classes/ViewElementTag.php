@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2016, Gabriel Zerbib.
- * @version 2.3
+ * @version 2.3.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -24,7 +24,7 @@
 namespace figdice\classes;
 
 use figdice\Filter;
-use Psr\Log\LoggerIntergace;
+use Psr\Log\LoggerInterface;
 use figdice\View;
 use figdice\LoggerFactory;
 use figdice\exceptions\RenderingException;
@@ -32,6 +32,7 @@ use figdice\exceptions\DictionaryDuplicateKeyException;
 use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
+use figdice\exceptions\DictionaryEntryNotFoundException;
 
 class ViewElementTag extends ViewElement {
 
@@ -96,6 +97,9 @@ class ViewElementTag extends ViewElement {
 	 * such as macros, plugs, cases etc.
 	 */
 	private $transientFlags = [];
+
+	/** @var Iteration[] */
+  private $iteration = null;
 
 	/**
 	 * 
@@ -222,6 +226,13 @@ class ViewElementTag extends ViewElement {
 									$message = get_class($this) . ': file: ' . $this->currentFile->getFilename() . '(' . $this->xmlLineNumber . '): ' . $message;
 									throw new RenderingException($this->getTagName(), $this->getCurrentFilename(), $this->getLineNumber(), $message);
 								}
+							}
+							else if (is_object($evaluatedValue)
+								&& ($evaluatedValue instanceof \DOMNode)) {
+
+								// Treat the special case of DOMNode descendants,
+								// for which we can evalute the text contents
+								$evaluatedValue = $evaluatedValue->nodeValue;
 							}
 
 							//The outcome of the evaluatedValue, coming from DB or other, might contain non-standard HTML characters.
@@ -521,7 +532,7 @@ class ViewElementTag extends ViewElement {
 			unset($this->attributes[$this->view->figNamespace . 'slot']);
 			$result = $this->render();
 			if($result === false)
-				throw new Exception();
+				throw new \Exception();
 			$slot->setLength(strlen($result));
 			$this->attributes[$this->view->figNamespace . 'slot'] = $slotName;
 			return $anchorString . $result;
@@ -755,7 +766,7 @@ class ViewElementTag extends ViewElement {
 	/**
 	 * Evaluates the expression written in specified attribute.
 	 * If attribute does not exist, returns false.
-	 * @param $name Attribute name
+	 * @param string $name Attribute name
 	 * @return mixed
 	 */
 	private function evalAttribute($name) {

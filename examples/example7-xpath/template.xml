@@ -35,4 +35,11 @@
        XPath queries! -->
   <span fig:text="xpath(myXml, '/xml/items/item[2]/@myattr')" />
 
+  <select>
+    <!-- We can also nest the calls to xpath() and xml(), if we
+         don't want to capture a reference to the XML resource for later reuse. -->
+    <fig:walk fig:walk="xpath(xml(/someXml), '/*/items/item')">
+      <option fig:text="." value="{.}"></option>
+    </fig:walk>
+  </select>
 </html>
