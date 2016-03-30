@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.2
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3.2
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -39,6 +39,9 @@ class TokenComparisonBinop extends TokenBinop {
 	public function evaluate(ViewElementTag $viewElement) {
 		$opL = $this->operands[0]->evaluate($viewElement);
 		$opR = $this->operands[1]->evaluate($viewElement);
+
+		if ($opL instanceof \DOMNode) $opL = $opL->nodeValue;
+		if ($opR instanceof \DOMNode) $opR = $opR->nodeValue;
 
 		switch($this->comparator) {
 			case 'gt' : return ($opL >  $opR);

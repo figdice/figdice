@@ -41,5 +41,16 @@
     <fig:walk fig:walk="xpath(xml(/someXml), '/*/items/item')">
       <option fig:text="." value="{.}"></option>
     </fig:walk>
+
+    ---------------
+    <!-- But if we need to use relative XPath queries, we must use the same captured reference
+         as returned by the xml() function. -->
+    <fig:walk fig:walk="xpath(/myXml, '/*/items/item')">
+      <!-- Relative xpath search, contextually to '.' (which is the iterating <item>) -->
+      <option fig:text="." value="{xpath(/myXml, '@myattr', .)}"
+              fig:cond=". != 'a'"
+        ></option>
+    </fig:walk>
+
   </select>
 </html>
