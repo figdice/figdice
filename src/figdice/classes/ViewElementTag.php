@@ -32,7 +32,6 @@ use figdice\exceptions\DictionaryDuplicateKeyException;
 use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
-use figdice\exceptions\DictionaryEntryNotFoundException;
 
 class ViewElementTag extends ViewElement {
 
@@ -1240,12 +1239,9 @@ class ViewElementTag extends ViewElement {
 				$key = $this->renderChildren();
 			}
 			//Ask current file to translate key:
-			try {
-				$value = $this->getCurrentFile()->translate($key, $dictionaryName, $this->xmlLineNumber);
-			} catch(DictionaryEntryNotFoundException $ex) {
-				LoggerFactory::getLogger('Dictionary')->error('Translation not found: key=' . $key . ', dictionary=' . $dictionaryName . ', language=' . $this->getView()->getLanguage() . ', file=' . $this->getCurrentFile()->getFilename() . ', line=' . $this->xmlLineNumber);
-				return $key;
-			}
+
+      //TODO: Optionally catch the DictionaryEntryNotFoundException exception so as to report in log instead.
+  		$value = $this->getCurrentFile()->translate($key, $dictionaryName, $this->xmlLineNumber);
 		}
 
 		//Fetch the parameters specified as immediate children

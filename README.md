@@ -1,5 +1,5 @@
 ## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP 
-[![Build Status](https://travis-ci.org/gabrielzerbib/figdice.svg?branch=master)](https://travis-ci.org/gabrielzerbib/figdice)
+[![Build Status](https://travis-ci.org/figdice/figdice.svg?branch=master)](https://travis-ci.org/gabrielzerbib/figdice)
 [![Latest Stable Version](https://poser.pugx.org/figdice/figdice/v/stable)](https://packagist.org/packages/figdice/figdice)
 [![Coverage Status](https://coveralls.io/repos/gabrielzerbib/figdice/badge.svg?branch=master&service=github)](https://coveralls.io/github/gabrielzerbib/figdice?branch=master)
 [![@figdice on Twitter](https://img.shields.io/badge/twitter-%40figdice-5189c7.svg)](https://twitter.com/figdice)
@@ -13,9 +13,10 @@ See **[figdice.org](http://www.figdice.org/)**
 
 # Try a [Live Demo](http://demo.figdice.org/) now!
 
-Presentation and Tutorial: [SitePoint | Getting Started With FigDice](http://www.sitepoint.com/?s=figdice)
-
-Presentation in French: [GLMF-158 : FigDice, un templating system efficace et original](http://connect.ed-diamond.com/GNU-Linux-Magazine/GLMF-158/FigDice-un-Templating-System-efficace-et-original)
+Presentation and Tutorial:
+- [SitePoint | Getting Started With FigDice](http://www.sitepoint.com/?s=figdice) (English)
+- [php[architect] | December 2015](https://www.phparch.com/magazine/2015-2/december/) (English)
+- [GNU/Linux Magazine France | 158, March 2013](http://connect.ed-diamond.com/GNU-Linux-Magazine/GLMF-158/FigDice-un-Templating-System-efficace-et-original) (French)
 
 ## Features
 
