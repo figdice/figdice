@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.2
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -22,10 +22,6 @@
  */
 
 use figdice\classes\lexer\Lexer;
-use figdice\exceptions\LexerUnexpectedCharException;
-use figdice\View;
-use figdice\classes\File;
-use figdice\classes\ViewElementTag;
 
 /**
  * Unit Test Class for basic Lexer expressions
@@ -101,5 +97,13 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
   public function testModZeroIsZero()
   {
     $this->assertEquals(0, $this->lexExpr('3 mod 0'));
+  }
+
+  /**
+   * @expectedException figdice\exceptions\LexerSyntaxErrorException
+   */
+  public function testEmptyArgumentsInFunctionCallRaisesException()
+  {
+    $this->assertEquals(0, $this->lexExpr('some(,)'));
   }
 }

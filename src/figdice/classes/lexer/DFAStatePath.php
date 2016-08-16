@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -37,7 +37,7 @@ class DFAStatePath extends DFAState {
 	 * a subpath has just been closed (i.e.: right after a ']').
 	 * In such state, the valid inputs are '/', blank, ')', ']' or end.
 	 *
-	 * @var unknown_type
+	 * @var bool
 	 */
 	private $closedSubpath;
 
@@ -48,7 +48,7 @@ class DFAStatePath extends DFAState {
 
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	public function input(Lexer $lexer, $char) {
 		//Valid inputs while in state Path are:
