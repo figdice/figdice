@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.1
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -40,12 +40,7 @@ class TokenPath extends Token {
 	}
 
 	public function appendElement($pathElement) {
-		if( (null == $pathElement) && (count($this->path) == 0) ) {
-			$this->path[] = new PathElementRoot();
-		}
-		else {
-			$this->path[] = $pathElement;
-		}
+		$this->path[] = $pathElement;
 	}
 
 	/**

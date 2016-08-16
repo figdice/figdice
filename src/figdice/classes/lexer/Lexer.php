@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2016, Gabriel Zerbib.
- * @version 2.3.3
+ * @version 2.3.4
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -350,6 +350,9 @@ class Lexer {
 
 			$nbOperands = $operator->getNumOperands();
 			if($nbOperands) {
+				if (count($this->stackRP) < $nbOperands) {
+					throw new LexerSyntaxErrorException('Not enough arguments in: ' . $this->getExpression(), $this->getViewFile()->getFilename(), $this->getViewLine());
+				}
 				$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
 			}
 			$this->stackRP[] = $operator;
@@ -407,7 +410,9 @@ class Lexer {
 	 * @param $buffer
 	 */
 	public function pushPathElement($buffer) {
-		$this->stackRP[count($this->stackRP) - 1]->appendElement($buffer);
+		/** @var TokenPath $tokenPath */
+		$tokenPath = $this->stackRP[count($this->stackRP) - 1];
+		$tokenPath->appendElement($buffer);
 	}
 
 	public function incrementLastFunctionArity() {
