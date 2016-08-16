@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.1
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3.3
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -22,9 +22,7 @@
  */
 
 use figdice\classes\lexer\Lexer;
-use figdice\exceptions\LexerUnexpectedCharException;
 use figdice\View;
-use figdice\classes\File;
 use figdice\classes\ViewElementTag;
 
 /**
