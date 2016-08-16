@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2016, Gabriel Zerbib.
- * @version 2.3.2
+ * @version 2.3.3
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -106,7 +106,7 @@ class ViewElementTag extends ViewElement {
 	 * @param string $name
 	 * @param integer $xmlLineNumber
 	 */
-	public function __construct(View &$view, $name, $xmlLineNumber) {
+	public function __construct(View $view, $name, $xmlLineNumber) {
 		parent::__construct($view);
 		$this->name = $name;
 		$this->attributes = array();
