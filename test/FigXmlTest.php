@@ -434,6 +434,22 @@ ENDTEMPLATE;
     $this->assertEquals('10-0 10-1 10-2 20-0 20-1 20-2 30-0 30-1 30-2 40-0 40-1 40-2 50-0 50-1 50-2', $result);
   }
 
+
+  public function testXmlnsFigIsNotRendered()
+  {
+    $template = <<<ENDTEMPLATE
+<html xmlns:fig="http://figdice.org/">
+</html>
+ENDTEMPLATE;
+
+    $view = new View();
+    $view->loadString($template);
+    $actual = $view->render();
+
+    $expected = "<html>\n</html>";
+    $this->assertEquals($expected, $actual);
+  }
+
 }
 
 
