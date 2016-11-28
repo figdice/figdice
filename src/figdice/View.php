@@ -542,6 +542,10 @@ class View {
 					break;
 				}
 			}
+
+			// Remove the fig xmlns directive from the list of attributes of the opening root tag
+      // (as it should not be rendered)
+      unset($attributes['xmlns:' . substr($this->figNamespace, 0, strlen($this->figNamespace) - 1)]);
 		}
 
 		$lineNumber = xml_get_current_line_number($xmlParser);
