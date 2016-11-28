@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.2
+ * @copyright 2004-2016, Gabriel Zerbib.
+ * @version 2.3.4
  * @package FigDice
  *
  * This file is part of FigDice.
