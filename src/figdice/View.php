@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2016, Gabriel Zerbib.
+ * @copyright 2004-2017, Gabriel Zerbib.
  * @version 2.3
  * @package FigDice
  *
@@ -24,6 +24,7 @@
 namespace figdice;
 
 use figdice\classes\AutoloadFeedFactory;
+use figdice\classes\MagicReflector;
 use figdice\classes\NativeFunctionFactory;
 use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
@@ -737,7 +738,7 @@ class View {
 			//then try to apply a Get method on the name of the property (a la Java Bean).
 			//If the object does not expose such method, try to obtain the object's property directly.
 			if(is_object($this->callStackData[$i])) {
-				$getter = 'get' . strtoupper($name[0]) . substr($name, 1);
+				$getter = 'get' . ucfirst($name);
 				if(method_exists($this->callStackData[$i], $getter))
 					return $this->callStackData[$i]->$getter();
 				else {
@@ -745,6 +746,9 @@ class View {
 					if(array_key_exists($name, $objectVars)) {
 						return $objectVars[$name];
 					}
+					else {
+                        return MagicReflector::invoke($this->callStackData[$i], $getter);
+                    }
 				}
 			}
 

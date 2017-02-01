@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2016, Gabriel Zerbib.
+ * @copyright 2004-2017, Gabriel Zerbib.
  * @version 2.3.4
  * @package FigDice
  *
@@ -23,6 +23,7 @@
 
 namespace figdice\classes\lexer;
 
+use figdice\classes\MagicReflector;
 use \figdice\classes\ViewElementTag;
 
 class TokenPath extends Token {
@@ -44,7 +45,7 @@ class TokenPath extends Token {
 	}
 
 	/**
-	 * @param ViewElement $viewElement
+	 * @param ViewElementTag $viewElement
 	 * @return mixed
 	 */
 	public function evaluate(ViewElementTag $viewElement) {
@@ -82,7 +83,7 @@ class TokenPath extends Token {
 			//If data is an Object,
 			//we can try to call getXxx() on the object, where Xxx is the symbolName with a capital letter.
 			else if(is_object($data)) {
-				$getter = 'get' . strtoupper($symbolName[0]) . substr($symbolName, 1);
+				$getter = 'get' . ucfirst($symbolName);
 				if(method_exists($data, $getter)) {
 					$data = $data->$getter();
 				}
@@ -91,10 +92,13 @@ class TokenPath extends Token {
 				else if(array_key_exists($symbolName, get_object_vars($data))) {
 					$data = $data->$symbolName;
 				}
+				// Otherwise, let's see if the Php Doc Block of the class declares a @method tag for our getter:
 				else {
-					$data = null;
-					break;
-				}
+                    $data = MagicReflector::invoke($data, $getter);
+                    if (null === $data) {
+                        break;
+                    }
+                }
 			}
 
 			//TODO: Undetermined behaviour if path contains a Dot somewhere in the middle...
