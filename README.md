@@ -40,7 +40,7 @@ Simply add the following composer.json file to your project root, or append the 
 
     {
       "require": {
-        "figdice/figdice": "~2.3"
+        "figdice/figdice": "~2.4"
       }
     }
 
