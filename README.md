@@ -72,9 +72,9 @@ Download the latest Figdice zip file to the location of your choice and extract 
 
 # Getting Started
 
-Browse the [examples](https://github.com/gabrielzerbib/figdice/tree/master/examples)!
+Browse the [examples](https://github.com/figdice/figdice/tree/master/examples)!
 
-See [Wiki](https://github.com/gabrielzerbib/figdice/wiki) for more details.
+See [Wiki](https://github.com/figdice/figdice/wiki) for more details.
 
 
 
