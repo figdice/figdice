@@ -708,15 +708,23 @@ class View {
 		return $result;
 	}
 
+    /**
+     * @internal
+     */
 	public function pushStackData($data) {
 		array_push($this->callStackData, $data);
 	}
-	public function popStackData() {
+
+    /**
+     * @internal
+     */
+    public function popStackData() {
 		array_pop($this->callStackData);
 	}
 	public function fetchData($name) {
 		if($name == '/') {
 			return $this->callStackData[0];
+			
 		}
 		if($name == '.') {
 			return $this->callStackData[count($this->callStackData) - 1];
