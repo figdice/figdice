@@ -29,7 +29,6 @@ use figdice\classes\NativeFunctionFactory;
 use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
 use figdice\classes\File;
-use figdice\classes\ViewElement;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\XMLParsingException;
@@ -113,7 +112,7 @@ class View {
 	/**
 	 * Topmost node of the tree after successful parsing.
 	 *
-	 * @var ViewElement
+	 * @var ViewElementTag
 	 */
 	private $rootNode;
 
@@ -131,7 +130,7 @@ class View {
 	/**
 	 * XML parser resource (domxml)
 	 *
-	 * @var XML_ressource
+	 * @var resource
 	 */
 	private $xmlParser;
 
@@ -398,9 +397,10 @@ class View {
 		$this->firstOpening = true;
 		$bSuccess = xml_parse($this->xmlParser, $this->source);
 
-    if ($bSuccess) {
-      $errMsg = '';
-    }
+        if ($bSuccess) {
+            $errMsg = '';
+            $lineNumber = 0;
+        }
 		else {
 			$errMsg = xml_error_string(xml_get_error_code($this->xmlParser));
 			$lineNumber = xml_get_current_line_number($this->xmlParser);
@@ -430,6 +430,7 @@ class View {
 	 *
 	 * @return string
 	 * @throws RenderingException
+	 * @throws XMLParsingException
 	 */
 	public function render() {
 		if(! $this->bParsed) {
@@ -544,10 +545,10 @@ class View {
 				}
 			}
 
-			// Remove the fig xmlns directive from the list of attributes of the opening root tag
-      // (as it should not be rendered)
-      unset($attributes['xmlns:' . substr($this->figNamespace, 0, strlen($this->figNamespace) - 1)]);
-		}
+            // Remove the fig xmlns directive from the list of attributes of the opening root tag
+            // (as it should not be rendered)
+            unset($attributes['xmlns:' . substr($this->figNamespace, 0, strlen($this->figNamespace) - 1)]);
+        }
 
 		$lineNumber = xml_get_current_line_number($xmlParser);
 
@@ -575,7 +576,7 @@ class View {
 		}
 
 		if($this->rootNode) {
-      /** @var ViewElementTag $parentElement */
+            /** @var ViewElementTag $parentElement */
 			$parentElement = & $this->stack[count($this->stack)-1];
 			$newElement->parent = &$parentElement;
 
@@ -623,7 +624,7 @@ class View {
 	 * XML parser handler for CDATA
 	 *
 	 * @access private
-	 * @param XML_resource $xmlParser
+	 * @param resource $xmlParser
 	 * @param string $cdata
 	 */
 	function cdataHandler($xmlParser, $cdata) {

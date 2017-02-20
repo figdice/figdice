@@ -1032,7 +1032,7 @@ class ViewElementTag extends ViewElement {
 		//rather than the future contents of the slot.
 		if(isset($this->attributes[$this->view->figNamespace . 'filter'])) {
 			$filterClass = $this->attributes[$this->view->figNamespace . 'filter'];
-			$filter = $this->instanciateFilter($filterClass);
+			$filter = $this->instantiateFilter($filterClass);
 			$buffer = $filter->transform($buffer);
 		}
 		return $buffer;
@@ -1342,10 +1342,13 @@ class ViewElementTag extends ViewElement {
 		return false;
 	}
 
-	/**
-	 * @return Filter
-	 */
-	private function instanciateFilter($className) {
+    /**
+     * @param string $className
+     * @return Filter
+     * @throws FileNotFoundException
+     * @throws RenderingException
+     */
+	private function instantiateFilter($className) {
 		if(! class_exists($className)) {
 			$classFile = $className . '.php';
 			if(realpath($classFile) != $classFile)
@@ -1357,16 +1360,16 @@ class ViewElementTag extends ViewElement {
 
 			require_once $classFile;
 
-			//Check that the loaded file did declare the requested class:
-			if(! class_exists($className)) {
-				$message = "Undefined filter class: $className in file: $classFile";
-        throw new RenderingException($this->getTagName(),
-          $this->getCurrentFilename(),
-          $this->getLineNumber(),
-          $message
-        );
+            //Check that the loaded file did declare the requested class:
+            if(! class_exists($className)) {
+                $message = "Undefined filter class: $className in file: $classFile";
+                throw new RenderingException($this->getTagName(),
+                    $this->getCurrentFilename(),
+                    $this->getLineNumber(),
+                    $message
+                );
 
-      }
+            }
 		}
 
 		if($this->view->getFilterFactory())
