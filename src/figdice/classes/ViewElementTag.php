@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2016, Gabriel Zerbib.
- * @version 2.3.3
+ * @copyright 2004-2017, Gabriel Zerbib.
+ * @version 2.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -1349,34 +1349,18 @@ class ViewElementTag extends ViewElement {
      * @throws RenderingException
      */
 	private function instantiateFilter($className) {
-		if(! class_exists($className)) {
-			$classFile = $className . '.php';
-			if(realpath($classFile) != $classFile)
-				$classFile = $this->view->getFilterPath() . '/' . $classFile;
-			if(! file_exists($classFile)) {
-				$message = 'Filter file not found: ' . $classFile . ' in Fig source: ' . $this->currentFile->getFilename() . "({$this->xmlLineNumber})";
-				throw new FileNotFoundException($message, $classFile);
-			}
-
-			require_once $classFile;
-
-            //Check that the loaded file did declare the requested class:
-            if(! class_exists($className)) {
-                $message = "Undefined filter class: $className in file: $classFile";
-                throw new RenderingException($this->getTagName(),
-                    $this->getCurrentFilename(),
-                    $this->getLineNumber(),
-                    $message
-                );
-
-            }
-		}
-
 		if($this->view->getFilterFactory())
 			return $this->view->getFilterFactory()->create($className);
 
 		$reflection = new \ReflectionClass($className);
-		return $reflection->newInstance();
+		$instance = $reflection->newInstance();
+		if (! $instance instanceof Filter) {
+		    throw new RenderingException($this->getTagName(),
+                $this->getCurrentFilename(),
+                $this->getLineNumber(),
+                'Class ' . get_class($instance) . ' is not a Filter.');
+        }
+        return $instance;
 	}
 
 	/**

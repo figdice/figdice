@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2017, Gabriel Zerbib.
+ * @version 2.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -31,5 +31,5 @@ interface FilterFactory {
 	 * @param string $className
 	 * @return Filter
 	 */
-	public function & create($className);
+	public function create($className);
 }

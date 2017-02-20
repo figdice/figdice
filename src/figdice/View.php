@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2017, Gabriel Zerbib.
- * @version 2.3
+ * @version 2.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -72,17 +72,15 @@ class View {
 	public $logger;
 
 	/**
-	 * The path where to find the output filters for the view.
-	 * @var string
-	 */
-	private $filterPath;
-	/**
 	 * The directory where to store temporary files (results of compilation).
 	 * @var string
 	 */
 	private $tempPath;
 	/**
 	 * The Filter Factory instance.
+     * If no factory is defined, the View will consider that the filter class are already
+     * (or auto-) loaded, or PHP will raise the usual class not found exception.
+     * Also, without a factory, the filter instance is constructed with no arguments.
 	 * @var FilterFactory
 	 */
 	private $filterFactory;
@@ -479,21 +477,6 @@ class View {
 		return $this->tempPath;
 	}
 	/**
-	 * @return string
-	 */
-	public function getFilterPath() {
-		return $this->filterPath;
-	}
-	/**
-	 * Specify the default location for all the filters
-	 * invoked by the view.
-	 *
-	 * @param string $path
-	 */
-	public function setFilterPath($path) {
-		$this->filterPath = $path;
-	}
-	/**
 	 * Returns the Filter Factory instance attachted to the view.
 	 *
 	 * @return FilterFactory
@@ -506,7 +489,7 @@ class View {
 	 *
 	 * @param FilterFactory $filterFactory
 	 */
-	public function setFilterFactory($filterFactory) {
+	public function setFilterFactory(FilterFactory $filterFactory) {
 		$this->filterFactory = $filterFactory;
 	}
 
