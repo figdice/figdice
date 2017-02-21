@@ -69,6 +69,18 @@ class FilterTest extends PHPUnit_Framework_TestCase
       $view->render();
       $this->assertTrue(false);
   }
+    /**
+     * @expectedException \figdice\exceptions\RenderingException
+     */
+    public function testFilterClassIsAutoloadableButIsNotFilterRaisesException()
+    {
+        $view = new View();
+        $view->loadString(
+            '<test><span fig:filter="figdice\classes\functions\Function_average"/></test>'
+        );
+        $view->render();
+        $this->assertTrue(false);
+    }
 }
 
 class DummyFilterClassWhichDoesNotImplementsFilter
