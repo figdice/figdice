@@ -636,6 +636,9 @@ class ViewElementTag extends ViewElement {
               );
           }
         }
+
+        // Since we're in a fig:text directive, make sure we'll output a string (even if we got a bool)
+        $output = (string) $output;
 				$this->outputBuffer = $output;
 				
 				
@@ -797,7 +800,6 @@ class ViewElementTag extends ViewElement {
 
 	private function fig_mount() {
 		$target = $this->getAttribute('target');
-		//TODO: $anchor = $this->getAttribute('anchor');
 		//When an explicit value="" attribute exists, use its contents as a Lex expression to evaluate.
 		if($this->hasAttribute('value')) {
 			$valueExpression = $this->getAttribute('value');
