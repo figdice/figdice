@@ -131,24 +131,6 @@ ENDXML;
     $this->assertEquals("a\nb\nc\n", $this->view->render());
   }
 
-  /**
-   * It should be possible to have fig:walk and fig:text on the same tag.
-   * Yet, this is currently not possible because of the way fig:text holds on
-   * the output buffer of the tag -- preventing the next iteration to continue
-   * its job.
-   * The rendering of :walk and :text need refactoring.
-   *
-   * @expectedException \figdice\exceptions\RenderingException
-   */
-  public function testTODOCompactWalkWithIndexedArrayAndTextFails() {
-    $this->view->mount('data',  array(1,2,3));
-    $source = <<<ENDXML
-<fig:x fig:walk="/data" fig:text="first()"/>
-ENDXML;
-    $this->view->loadString($source);
-    $this->view->render();
-    $this->assertFalse(true);
-  }
 
   public function testLoadXMLwithUTF8AccentsAndDeclaredEntities()
   {
@@ -453,6 +435,36 @@ ENDTEMPLATE;
     $expected = "<html>\n</html>";
     $this->assertEquals($expected, $actual);
   }
+
+    public function testIndentationInLoopIsRespected()
+    {
+        $view = new View();
+        $source = <<<ENDSOURCE
+<fig>
+  <ul>
+    <li fig:walk="/array" fig:text="."></li>
+  </ul>
+</fig>
+ENDSOURCE;
+
+
+        $expected = <<<ENDEXPECTED
+<fig>
+  <ul>
+    <li>1</li>
+    <li>2</li>
+    <li>3</li>
+  </ul>
+</fig>
+ENDEXPECTED;
+
+
+        $view->loadString($source);
+        $view->mount('array', [1, 2, 3]);
+        $output = $view->render();
+        $this->assertEquals($expected, $output);
+    }
+
 
 }
 

@@ -1082,15 +1082,6 @@ class ViewElementTag extends ViewElement {
 				$this->view->pushStackData($data);
 				$newIteration->iterate($key);
 				$nextContent = $this->render(/*bypassWalk*/true);
-				if($nextContent === false) {
-					throw new RenderingException($this->getTagName(),
-							$this->getCurrentFilename(),
-							$this->getLineNumber(),
-							"In file: " . $this->getCurrentFilename() . '(' . $this->getLineNumber() . '), '.
-							'tag <' . $this->getTagName() . '> : ' . PHP_EOL .
-							"Inner content of loop could not be rendered." . PHP_EOL .
-								"Have you used :walk and :text on the same tag?");
-				}
 
 				//Each rendered iteration start again
 				//with the blank part on the right of the preceding CDATA,

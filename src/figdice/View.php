@@ -500,9 +500,26 @@ class View {
 	 * @param string $mountingName
 	 * @param mixed $data
 	 */
-	function mount($mountingName, $data) {
+	public function mount($mountingName, $data) {
 		$this->callStackData[0][$mountingName] = $data;
 	}
+
+    /**
+     * Returns an assoc array of the universe data.
+     * During view rendering, the unvierse is made of layers, along the iterations and macro calls etc.
+     * One same key can exist in a lower layer and in another layer above it,
+     * in which case the upper version is used in priority.
+     * This method merges top-bottom (the upper key overwrites the lower one).
+     * @return mixed
+     */
+	public function getMergedData()
+    {
+        $result = [];
+        foreach ($this->callStackData as $layer) {
+            $result = array_merge($layer, $result);
+        }
+        return $result;
+    }
 
 	/**
 	 * @param $doctype string
