@@ -1,4 +1,4 @@
-## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP 
+## ![Logo](http://www.figdice.org/img/fig-130-16.png) FigDice Templating System for PHP 
 [![Build Status](https://travis-ci.org/figdice/figdice.svg?branch=master)](https://travis-ci.org/figdice/figdice)
 [![Latest Stable Version](https://poser.pugx.org/figdice/figdice/v/stable)](https://packagist.org/packages/figdice/figdice)
 [![Coverage Status](https://coveralls.io/repos/github/figdice/figdice/badge.svg?branch=master)](https://coveralls.io/github/figdice/figdice?branch=master)

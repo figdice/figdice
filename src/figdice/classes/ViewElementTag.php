@@ -1347,6 +1347,7 @@ class ViewElementTag extends ViewElement {
      * @return Filter
      * @throws FileNotFoundException
      * @throws RenderingException
+     * @throws \ReflectionException in case the specified class cannot be found.
      */
 	private function instantiateFilter($className) {
 		if($this->view->getFilterFactory())
@@ -1394,6 +1395,7 @@ class ViewElementTag extends ViewElement {
 
 	/**
 	 * This const is used internally to indicate that the object is currently being rendered as a local plug.
+     * @internal
 	 */
 	const TRANSIENT_PLUG_RENDERING = 'TRANSIENT_PLUG_RENDERING';
 }

@@ -43,6 +43,40 @@ class FilterTest extends PHPUnit_Framework_TestCase
     $view->mount('data', '<TAG>');
     $this->assertEquals('<test><span>&lt;TAG&gt;</span></test>', $view->render());
   }
+
+    /**
+     * @expectedException \ReflectionException
+     */
+  public function testClassNotFoundRaisesException()
+  {
+      $view = new View();
+      $view->loadString(
+          '<test><span fig:filter="DummyNotFoundFilterClass"/></test>'
+      );
+      $view->render();
+      $this->assertTrue(false);
+  }
+
+    /**
+     * @expectedException \figdice\exceptions\RenderingException
+     */
+  public function testClassDoesNotImplementFilterRaisesException()
+  {
+      $view = new View();
+      $view->loadString(
+          '<test><span fig:filter="DummyFilterClassWhichDoesNotImplementsFilter"/></test>'
+      );
+      $view->render();
+      $this->assertTrue(false);
+  }
+}
+
+class DummyFilterClassWhichDoesNotImplementsFilter
+{
+    public function transform($buffer)
+    {
+        return $buffer;
+    }
 }
 
 class EscapeHtmlFilter implements Filter

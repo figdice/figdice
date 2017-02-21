@@ -336,9 +336,8 @@ class View {
 
 	/**
 	 * Instead of loading a file, you can load a string, and optionally pass
-	 * a "working directory" (mainly useful for incldues).
+	 * a "working directory" (mainly useful for includes).
 	 * This creates a File object with no real filesystem location.
-	 * @internal
 	 * @param string $string
 	 * @param string|null $workingDirectory
 	 */
