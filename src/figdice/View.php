@@ -2,7 +2,7 @@
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
  * @copyright 2004-2017, Gabriel Zerbib.
- * @version 2.3
+ * @version 2.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -29,7 +29,6 @@ use figdice\classes\NativeFunctionFactory;
 use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
 use figdice\classes\File;
-use figdice\classes\ViewElement;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\XMLParsingException;
@@ -73,17 +72,15 @@ class View {
 	public $logger;
 
 	/**
-	 * The path where to find the output filters for the view.
-	 * @var string
-	 */
-	private $filterPath;
-	/**
 	 * The directory where to store temporary files (results of compilation).
 	 * @var string
 	 */
 	private $tempPath;
 	/**
 	 * The Filter Factory instance.
+     * If no factory is defined, the View will consider that the filter class are already
+     * (or auto-) loaded, or PHP will raise the usual class not found exception.
+     * Also, without a factory, the filter instance is constructed with no arguments.
 	 * @var FilterFactory
 	 */
 	private $filterFactory;
@@ -113,7 +110,7 @@ class View {
 	/**
 	 * Topmost node of the tree after successful parsing.
 	 *
-	 * @var ViewElement
+	 * @var ViewElementTag
 	 */
 	private $rootNode;
 
@@ -131,7 +128,7 @@ class View {
 	/**
 	 * XML parser resource (domxml)
 	 *
-	 * @var XML_ressource
+	 * @var resource
 	 */
 	private $xmlParser;
 
@@ -339,9 +336,8 @@ class View {
 
 	/**
 	 * Instead of loading a file, you can load a string, and optionally pass
-	 * a "working directory" (mainly useful for incldues).
+	 * a "working directory" (mainly useful for includes).
 	 * This creates a File object with no real filesystem location.
-	 * @internal
 	 * @param string $string
 	 * @param string|null $workingDirectory
 	 */
@@ -398,9 +394,10 @@ class View {
 		$this->firstOpening = true;
 		$bSuccess = xml_parse($this->xmlParser, $this->source);
 
-    if ($bSuccess) {
-      $errMsg = '';
-    }
+        if ($bSuccess) {
+            $errMsg = '';
+            $lineNumber = 0;
+        }
 		else {
 			$errMsg = xml_error_string(xml_get_error_code($this->xmlParser));
 			$lineNumber = xml_get_current_line_number($this->xmlParser);
@@ -430,6 +427,7 @@ class View {
 	 *
 	 * @return string
 	 * @throws RenderingException
+	 * @throws XMLParsingException
 	 */
 	public function render() {
 		if(! $this->bParsed) {
@@ -478,21 +476,6 @@ class View {
 		return $this->tempPath;
 	}
 	/**
-	 * @return string
-	 */
-	public function getFilterPath() {
-		return $this->filterPath;
-	}
-	/**
-	 * Specify the default location for all the filters
-	 * invoked by the view.
-	 *
-	 * @param string $path
-	 */
-	public function setFilterPath($path) {
-		$this->filterPath = $path;
-	}
-	/**
 	 * Returns the Filter Factory instance attachted to the view.
 	 *
 	 * @return FilterFactory
@@ -505,7 +488,7 @@ class View {
 	 *
 	 * @param FilterFactory $filterFactory
 	 */
-	public function setFilterFactory($filterFactory) {
+	public function setFilterFactory(FilterFactory $filterFactory) {
 		$this->filterFactory = $filterFactory;
 	}
 
@@ -517,9 +500,26 @@ class View {
 	 * @param string $mountingName
 	 * @param mixed $data
 	 */
-	function mount($mountingName, $data) {
+	public function mount($mountingName, $data) {
 		$this->callStackData[0][$mountingName] = $data;
 	}
+
+    /**
+     * Returns an assoc array of the universe data.
+     * During view rendering, the unvierse is made of layers, along the iterations and macro calls etc.
+     * One same key can exist in a lower layer and in another layer above it,
+     * in which case the upper version is used in priority.
+     * This method merges top-bottom (the upper key overwrites the lower one).
+     * @return mixed
+     */
+	public function getMergedData()
+    {
+        $result = [];
+        foreach ($this->callStackData as $layer) {
+            $result = array_merge($layer, $result);
+        }
+        return $result;
+    }
 
 	/**
 	 * @param $doctype string
@@ -544,10 +544,10 @@ class View {
 				}
 			}
 
-			// Remove the fig xmlns directive from the list of attributes of the opening root tag
-      // (as it should not be rendered)
-      unset($attributes['xmlns:' . substr($this->figNamespace, 0, strlen($this->figNamespace) - 1)]);
-		}
+            // Remove the fig xmlns directive from the list of attributes of the opening root tag
+            // (as it should not be rendered)
+            unset($attributes['xmlns:' . substr($this->figNamespace, 0, strlen($this->figNamespace) - 1)]);
+        }
 
 		$lineNumber = xml_get_current_line_number($xmlParser);
 
@@ -575,7 +575,7 @@ class View {
 		}
 
 		if($this->rootNode) {
-      /** @var ViewElementTag $parentElement */
+            /** @var ViewElementTag $parentElement */
 			$parentElement = & $this->stack[count($this->stack)-1];
 			$newElement->parent = &$parentElement;
 
@@ -623,7 +623,7 @@ class View {
 	 * XML parser handler for CDATA
 	 *
 	 * @access private
-	 * @param XML_resource $xmlParser
+	 * @param resource $xmlParser
 	 * @param string $cdata
 	 */
 	function cdataHandler($xmlParser, $cdata) {

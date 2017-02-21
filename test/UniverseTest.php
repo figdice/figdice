@@ -30,12 +30,22 @@ class UniverseTest extends PHPUnit_Framework_TestCase {
 
     private function symbolize($expr, $universe)
     {
+        // In order to evaluate an expression, as seen by the view,
+        // we will have it mount its result into a universe symbol
+        // which we will read after the rendering.
         $view = new View();
-        $view->loadString('<fig:text fig:text="' . $expr . '"/>');
+        $view->loadString('<fig:mount target="unittest" value="' . $expr . '"/>');
+        // Mount the passed data into the view
         foreach ($universe as $key => $value) {
             $view->mount($key, $value);
         }
-        return $view->render();
+        // Render (and thus evaluate our expression given the passed data)
+        $view->render();
+
+        // Now, obtain the merged universe as of end of rendering,
+        $finalUnvierse = $view->getMergedData();
+        // and return the value of the symbol that contains our evaluated expression.
+        return $finalUnvierse['unittest'];
     }
 
     /**

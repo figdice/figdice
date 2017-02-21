@@ -23,6 +23,7 @@
 
 namespace figdice\classes\functions;
 
+use figdice\exceptions\XMLParsingException;
 use \figdice\FigFunction;
 use \figdice\classes\ViewElementTag;
 
@@ -41,20 +42,29 @@ use \figdice\classes\ViewElementTag;
  */
 class Function_xml implements FigFunction {
 
-	/**
-	 * @param {@link ViewElement} $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
+    /**
+     * @param ViewElementTag $viewElement
+     * @param integer $arity
+     * @param array $arguments
+     *
+     * @return \DOMXPath
+     * @throws XMLParsingException
+     */
 	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
 		$xmlString = $arguments[0];
-		$xml = new \DomDocument();
+		$xml = new \DOMDocument();
 		$successParse = @ $xml->loadXML($xmlString, LIBXML_NOENT);
 		if (! $successParse) {
 			$explicitRoot = $arity >= 2 ? $arguments[1] : 'xml';
 			$xmlString = '<'.$explicitRoot.'>' . $arguments[0] . '</'.$explicitRoot.'>';
 			// This time we let a warning be fired in case of invalid xml.
-			$xml->loadXML($xmlString, LIBXML_NOENT);
+			$successParse = @ $xml->loadXML($xmlString, LIBXML_NOENT);
+			if (! $successParse) {
+                $xmlError = libxml_get_last_error();
+                throw new XMLParsingException('xml() function: ' . $xmlError->message,
+                    $viewElement->getCurrentFile()->getFilename(),
+                    $viewElement->getLineNumber());
+            }
 		}
 		$xpath = new \DOMXPath($xml);
 		return $xpath;
