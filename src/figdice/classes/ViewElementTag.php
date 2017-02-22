@@ -811,15 +811,16 @@ class ViewElementTag extends ViewElement {
 		$this->view->mount($target, $value);
 	}
 
-	/**
-	 * Process <fig:feed> tag.
-	 * This tag accepts the following attributes:
-	 *  - class = the name of the Feed class to instanciate and run.
-	 *  - target = the mount point in the global universe.
-	 *
-	 * @access private
-	 * @return void
-	 */
+    /**
+     * Process <fig:feed> tag.
+     * This tag accepts the following attributes:
+     *  - class = the name of the Feed class to instanciate and run.
+     *  - target = the mount point in the global universe.
+     *
+     * @access private
+     * @throws FeedClassNotFoundException
+     * @throws RequiredAttributeException
+     */
 	private function fig_feed() {
 		if($this->logger == null) {
 			$this->logger = LoggerFactory::getLogger(get_class($this));
@@ -859,9 +860,6 @@ class ViewElementTag extends ViewElement {
 			$mountPoint = $this->attributes['target'];
 		}
 
-
-		//TODO: check if it still always needed to know the fig file from within the feed.
-		//$feedInstance->setFigFile($this->view->getFilename());
 
 		$feedInstance->setParameters($feedParameters);
 
