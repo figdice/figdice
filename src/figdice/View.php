@@ -631,9 +631,6 @@ class View implements \Serializable {
 				$element->autoclose = false;
 			}
 		}
-		//TODO: Bad bad! hard-coded br tag. Just out of laziness. The only real solution will be to rewrite an XML parser (on-the-fly in the file).
-		if($tagName == 'br')
-			$element->autoclose = true;
 	}
 
 
