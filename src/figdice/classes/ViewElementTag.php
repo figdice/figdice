@@ -483,11 +483,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			return $this->fig_include();
 		}
 
-		//================================================================
-		//fig:cdata
-		if( ($this->name == $this->view->figNamespace . 'cdata') && ! isset($this->bRendering) ) {
-			return $this->fig_cdata();
-		}
 
 		//================================================================
 		//fig:trans
@@ -660,57 +655,57 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//Only the immediate Tag children of name fig:attr are parsed,
 		//so that it is still possible to have dynamic attributes to a tag bearing fig:text.
 		if(null !== $this->figText) {
-			$content = $this->figText;
+            $content = $this->figText;
 
-			$output = $this->evaluate($content);
-			if($output === null) {
-				$this->outputBuffer = '';
-			}
-			else {
+            $output = $this->evaluate($content);
+            if($output === null) {
+                $this->outputBuffer = '';
+            }
+            else {
 
-			  // Unfortunately there is no auto __toString
-			  // for DOMNode objects (not even DOMText...)
-			  if (is_object($output)
-			      && ($output instanceof \DOMNode)) {
-			    $output = $output->nodeValue;
-			  }
+                // Unfortunately there is no auto __toString
+                // for DOMNode objects (not even DOMText...)
+                if (is_object($output)
+                    && ($output instanceof \DOMNode)) {
+                    $output = $output->nodeValue;
+                }
 
-        if (is_object($output)) {
-          // Try to convert object to string, using PHP's cast mechanism (possibly involving __toString() method).
-          try {
-            $output = (string) $output;
-          } catch(\ErrorException $ex) {
-            throw new RenderingException($this->getTagName(),
-              $this->getCurrentFilename(),
-              $this->getLineNumber(),
-              $ex->getMessage()
-              );
-          }
+                if (is_object($output)) {
+                    // Try to convert object to string, using PHP's cast mechanism (possibly involving __toString() method).
+                    try {
+                        $output = (string) $output;
+                    } catch(\ErrorException $ex) {
+                        throw new RenderingException($this->getTagName(),
+                            $this->getCurrentFilename(),
+                            $this->getLineNumber(),
+                            $ex->getMessage()
+                        );
+                    }
+                }
+
+                // Since we're in a fig:text directive, make sure we'll output a string (even if we got a bool)
+                $output = (string) $output;
+                $this->outputBuffer = $output;
+				
+				
+				
+                if (trim($output) != '') {
+                    //We clear the autoclose flag only if there is any meaningful
+                    //inner content.
+                    $this->autoclose = false;
+                }
+            }
+
+            if(! $this->isMute()) {
+                //Take care of inner fig:attr
+                for($iChild = 0; $iChild < count($this->children); ++$iChild) {
+                    $child = & $this->children[$iChild];
+                    if($child instanceof TagFigAttr) {
+                        $child->render();
+                    }
+                }
+            }
         }
-
-        // Since we're in a fig:text directive, make sure we'll output a string (even if we got a bool)
-        $output = (string) $output;
-				$this->outputBuffer = $output;
-				
-				
-				
-				if (trim($output) != '') {
-					//We clear the autoclose flag only if there is any meaningful
-					//inner content.
-					$this->autoclose = false;
-				}
-			}
-
-			if(! $this->isMute()) {
-				//Take care of inner fig:attr
-				for($iChild = 0; $iChild < count($this->children); ++$iChild) {
-					$child = & $this->children[$iChild];
-					if($child instanceof TagFigAttr) {
-						$child->render();
-					}
-				}
-			}
-		}
 
 
 		//Now proceed with the children...
@@ -850,22 +845,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	}
 
 
-	/**
-	 * Imports at the current output position
-	 * the contents of specified file unparsed, rendered as is.
-	 * @return string
-	 * @throws FileNotFoundException
-	 */
-	private function fig_cdata() {
-		$filename = $this->attributes['file'];
-		$realfilename = dirname($this->getCurrentFilename()).'/'.$filename;
-		if(! file_exists($realfilename)) {
-			$message = "File not found: $filename called from: " . $this->getCurrentFilename(). '(' . $this->xmlLineNumber . ')';
-			throw new FileNotFoundException($message, $filename);
-		}
-		$cdata = file_get_contents($realfilename);
-		return $cdata;
-	}
 
 	/**
 	 * Creates a sub-view object, invokes its parsing phase,
@@ -1285,8 +1264,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	}
 
 	/**
-	 * Determines whether the current Tag bears the mute/hollow directive,
-	 * in which case it should render only its inner parts,
+	 * Determines whether the current Tag bears the mute directive,
+	 * in which case we render only its inner parts,
 	 * without an outer tag.
 	 * A <fig: > tag is always mute.
 	 *

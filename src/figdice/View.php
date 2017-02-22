@@ -29,6 +29,7 @@ use figdice\classes\NativeFunctionFactory;
 use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
 use figdice\classes\File;
+use figdice\classes\TagFigCdata;
 use figdice\classes\TagFigFeed;
 use figdice\classes\TagFigMount;
 use figdice\classes\ViewElementTag;
@@ -234,7 +235,6 @@ class View implements \Serializable {
 	public function __construct(array $options = []) {
 		$this->options = $options;
 		$this->source = '';
-		$this->result = '';
 		$this->rootNode = null;
 		$this->stack = array();
 		$this->logger = LoggerFactory::getLogger(get_class($this));
@@ -572,9 +572,15 @@ class View implements \Serializable {
 		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
 		    $newElement = new TagFigMount($view, $tagName, $lineNumber);
         }
+		else if ($tagName == $this->figNamespace . TagFigCdata::TAGNAME) {
+		    $newElement = new TagFigCdata($view, $tagName, $lineNumber);
+        }
+
+
 		else {
 			$newElement = new ViewElementTag($view, $tagName, $lineNumber);
 		}
+
 		$newElement->setCurrentFile($this->file);
 		$newElement->setAttributes($attributes);
 
@@ -630,14 +636,14 @@ class View implements \Serializable {
 			$element->autoclose = true;
 	}
 
-	/**
+
+    /**
 	 * XML parser handler for CDATA
 	 *
-	 * @access private
 	 * @param resource $xmlParser
 	 * @param string $cdata
 	 */
-	function cdataHandler($xmlParser, $cdata) {
+	private function cdataHandler($xmlParser, $cdata) {
 		//Last element in stack = parent element of the CDATA.
 		$currentElement = &$this->stack[count($this->stack)-1];
 		$currentElement->appendCDataChild($cdata);
@@ -721,6 +727,7 @@ class View implements \Serializable {
 
     /**
      * @internal
+     * @param $data
      */
 	public function pushStackData($data) {
 		array_push($this->callStackData, $data);
