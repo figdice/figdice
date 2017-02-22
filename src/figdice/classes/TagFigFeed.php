@@ -54,7 +54,7 @@ class TagFigFeed extends ViewElementTag {
             throw new RequiredAttributeException($this->getTagName(),
                 $this->getCurrentFile()->getFilename(),
                 $this->xmlLineNumber,
-                'Missing "class" attribute for fig:feed tag, in ' . $this->getCurrentFile()->getFilename() . '(' . $this->xmlLineNumber . ')');
+                'Missing "class" attribute for '.$this->getTagName().' tag, in ' . $this->getCurrentFile()->getFilename() . '(' . $this->xmlLineNumber . ')');
         }
 
     }

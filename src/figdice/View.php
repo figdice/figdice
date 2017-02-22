@@ -30,6 +30,7 @@ use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
 use figdice\classes\File;
 use figdice\classes\TagFigFeed;
+use figdice\classes\TagFigMount;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\XMLParsingException;
@@ -567,6 +568,9 @@ class View implements \Serializable {
 		}
 		else if ($tagName == $this->figNamespace . TagFigFeed::TAGNAME) {
 		    $newElement = new TagFigFeed($view, $tagName, $lineNumber);
+        }
+		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
+		    $newElement = new TagFigMount($view, $tagName, $lineNumber);
         }
 		else {
 			$newElement = new ViewElementTag($view, $tagName, $lineNumber);

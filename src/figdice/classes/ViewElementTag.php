@@ -478,12 +478,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 
 		//================================================================
-		if($this->name == $this->view->figNamespace . 'mount') {
-			$this->fig_mount();
-			return '';
-		}
-
-		//================================================================
 		//fig:include
 		if( ($this->name == $this->view->figNamespace . 'include') && ! isset($this->bRendering) ) {
 			return $this->fig_include();
@@ -780,7 +774,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		return $result;
 	}
 
-	private function renderChildren($doNotRenderFigParam = false) {
+	protected function renderChildren($doNotRenderFigParam = false) {
 		$result = '';
 		//If a fig treatment happened already, then outputBuffer contains
 		//the result to use. Otherwise, it needs to be calculated recursively
@@ -853,21 +847,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	}
 	private function getFigAttribute($name, $default = null) {
 		return $this->getAttribute($this->view->figNamespace . $name, $default);
-	}
-
-	private function fig_mount() {
-		$target = $this->getAttribute('target');
-		//When an explicit value="" attribute exists, use its contents as a Lex expression to evaluate.
-		if($this->hasAttribute('value')) {
-			$valueExpression = $this->getAttribute('value');
-			$value = $this->evaluate($valueExpression);
-		}
-		//Otherwise, no value attribute: then we render the inner contents of the fig:mount into the target variable.
-		else {
-			$value = $this->renderChildren(true);
-		}
-
-		$this->view->mount($target, $value);
 	}
 
 
