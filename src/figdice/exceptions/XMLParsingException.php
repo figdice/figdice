@@ -24,7 +24,13 @@
 namespace figdice\exceptions;
 
 class XMLParsingException extends \Exception {
-	public function __construct($message, $filename, $line) {
+    /**
+     * XMLParsingException constructor.
+     * @param string $message
+     * @param string $filename
+     * @param int $line
+     */
+    public function __construct($message, $filename, $line) {
 		parent::__construct($message);
 		$this->file = $filename;
 		$this->line = $line;

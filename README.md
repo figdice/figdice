@@ -1,4 +1,4 @@
-## ![Logo](https://c.fsdn.com/allura/p/figdice/icon) FigDice Templating System for PHP 
+## ![Logo](http://www.figdice.org/img/fig-130-16.png) FigDice Templating System for PHP 
 [![Build Status](https://travis-ci.org/figdice/figdice.svg?branch=master)](https://travis-ci.org/figdice/figdice)
 [![Latest Stable Version](https://poser.pugx.org/figdice/figdice/v/stable)](https://packagist.org/packages/figdice/figdice)
 [![Coverage Status](https://coveralls.io/repos/github/figdice/figdice/badge.svg?branch=master)](https://coveralls.io/github/figdice/figdice?branch=master)
@@ -36,19 +36,10 @@ Choose among the 3 methods below, which suits better your needs: Composer, Phar,
 
 ## 1. Composer
 
-Simply add the following composer.json file to your project root, or append the "require" section to your existing composer.json file:
+Add the figdice dependency to the `require` section of your `composer.json` file:
 
-    {
-      "require": {
-        "figdice/figdice": "~2.3"
-      }
-    }
+    "figdice/figdice": "~2.4"
 
-Then run the following command in your project folder:
-
-    php composer.phar install
-
-The **\figdice** namespace is made available thanks to the **autoload** Composer feature.
 
 
 

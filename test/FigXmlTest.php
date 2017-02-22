@@ -25,6 +25,8 @@ namespace figdice\test;
 
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\Feed;
+use figdice\Filter;
+use figdice\FilterFactory;
 use figdice\View;
 use figdice\exceptions\FileNotFoundException;
 
@@ -32,16 +34,18 @@ use figdice\exceptions\FileNotFoundException;
 /**
  * Unit Test Class for fig tags and attributes
  */
-class FigXmlTest extends \PHPUnit_Framework_TestCase {
+class FigXmlTest extends \PHPUnit_Framework_TestCase
+{
 
-  protected $view;
+    /** @var View */
+    protected $view;
 
-  protected function setUp() {
-    $this->view = new View();
-  }
-  protected function tearDown() {
-    $this->view = null;
-  }
+    protected function setUp() {
+        $this->view = new View();
+    }
+    protected function tearDown() {
+        $this->view = null;
+    }
 
   public function testFigFlag()
   {
@@ -127,24 +131,6 @@ ENDXML;
     $this->assertEquals("a\nb\nc\n", $this->view->render());
   }
 
-  /**
-   * It should be possible to have fig:walk and fig:text on the same tag.
-   * Yet, this is currently not possible because of the way fig:text holds on
-   * the output buffer of the tag -- preventing the next iteration to continue
-   * its job.
-   * The rendering of :walk and :text need refactoring.
-   *
-   * @expectedException \figdice\exceptions\RenderingException
-   */
-  public function testTODOCompactWalkWithIndexedArrayAndTextFails() {
-    $this->view->mount('data',  array(1,2,3));
-    $source = <<<ENDXML
-<fig:x fig:walk="/data" fig:text="first()"/>
-ENDXML;
-    $this->view->loadString($source);
-    $this->view->render();
-    $this->assertFalse(true);
-  }
 
   public function testLoadXMLwithUTF8AccentsAndDeclaredEntities()
   {
@@ -232,7 +218,7 @@ ENDXML;
 ENDXML;
     $view = new View();
     $view->loadString($source);
-    $view->setFilterPath(__DIR__.DIRECTORY_SEPARATOR.'resources');
+    $view->setFilterFactory(new TestFilterFactory(__DIR__.'/resources'));
     $output = $view->render();
 	  
     $expected = <<<ENDHTML
@@ -450,6 +436,36 @@ ENDTEMPLATE;
     $this->assertEquals($expected, $actual);
   }
 
+    public function testIndentationInLoopIsRespected()
+    {
+        $view = new View();
+        $source = <<<ENDSOURCE
+<fig>
+  <ul>
+    <li fig:walk="/array" fig:text="."></li>
+  </ul>
+</fig>
+ENDSOURCE;
+
+
+        $expected = <<<ENDEXPECTED
+<fig>
+  <ul>
+    <li>1</li>
+    <li>2</li>
+    <li>3</li>
+  </ul>
+</fig>
+ENDEXPECTED;
+
+
+        $view->loadString($source);
+        $view->mount('array', [1, 2, 3]);
+        $output = $view->render();
+        $this->assertEquals($expected, $output);
+    }
+
+
 }
 
 
@@ -459,4 +475,27 @@ class CustomFeed extends Feed
   {
     return ['value' => $this->getParameterInt('some-param')];
   }
+}
+
+class TestFilterFactory implements FilterFactory
+{
+    private $directory;
+
+    public function __construct($directory)
+    {
+        $this->directory = $directory;
+    }
+
+    /**
+     * Called by the ViewElementTag::applyOutputFilter method,
+     * to instanciate a filter by its class name.
+     *
+     * @param string $className
+     * @return Filter
+     */
+    public function create($className)
+    {
+        require $this->directory.'/'.$className.'.php';
+        return new $className;
+    }
 }

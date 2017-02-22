@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2016, Gabriel Zerbib.
- * @version 2.3.3
+ * @copyright 2004-2017, Gabriel Zerbib.
+ * @version 2.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -636,6 +636,9 @@ class ViewElementTag extends ViewElement {
               );
           }
         }
+
+        // Since we're in a fig:text directive, make sure we'll output a string (even if we got a bool)
+        $output = (string) $output;
 				$this->outputBuffer = $output;
 				
 				
@@ -797,7 +800,6 @@ class ViewElementTag extends ViewElement {
 
 	private function fig_mount() {
 		$target = $this->getAttribute('target');
-		//TODO: $anchor = $this->getAttribute('anchor');
 		//When an explicit value="" attribute exists, use its contents as a Lex expression to evaluate.
 		if($this->hasAttribute('value')) {
 			$valueExpression = $this->getAttribute('value');
@@ -1030,7 +1032,7 @@ class ViewElementTag extends ViewElement {
 		//rather than the future contents of the slot.
 		if(isset($this->attributes[$this->view->figNamespace . 'filter'])) {
 			$filterClass = $this->attributes[$this->view->figNamespace . 'filter'];
-			$filter = $this->instanciateFilter($filterClass);
+			$filter = $this->instantiateFilter($filterClass);
 			$buffer = $filter->transform($buffer);
 		}
 		return $buffer;
@@ -1078,15 +1080,6 @@ class ViewElementTag extends ViewElement {
 				$this->view->pushStackData($data);
 				$newIteration->iterate($key);
 				$nextContent = $this->render(/*bypassWalk*/true);
-				if($nextContent === false) {
-					throw new RenderingException($this->getTagName(),
-							$this->getCurrentFilename(),
-							$this->getLineNumber(),
-							"In file: " . $this->getCurrentFilename() . '(' . $this->getLineNumber() . '), '.
-							'tag <' . $this->getTagName() . '> : ' . PHP_EOL .
-							"Inner content of loop could not be rendered." . PHP_EOL .
-								"Have you used :walk and :text on the same tag?");
-				}
 
 				//Each rendered iteration start again
 				//with the blank part on the right of the preceding CDATA,
@@ -1340,38 +1333,26 @@ class ViewElementTag extends ViewElement {
 		return false;
 	}
 
-	/**
-	 * @return Filter
-	 */
-	private function instanciateFilter($className) {
-		if(! class_exists($className)) {
-			$classFile = $className . '.php';
-			if(realpath($classFile) != $classFile)
-				$classFile = $this->view->getFilterPath() . '/' . $classFile;
-			if(! file_exists($classFile)) {
-				$message = 'Filter file not found: ' . $classFile . ' in Fig source: ' . $this->currentFile->getFilename() . "({$this->xmlLineNumber})";
-				throw new FileNotFoundException($message, $classFile);
-			}
-
-			require_once $classFile;
-
-			//Check that the loaded file did declare the requested class:
-			if(! class_exists($className)) {
-				$message = "Undefined filter class: $className in file: $classFile";
-        throw new RenderingException($this->getTagName(),
-          $this->getCurrentFilename(),
-          $this->getLineNumber(),
-          $message
-        );
-
-      }
-		}
-
+    /**
+     * @param string $className
+     * @return Filter
+     * @throws FileNotFoundException
+     * @throws RenderingException
+     * @throws \ReflectionException in case the specified class cannot be found.
+     */
+	private function instantiateFilter($className) {
 		if($this->view->getFilterFactory())
 			return $this->view->getFilterFactory()->create($className);
 
 		$reflection = new \ReflectionClass($className);
-		return $reflection->newInstance();
+		$instance = $reflection->newInstance();
+		if (! $instance instanceof Filter) {
+		    throw new RenderingException($this->getTagName(),
+                $this->getCurrentFilename(),
+                $this->getLineNumber(),
+                'Class ' . get_class($instance) . ' is not a Filter.');
+        }
+        return $instance;
 	}
 
 	/**
@@ -1405,6 +1386,7 @@ class ViewElementTag extends ViewElement {
 
 	/**
 	 * This const is used internally to indicate that the object is currently being rendered as a local plug.
+     * @internal
 	 */
 	const TRANSIENT_PLUG_RENDERING = 'TRANSIENT_PLUG_RENDERING';
 }

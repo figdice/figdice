@@ -14,9 +14,9 @@ use figdice\View;
 class FunctionXmlTest extends PHPUnit_Framework_TestCase
 {
   /**
-   * @expectedException PHPUnit_Framework_Error_Warning
+   * @expectedException \figdice\exceptions\XMLParsingException
    */
-  public function testFunctionXmlForInvalidXmlIssuesWarning()
+  public function testFunctionXmlForInvalidXmlIssuesException()
   {
     // Deliberately supplying invalid XML island,
     // but because we're inside a Fig template which must be valid XML,
@@ -35,7 +35,7 @@ TEMPLATE;
     $view->loadString($xml);
     $view->render();
 
-    $this->assertTrue(false, 'Should never occur: a Warning was caught before.');
+    $this->assertTrue(false, 'Should never occur: an exception was caught before.');
   }
 
   public function testFunctionXmlWithoutRootNodeDefaultsToXmlRootNode()
