@@ -33,7 +33,7 @@ use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
 
-class ViewElementTag extends ViewElement {
+class ViewElementTag extends ViewElement implements \Serializable {
 
 
 	/**
@@ -1389,4 +1389,27 @@ class ViewElementTag extends ViewElement {
      * @internal
 	 */
 	const TRANSIENT_PLUG_RENDERING = 'TRANSIENT_PLUG_RENDERING';
+
+	public function serialize()
+    {
+        return serialize([
+            'tag' => $this->name,
+            'attr' => $this->attributes,
+            'line' => $this->xmlLineNumber,
+            'ac' => $this->autoclose,
+            'tree' => $this->children,
+            'vw' => & $this->view
+        ]);
+    }
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        $this->name = $data['tag'];
+        $this->attributes = $data['attr'];
+        $this->xmlLineNumber = $data['line'];
+        $this->autoclose = $data['ac'];
+        $this->view = & $data['vw'];
+        $this->children = $data['tree'];
+        $this->runtimeAttributes = [];
+    }
 }

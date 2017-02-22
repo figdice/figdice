@@ -47,7 +47,7 @@ use figdice\classes\Slot;
  *
  * Then you would {@see loadFile} an XML source file, and finally {@see render} it to obtain its final result (which you would typically output to the browser).
  */
-class View {
+class View implements \Serializable {
 
 	const GLOBAL_PLUGS = 'GLOBAL_PLUGS';
 
@@ -840,5 +840,28 @@ class View {
 
   public function addPlug($slotName, ViewElementTag $element, $renderedString = null, $isAppend = false) {
     $this->plugs[$slotName] [] = new Plug($element, $renderedString, $isAppend);
+  }
+
+
+  public function serialize()
+  {
+      if (! $this->bParsed) {
+          $this->parse();
+      }
+
+      return serialize([
+          'f' => $this->getFilename(),
+          'ns' => $this->figNamespace,
+          'root' => $this->rootNode
+      ]);
+  }
+  public function unserialize($serialized)
+  {
+      $data = unserialize($serialized);
+
+      $this->bParsed = true;
+      $this->file = new File($data['f']);
+      $this->figNamespace = $data['ns'];
+      $this->rootNode = $data['root'];
   }
 }
