@@ -29,6 +29,7 @@ use figdice\classes\NativeFunctionFactory;
 use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
 use figdice\classes\File;
+use figdice\classes\TagFigFeed;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\XMLParsingException;
@@ -558,9 +559,15 @@ class View implements \Serializable {
 			$view = &$this;
 		}
 
+		//
+		// Detect special tags
+        //
 		if($tagName == $this->figNamespace . TagFigAttr::TAGNAME) {
 			$newElement = new TagFigAttr($view, $tagName, $lineNumber);
 		}
+		else if ($tagName == $this->figNamespace . TagFigFeed::TAGNAME) {
+		    $newElement = new TagFigFeed($view, $tagName, $lineNumber);
+        }
 		else {
 			$newElement = new ViewElementTag($view, $tagName, $lineNumber);
 		}

@@ -30,7 +30,6 @@ use figdice\LoggerFactory;
 use figdice\exceptions\RenderingException;
 use figdice\exceptions\DictionaryDuplicateKeyException;
 use figdice\exceptions\RequiredAttributeException;
-use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
 
 class ViewElementTag extends ViewElement implements \Serializable {
@@ -42,7 +41,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 */
 	private $name;
 
-	private $attributes;
+	protected $attributes;
 	private $runtimeAttributes;
 
     /**
@@ -477,12 +476,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			}
 		}
 
-		//================================================================
-		//fig:feed
-		if($this->name == $this->view->figNamespace . 'feed') {
-			$this->fig_feed();
-			return '';
-		}
 
 		//================================================================
 		if($this->name == $this->view->figNamespace . 'mount') {
@@ -877,69 +870,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$this->view->mount($target, $value);
 	}
 
-    /**
-     * Process <fig:feed> tag.
-     * This tag accepts the following attributes:
-     *  - class = the name of the Feed class to instanciate and run.
-     *  - target = the mount point in the global universe.
-     *
-     * @access private
-     * @throws FeedClassNotFoundException
-     * @throws RequiredAttributeException
-     */
-	private function fig_feed() {
-		if($this->logger == null) {
-			$this->logger = LoggerFactory::getLogger(get_class($this));
-		}
-
-		$className = isset($this->attributes['class']) ? $this->attributes['class'] : null;
-		if(null === $className) {
-			$this->logger->error('Missing class attribute for fig:feed.');
-			throw new RequiredAttributeException($this->getTagName(), $this->getCurrentFile()->getFilename(), $this->xmlLineNumber, 'Missing "class" attribute for fig:feed tag, in ' . $this->getCurrentFile()->getFilename() . '(' . $this->xmlLineNumber . ')');
-		}
-
-		//Set the parameters for the feed class:
-		//the parameters are an assoc array made of the
-		//scalar attributes of the fig:feed tag other than fig:* and
-		//class and target attributes.
-		$feedParameters = array();
-		foreach($this->attributes as $attribName=>$attribText) {
-			if( (! $this->view->isFigAttribute($attribName)) && 
-					($attribName != 'class') && ($attribName != 'target') ) {
-				$feedParameters[$attribName] = $this->evaluate($attribText);
-			}
-		}
-
-		//TODO: catch exception, to enrich with fig xml file+line, and rethrow.
-		$feedInstance = $this->view->createFeed($className, $feedParameters);
-
-		//At this point the feed instance must be created.
-		//If not, there was no factory to handle its loading.
-		if(! $feedInstance) {
-			throw new FeedClassNotFoundException($className, $this->getCurrentFile()->getFilename(), $this->xmlLineNumber);
-		}
-
-		//It is possible to simply invoke a Feed class and
-		//discard its result, by not defining a target to the tag.
-		$mountPoint = null;
-		if(isset($this->attributes['target'])) {
-			$mountPoint = $this->attributes['target'];
-		}
-
-
-		$feedInstance->setParameters($feedParameters);
-
-		// The run method of the Feed might throw a FeedRuntimeException...
-		// It means that the problem encountered is severe enough, for the Feed to
-		// request that the View rendering should stop.
-		// In this case, the controller is responsible for treating accordingly.
-		$subUniverse = $feedInstance->run();
-
-		if($mountPoint !== null) {
-			$this->view->mount($mountPoint, $subUniverse);
-		}
-
-	}
 
 	/**
 	 * Imports at the current output position
