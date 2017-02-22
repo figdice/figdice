@@ -1261,6 +1261,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 */
 	const TRANSIENT_PLUG_RENDERING = 'TRANSIENT_PLUG_RENDERING';
 
+
+	// TODO: this is just a attempt at serializing the View object (and its tree of tags)
+    // do not use in production.
 	public function serialize()
     {
         return serialize([
