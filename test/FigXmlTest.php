@@ -230,6 +230,30 @@ ENDHTML;
     $this->assertEquals($expected, $output);
   }
 
+
+  public function testCond()
+  {
+      $source1 = <<<ENDXML
+<html>
+<a fig:cond="12">Yes</a>
+<b fig:cond="2 - 2">No</b>
+</html>
+ENDXML;
+
+      $view = new View();
+      $view->loadString($source1);
+      $output = $view->render();
+
+      $expected = <<<ENDEXPECTED
+<html>
+<a>Yes</a>
+
+</html>
+ENDEXPECTED;
+      $this->assertEquals($expected, $output);
+
+  }
+
   public function testCase()
   {
     $source = <<<ENDXML

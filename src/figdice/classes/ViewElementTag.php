@@ -45,6 +45,44 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	private $attributes;
 	private $runtimeAttributes;
 
+    /**
+     * The value for fig:auto attribute, or null if not present
+     * @var string
+     */
+    private $figAuto = null;
+    /**
+     * The value for fig:call attribute, or null if not present
+     * @var string
+     */
+    private $figCall = null;
+    /**
+     * The value for fig:cond attribute, or null if not present
+     * @var string
+     */
+    private $figCond = null;
+    /**
+     * The value for fig:macro attribute, or null if not present
+     * @var string
+     */
+	private $figMacro = null;
+    /**
+     * The value for fig:text attribute, or null if not present
+     * @var string
+     */
+	private $figText = null;
+    /**
+     * The value for fig:void attribute, or null if not present
+     * @var string
+     */
+	private $figVoid = null;
+    /**
+     * The value for fig:walk attribute, or null if not present
+     * @var string
+     */
+	private $figWalk = null;
+
+
+
   /**
    * @var ViewElement[]
    */
@@ -122,9 +160,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 * provide a native View::loadFromString mechanism, which will handle
 	 * properly the null-file special case.
 	 *
-	 * @param File & $file
+	 * @param File $file
 	 */
-	public function setCurrentFile(File & $file = null) {
+	public function setCurrentFile(File $file = null) {
 		$this->currentFile = & $file;
 	}
 	/**
@@ -149,6 +187,35 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		return $this->name;
 	}
 	public function setAttributes(array $attributes) {
+        if (array_key_exists($key = $this->view->figNamespace . 'auto', $attributes)) {
+            $this->figAuto = $attributes[$key];
+            unset($attributes[$key]);
+        }
+        if (array_key_exists($key = $this->view->figNamespace . 'call', $attributes)) {
+            $this->figCall = $attributes[$key];
+            unset($attributes[$key]);
+        }
+        if (array_key_exists($key = $this->view->figNamespace . 'cond', $attributes)) {
+            $this->figCond = $attributes[$key];
+            unset($attributes[$key]);
+        }
+        if (array_key_exists($key = $this->view->figNamespace . 'macro', $attributes)) {
+            $this->figMacro = $attributes[$key];
+            unset($attributes[$key]);
+        }
+        if (array_key_exists($key = $this->view->figNamespace . 'text', $attributes)) {
+            $this->figText = $attributes[$key];
+            unset($attributes[$key]);
+        }
+	    if (array_key_exists($key = $this->view->figNamespace . 'void', $attributes)) {
+	        $this->figVoid = $attributes[$key];
+	        unset($attributes[$key]);
+        }
+	    if (array_key_exists($key = $this->view->figNamespace . 'walk', $attributes)) {
+	        $this->figWalk = $attributes[$key];
+	        unset($attributes[$key]);
+        }
+
 		$this->attributes = $attributes;
 	}
 	public function clearAttribute($name) {
@@ -328,11 +395,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 * @return boolean
 	 */
 	private function evalCondition() {
-		$condExpr = $this->getAttribute($this->view->figNamespace . 'cond');
-		if($condExpr) {
-			return $this->evaluate($condExpr);
-		}
-		return true;
+		return (null !== $this->figCond) ? $this->evaluate($this->figCond) : true;
 	}
 
 
@@ -348,7 +411,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//There is no condition to a macro definition.
 		//A tag bearing the fig:macro directive is not implied mute.
 		//It can render as a regular outer tag. If needed, it must be explicitly muted.
-		if($this->hasAttribute($this->view->figNamespace . 'macro')) {
+		if(null !== $this->figMacro) {
 			return $this->fig_macro();
 		}
 
@@ -378,13 +441,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 		//================================================================
 		//fig:cond
-		//(fig:condition is deprecated)
 		//If the tag holds a fig:walk directive as well as the fig:cond,
 		//do not take into account this fig:cond unless the rendering is inside the looping phase,
 		//because the condition pertains to every single iteration, rather than to the global loop.
 		// TODO: contradictory with the Wiki doc. Missing a unit test here to prove the point.
-		if($this->hasAttribute($this->view->figNamespace . 'cond')) {
-			if(! ($this->hasAttribute($this->view->figNamespace . 'walk') && $bypassWalk) ) {
+		if(null !== $this->figCond) {
+			if((null === $this->figWalk) || $bypassWalk) {
 				if(! $this->evalCondition()) {
 					return '';
 				}
@@ -459,38 +521,38 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				//name is a required attribute for fig:attr.
 				throw new RequiredAttributeException($this->view->figNamespace . 'attr', $this->currentFile->getFilename(), $this->xmlLineNumber, 'Missing required name attribute for attr tag.');
 			}
-      //flag attribute
-      // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
-      if(isset($this->attributes['flag']) && $this->evaluate($this->attributes['flag'])) {
-        $this->parent->runtimeAttributes[$this->attributes['name']] = new Flag();
-      }
-      else {
-        if ($this->hasAttribute('value')) {
-          $value = $this->evaluate($this->attributes['value']);
-          if (is_string($value)) {
-            $value = htmlspecialchars($value);
-          }
-          $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
-        } else {
-          $value = '';
-          /**
-           * @var ViewElement
-           */
-          $child = null;
-          foreach ($this->children as $child) {
-            $renderChild = $child->render();
-            if ($renderChild === false) {
-              throw new \Exception();
+            //flag attribute
+            // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
+            if(isset($this->attributes['flag']) && $this->evaluate($this->attributes['flag'])) {
+                $this->parent->runtimeAttributes[$this->attributes['name']] = new Flag();
             }
-            $value .= $renderChild;
-          }
-          //An XML attribute should not span accross several lines.
-          $value = trim(preg_replace("#[\n\r\t]+#", ' ', $value));
-          $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
+            else {
+                if ($this->hasAttribute('value')) {
+                    $value = $this->evaluate($this->attributes['value']);
+                    if (is_string($value)) {
+                        $value = htmlspecialchars($value);
+                    }
+                    $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
+                } else {
+                    $value = '';
+                    /**
+                     * @var ViewElement
+                     */
+                    $child = null;
+                    foreach ($this->children as $child) {
+                        $renderChild = $child->render();
+                        if ($renderChild === false) {
+                            throw new \Exception();
+                        }
+                        $value .= $renderChild;
+                    }
+                    //An XML attribute should not span accross several lines.
+                    $value = trim(preg_replace("#[\n\r\t]+#", ' ', $value));
+                    $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
+                }
+            }
+            return '';
         }
-      }
-			return '';
-		}
 
 
 
@@ -498,7 +560,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//fig:walk
 		//Loop over evaluated dataset.
 		if(! $bypassWalk) {
-			if($this->hasFigAttribute('walk')) {
+			if(null !== $this->figWalk) {
 				return $this->fig_walk();
 			}
 		}
@@ -507,7 +569,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//fig:call
 		//A tag with the fig:call directive is necessarily mute.
 		//It is used as a placeholder only for the directive.
-		if($this->hasFigAttribute('call')) {
+		if(null !== $this->figCall) {
 			return $this->fig_call();
 		}
 
@@ -575,10 +637,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//
 		//This attribute means that the tag should render auto-closed, even though it
 		//may be exploded for the purpose of assigning fig:attr children.
-		if(isset($this->attributes[$this->view->figNamespace . 'auto'])) {
-			$expression = $this->attributes[$this->view->figNamespace . 'auto'];
+		if(null !== $this->figAuto) {
+			$expression = $this->figAuto;
 			if($this->evaluate($expression)) {
-				$this->attributes[$this->view->figNamespace . 'text'] = '';
+			    // The empty string here is important, rather than null,
+                // because it is needed by the part that renders the children of a fig:auto tag.
+				$this->figText = '';
 				$this->autoclose = true;
 			}
 		}
@@ -588,10 +652,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//
 		//This attribute means that the tag should render as HTML-void (such as: <br>)
 		//and its contents discarded.
-		if(isset($this->attributes[$this->view->figNamespace . 'void'])) {
-			$expression = $this->attributes[$this->view->figNamespace . 'void'];
+		if(null !== $this->figVoid) {
+			$expression = $this->figVoid;
 			if($this->evaluate($expression)) {
-				$this->attributes[$this->view->figNamespace . 'text'] = '';
+				$this->figText = null;
 				$this->voidtag = true;
 			}
 		}
@@ -608,8 +672,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//
 		//Only the immediate Tag children of name fig:attr are parsed,
 		//so that it is still possible to have dynamic attributes to a tag bearing fig:text.
-		if(isset($this->attributes[$this->view->figNamespace . 'text'])) {
-			$content = & $this->attributes[$this->view->figNamespace . 'text'];
+		if(null !== $this->figText) {
+			$content = $this->figText;
 
 			$output = $this->evaluate($content);
 			if($output === null) {
@@ -934,8 +998,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 * topmost view.
 	 */
 	private function fig_macro() {
-		$macroName = $this->attributes[$this->view->figNamespace . 'macro'];
-		$this->view->macros[$macroName] = & $this;
+		$this->view->macros[$this->figMacro] = & $this;
 		return '';
 	}
 
@@ -948,7 +1011,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 */
 	private function fig_call() {
 		//Retrieve the name of the macro to call.
-		$macroName = $this->attributes[$this->view->figNamespace . 'call'];
+		$macroName = $this->figCall;
 
 		//Prepare the arguments to pass to the macro:
 		//all the non-fig: attributes, evaluated.
@@ -1044,7 +1107,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 * @return string
 	 */
 	private function fig_walk() {
-		$figIterateAttribute = $this->attributes[$this->view->figNamespace . 'walk'];
+		$figIterateAttribute = $this->figWalk;
 		$dataset = $this->evaluate($figIterateAttribute);
 
 		//Walking on nothing gives no ouptut.
