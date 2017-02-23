@@ -395,7 +395,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//A tag bearing the fig:macro directive is not implied mute.
 		//It can render as a regular outer tag. If needed, it must be explicitly muted.
 		if(null !== $this->figMacro) {
-		    $result = $this->fig_macro();
+		    $result = $this->fig_macro($context);
 		}
 		else {
             $result = $this->renderNoMacro($context);
@@ -821,8 +821,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 * Defines a macro in the dictionary of the
 	 * topmost view.
 	 */
-	private function fig_macro() {
-		$this->view->macros[$this->figMacro] = & $this;
+	private function fig_macro(Context $context) {
+		$context->view->macros[$this->figMacro] = & $this;
 		return '';
 	}
 
@@ -842,7 +842,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//all the non-fig: attributes, evaluated.
 		$arguments = array();
 		foreach($this->attributes as $attribName => $attribValue) {
-			if( ! $this->view->isFigAttribute($attribName) ) {
+			if( ! $context->view->isFigAttribute($attribName) ) {
 				$value = $this->evaluate($context, $attribValue);
 				$arguments[$attribName] = $value;
 			}
@@ -854,18 +854,15 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$arguments = array_merge($arguments, $this->collectParamChildren($context));
 
 		//Retrieve the macro contents.
-		if(isset($this->view->macros[$macroName])) {
+		if(isset($context->view->macros[$macroName])) {
 		    /** @var ViewElementTag $macroElement */
-			$macroElement = & $this->view->macros[$macroName];
-			$this->view->pushStackData($arguments);
-			if(isset($this->iteration)) {
-				$macroElement->iteration = &$this->iteration;
-			}
+			$macroElement = & $context->view->macros[$macroName];
+			$context->view->pushStackData($arguments);
 
 			//Now render the macro contents, but do not take into account the fig:macro
 			//that its root tag holds.
 			$result = $macroElement->renderNoMacro($context);
-			$this->view->popStackData();
+			$context->view->popStackData();
 			return $result;
 			//unset($macroElement->iteration);
 		}
