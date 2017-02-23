@@ -10,6 +10,7 @@ use Exception;
  */
 class TagRenderingException extends \Exception
 {
+    private $tag;
     /**
      * RequiredAttributeParsingException constructor.
      * @param string $tag
@@ -18,6 +19,12 @@ class TagRenderingException extends \Exception
      */
     public function __construct($tag, $line, $message)
     {
-        parent::__construct();
+        parent::__construct($message);
+        $this->tag = $tag;
+        $this->line = $line;
+    }
+    public function getTag()
+    {
+        return $this->tag;
     }
 }

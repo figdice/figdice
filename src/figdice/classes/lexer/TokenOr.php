@@ -35,11 +35,11 @@ class TokenOr extends TokenBinop {
      */
     public function evaluate(Context $context) {
 		$opL = $this->operands[0];
-		if(true == $opL->evaluate($viewElement)) {
+		if(true == $opL->evaluate($context)) {
 			return true;
 		}
 
 		$opR = $this->operands[1];
-		return (true == $opR->evaluate($viewElement));
+		return (true == $opR->evaluate($context));
 	}
 }

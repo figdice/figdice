@@ -28,11 +28,17 @@ use figdice\classes\File;
 class DictionaryNotFoundException extends \Exception {
   private $dictionaryName;
 
-  public function __construct($dictionaryName, File $file, $xmlLineNumber)
+    /**
+     * DictionaryNotFoundException constructor.
+     * @param string $dictionaryName
+     * @param string $file
+     * @param int $xmlLineNumber
+     */
+    public function __construct($dictionaryName, $file, $xmlLineNumber)
   {
-    parent::__construct('Dictionary "' . $dictionaryName . '" not found in template: ' . $file->getFilename() . '('.$xmlLineNumber.')');
+    parent::__construct('Dictionary "' . $dictionaryName . '" not found in template: ' . $file . '('.$xmlLineNumber.')');
     $this->dictionaryName = $dictionaryName;
-    $this->file = $file->getFilename();
+    $this->file = $file;
     $this->line = $xmlLineNumber;
   }
 

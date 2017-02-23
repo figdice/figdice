@@ -37,14 +37,15 @@ use \Exception;
 class FeedClassNotFoundException extends Exception {
 	private $classname;
 
-	/**
-	 * FeedClassNotFoundException constructor.
-	 * @param string $classname
-	 * @param string $filename
-	 * @param int $line
-   */
-	public function __construct($classname, $filename, $line) {
-		parent::__construct('Could not find factory for feed: ' . $classname);
+    /**
+     * FeedClassNotFoundException constructor.
+     * @param string $classname
+     * @param string $filename
+     * @param int $line
+     * @param Exception $previous
+     */
+	public function __construct($classname, $filename, $line, $previous) {
+		parent::__construct('Could not find factory for feed: ' . $classname, 0, $previous);
 		$this->classname = $classname;
 		$this->file = $filename;
 		$this->line = $line;

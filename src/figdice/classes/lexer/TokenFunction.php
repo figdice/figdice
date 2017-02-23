@@ -26,7 +26,6 @@ namespace figdice\classes\lexer;
 use figdice\classes\Context;
 use figdice\FigFunction;
 use \figdice\FunctionFactory;
-use \figdice\LoggerFactory;
 use \figdice\exceptions\FunctionNotFoundException;
 
 class TokenFunction extends TokenOperator {
@@ -93,9 +92,6 @@ class TokenFunction extends TokenOperator {
 			}
 
 			if($this->function == null) {
-				$logger = LoggerFactory::getLogger(__CLASS__);
-				$message = 'Undeclared function: ' . $this->name;
-				$logger->error($message);
 				throw new FunctionNotFoundException($this->name);
 			}
 		}

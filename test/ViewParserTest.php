@@ -244,24 +244,21 @@ EXPECTED;
 
     $this->assertEquals($expected, $view->render());
   }
-  public function testDoctypeOnNonRootNodeReplacesExisting()
+  public function testDoctypeOnNonRootNodeHasNoEffect()
   {
     $view = new View();
     $templateSource = <<<ENDXML
-<fig:template>
 <html fig:doctype="html">
   <head fig:doctype="dummy"></head>
 </html>
-</fig:template>
 ENDXML;
     $view->loadString($templateSource);
 
     $expected = <<<EXPECTED
-<!doctype dummy>
+<!doctype html>
 <html>
   <head></head>
 </html>
-
 EXPECTED;
 
     $rendered = $view->render();

@@ -40,6 +40,6 @@ class Expression extends Token {
      * @return mixed
      */
     public function evaluate(Context $context) {
-		return $this->root->evaluate($viewElement);
+		return $this->root->evaluate($context);
 	}
 }

@@ -37,6 +37,6 @@ class TokenMul extends TokenOperator {
      * @return mixed
      */
     public function evaluate(Context $context) {
-		return $this->operands[0]->evaluate($viewElement) * $this->operands[1]->evaluate($viewElement);
+		return $this->operands[0]->evaluate($context) * $this->operands[1]->evaluate($context);
 	}
 }

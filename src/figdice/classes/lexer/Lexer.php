@@ -30,14 +30,8 @@ use \figdice\classes\ViewElementTag;
 use \figdice\exceptions\LexerUnexpectedCharException;
 use \figdice\exceptions\LexerSyntaxErrorException;
 use \figdice\exceptions\LexerUnbalancedParenthesesException;
-use \figdice\LoggerFactory;
-use Psr\Log\LoggerInterface;
 
 class Lexer {
-	/**
-	 * @var LoggerInterface
-	 */
-	private $logger;
 
 	/**
 	 * @var ViewElementTag
@@ -191,7 +185,6 @@ class Lexer {
 		catch (Exception $exception) {
 			$errorMsg = "Unexpected character: $char at position: {$this->parsingPosition} in expression: {$this->expression}.";
 			$message = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): ' . $errorMsg ;
-			$this->getLogger()->error($message);
 			throw new LexerUnexpectedCharException($errorMsg, $this->getViewFile()->getFilename(), $this->getViewLine());
 		}
 
@@ -201,7 +194,6 @@ class Lexer {
 			)
 		{
 			$message = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): Syntax error in expression: ' . $this->expression;
-			$this->getLogger()->error($message);
 			throw new LexerSyntaxErrorException($message,
 					$this->getViewFile()->getFilename(),
 					$this->getViewLine());
@@ -213,7 +205,6 @@ class Lexer {
 		)
 		{
 		  $message = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): Unbalanced parentheses in expression: ' . $this->expression;
-		  $this->getLogger()->error($message);
 		  throw new LexerUnbalancedParenthesesException($message,
 		    $this->getViewFile()->getFilename(),
 		    $this->getViewLine());
@@ -223,7 +214,7 @@ class Lexer {
 	}
 
 	/**
-	 * @param char $char
+	 * @param string $char
 	 */
 	public function setStateSymbol($char)
 	{
@@ -282,7 +273,7 @@ class Lexer {
 	}
 
 	/**
-	 * @param TokenOperand $tokenOperand
+	 * @param Token $tokenOperand
 	 */
 	public function pushOperand($tokenOperand) {
 		$this->stackRP[] = $tokenOperand;
@@ -421,7 +412,6 @@ class Lexer {
 		if ( ($funcStackCount = count($this->stackFunctions)) == 0) {
 			// There isn't a function to which we're incrementing arity!
 			$errorMsg = $this->getViewFile()->getFilename() . '(' . $this->getViewLine() . '): Unbalanced parentheses in expression: "' . $this->expression . '"';
-			$this->getLogger()->error($errorMsg);
 			throw new LexerUnbalancedParenthesesException($errorMsg,
 				$this->getViewFile()->getFilename(), 
 				$this->getViewLine());
@@ -447,15 +437,6 @@ class Lexer {
 		$tokenFunction->incrementArity();
 	}
 
-	/**
-	 * @return LoggerInterface
-	 */
-	private function getLogger() {
-		if(null == $this->logger) {
-			$this->logger = LoggerFactory::getLogger(__CLASS__);
-		}
-		return $this->logger;
-	}
 
 	public function forwardInput($char) {
 		$this->currentState->input($this, $char);

@@ -26,15 +26,16 @@ namespace figdice\exceptions;
 class RequiredAttributeException extends \Exception {
 	private $tagname;
 
-	/**
-	 * RequiredAttributeException constructor.
-	 * @param string $tagname
-	 * @param string $filename
-	 * @param int $line
-	 * @param string $message
-   */
-	public function __construct($tagname, $filename, $line, $message) {
-		parent::__construct($message);
+    /**
+     * RequiredAttributeException constructor.
+     * @param string $tagname
+     * @param string $filename
+     * @param int $line
+     * @param string $message
+     * @param \Exception $previous
+     */
+	public function __construct($tagname, $filename, $line, $message, $previous) {
+		parent::__construct($message, 0, $previous);
 		$this->tagname = $tagname;
 		$this->file = $filename;
 		$this->line = $line;

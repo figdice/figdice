@@ -28,9 +28,7 @@ use figdice\exceptions\TagRenderingException;
 use figdice\Filter;
 use Psr\Log\LoggerInterface;
 use figdice\View;
-use figdice\LoggerFactory;
 use figdice\exceptions\RenderingException;
-use figdice\exceptions\RequiredAttributeException;
 
 class ViewElementTag extends ViewElement implements \Serializable {
 
@@ -133,9 +131,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 * such as macros, plugs, cases etc.
 	 */
 	private $transientFlags = [];
-
-	/** @var Iteration[] */
-  private $iteration = null;
 
 	/**
 	 * 
@@ -473,12 +468,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		}
 
 
-		//================================================================
-		//fig:include
-		if( ($this->name == $context->figNamespace . 'include') && ! isset($this->bRendering) ) {
-			return $this->fig_include();
-		}
-
 
 		//================================================================
 		//fig:trans
@@ -596,7 +585,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				// The plugs are rendered in their local context
 				// (but still, remain stuffed at the end of the template rendering)
 				$this->transient(self::TRANSIENT_PLUG_RENDERING);
-				$context->view->addPlug($slotName, $this, $this->render($context), $this->evalFigAttribute('append'));
+				$context->view->addPlug($slotName, $this, $this->render($context), $this->evalFigAttribute($context, 'append'));
 			}
 
 			//A fig:plug tag does not produce any in-place output.
@@ -842,40 +831,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 
 
-	/**
-	 * Creates a sub-view object, invokes its parsing phase,
-	 * and renders it as the child of the current tag.
-	 * @return string or false
-	 */
-	private function fig_include() {
-		//Extract from the attributes the file to include.
-		if (! $this->hasAttribute('file')) {
-		  throw new RequiredAttributeException($this->name,
-		    $this->getCurrentFilename(),
-		    $this->getLineNumber(), 
-		    'Missing required attribute: "file" in tag: "'. $this->name .'"' .
-		      ' in file: ' .$this->getCurrentFilename(). '(' .$this->getLineNumber(). ')');
-		}
-		$file = $this->attributes['file'];
-
-		//Create a sub-view, attached to the current element.
-		$view = new View();
-		$view->inherit($this);
-		$view->loadFile(dirname($this->getCurrentFilename()).'/'.$file, $this->getCurrentFile());
-
-		//Make the current node aware that it is being rendered
-		//as an include directive (therefore, it will be skipped
-		//when the subview tries to render it).
-		$this->bRendering = true;
-
-		//Parse the subview (build its own tree).
-		$view->parse();
-
-		$result = $view->render();
-		unset($this->bRendering);
-		return $result;
-	}
-
 
 	/**
 	 * Defines a macro in the dictionary of the
@@ -1023,7 +978,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			$this->iteration = array();
 		}
 		$newIteration = new Iteration($datasetCount);
-		array_push($this->iteration, $newIteration);
+		$context->pushIteration($newIteration);
 		$bFirstIteration = true;
 
 		if(is_array($dataset) || (is_object($dataset) && ($dataset instanceof \Countable)) ) {
@@ -1063,7 +1018,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				$context->view->popStackData();
 			}
 		}
-		array_pop($this->iteration);
+		$context->popIteration();
 		return $outputBuffer;
 	}
 
@@ -1110,10 +1065,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				//throw new SyntaxErrorException($this->getCurrentFile()->getFilename(), $this->xmlLineNumber, $this->name, 'Missing @key attribute.');
 				$key = $this->renderChildren($context);
 			}
-			//Ask current file to translate key:
+			//Ask current context to translate key:
 
-      //TODO: Optionally catch the DictionaryEntryNotFoundException exception so as to report in log instead.
-  		$value = $this->getCurrentFile()->translate($key, $dictionaryName, $this->xmlLineNumber);
+            $value = $context->translate($key, $dictionaryName, $this->xmlLineNumber);
 		}
 
 		//Fetch the parameters specified as immediate children
@@ -1159,11 +1113,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//So in the meantime we output the key.
 		if($value == '') {
 			$value = $key;
-			LoggerFactory::getLogger('Dictionary')->error(
-			  'Empty translation: key=' . $key . 
-			  ', dictionary=' . $dictionaryName . 
-			  ', language=' . $this->getView()->getLanguage() . 
-			  ', file=' . $this->getCurrentFilename() . ', line=' . $this->xmlLineNumber);
+			// TODO: One might want to be notified, either by an exception or another mechanism (Context logging?).
 		}
 		
 		return $value;
@@ -1213,18 +1163,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
         return $instance;
 	}
 
-	/**
-	 * Returns the logger instance,
-	 * or creates one beforehand, if null.
-	 *
-	 * @return LoggerInterface
-	 */
-	protected function getLogger() {
-		if(! $this->logger) {
-			$this->logger = LoggerFactory::getLogger(get_class($this));
-		}
-		return $this->logger;
-	}
 
 
 	/**

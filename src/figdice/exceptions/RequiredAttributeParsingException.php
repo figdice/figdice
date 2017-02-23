@@ -10,6 +10,8 @@ use Exception;
  */
 class RequiredAttributeParsingException extends \Exception
 {
+    private $tag;
+
     /**
      * RequiredAttributeParsingException constructor.
      * @param string $tag
@@ -19,5 +21,10 @@ class RequiredAttributeParsingException extends \Exception
     public function __construct($tag, $line, $attribute)
     {
         parent::__construct();
+        $this->tag = $tag;
+    }
+    public function getTag()
+    {
+        return $this->tag;
     }
 }

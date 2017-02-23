@@ -55,10 +55,10 @@ TEMPLATE;
     vfsStream::setup('root');
 
     $template = <<<TEMPLATE
-<fig:template xmlns:fig="http://www.figdice.org">
+<html xmlns:fig="http://www.figdice.org">
   <link href="/assets/style.css" rel="stylesheet" />
   <fig:include file="inner.html" />
-</fig:template>
+</html>
 TEMPLATE;
 
 
@@ -85,8 +85,11 @@ TEMPLATE;
     $output = $view->render();
 
     $expected = <<<EXPECTED
+<html>
   <link href="/assets/style.css" rel="stylesheet" />
   <script src="/assets/require.js"></script>
+
+</html>
 EXPECTED;
 
 
@@ -108,9 +111,12 @@ TEMPLATE;
     $innerVFile->setContent($template);
 
     $expected = <<<EXPECTED
+<html>
   <link href="/assets/style.css" rel="stylesheet" />
   <script src="/assets/require.js"></script>
   <link href="/assets/style.css" rel="stylesheet" />
+
+</html>
 EXPECTED;
 
     $view = new View();

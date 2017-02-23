@@ -33,12 +33,17 @@ use figdice\classes\File;
 use figdice\classes\TagFigCdata;
 use figdice\classes\TagFigDictionary;
 use figdice\classes\TagFigFeed;
+use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
 use figdice\classes\ViewElementTag;
+use figdice\exceptions\FeedClassNotFoundException;
+use figdice\exceptions\FeedClassNotFoundRenderingException;
 use figdice\exceptions\FileNotFoundException;
+use figdice\exceptions\RequiredAttributeException;
+use figdice\exceptions\RequiredAttributeParsingException;
+use figdice\exceptions\TagRenderingException;
 use figdice\exceptions\XMLParsingException;
 
-use Psr\Log\LoggerInterface;
 use figdice\exceptions\RenderingException;
 use figdice\classes\XMLEntityTransformer;
 use figdice\classes\Slot;
@@ -68,11 +73,6 @@ class View implements \Serializable {
 	 * @var string
 	 */
 	private $filename;
-
-	/**
-	 * @var LoggerInterface
-	 */
-	public $logger;
 
 	/**
 	 * The directory where to store temporary files (results of compilation).
@@ -134,20 +134,6 @@ class View implements \Serializable {
 	 * @var resource
 	 */
 	private $xmlParser;
-
-	/**
-	 * When this View is not created directly by the user
-	 * (ie when it is a sub-view of another view, invoked
-	 * by the fig:include directive), this variable refers
-	 * to the fig:include ViewElementTag of the parent view.
-	 *
-	 * Every ViewElement created subsequently during the
-	 * parsing phase of this View, is attached to the caller view,
-	 * so as to inject the parsed elements directly into the tree
-	 * of the caller view.
-	 * @var ViewElementTag
-	 */
-	public $parentViewElement;
 
 
 	/**
@@ -237,8 +223,6 @@ class View implements \Serializable {
 		$this->source = '';
 		$this->rootNode = null;
 		$this->stack = array();
-		$this->logger = LoggerFactory::getLogger(get_class($this));
-		$this->parentViewElement = null;
 		$this->lexers = array();
 		$this->callStackData = array(array());
 		$this->functionFactories = array(new NativeFunctionFactory());
@@ -274,21 +258,7 @@ class View implements \Serializable {
 	public function getLanguage() {
 		return $this->language;
 	}
-	/**
-	 * When including a fig file, the included entity
-	 * is processed as a View in itself.
-	 * Yet, it is linked to the parent View.
-	 *
-	 * @param ViewElementTag $parentViewElement
-	 */
-	public function inherit(ViewElementTag &$parentViewElement) {
-		$this->parentViewElement = & $parentViewElement;
-		$this->callStackData = & $parentViewElement->view->callStackData;
-		$this->functionFactories = & $parentViewElement->view->functionFactories;
-		$this->feedFactories = & $parentViewElement->view->feedFactories;
-		$this->feedFactoryForClass = & $parentViewElement->view->feedFactoryForClass;
-		$this->replacements = $parentViewElement->view->replacements;
-	}
+
 
 	/**
 	 * Register a new Function Factory instance,
@@ -320,18 +290,16 @@ class View implements \Serializable {
 	 * Load from source file.
 	 *
    * @param string $filename
-   * @param File|null $parent
    * @throws FileNotFoundException
    */
-	public function loadFile($filename, File $parent = null) {
-		$this->file = new File($filename, $parent);
+	public function loadFile($filename) {
+		$this->filename = $filename;
 
 		if(file_exists($filename)) {
 			$this->source = file_get_contents($filename);
 		}
 		else {
 			$message = "File not found: $filename";
-			$this->logger->error($message);
 			throw new FileNotFoundException($message, $filename);
 		}
 	}
@@ -394,7 +362,13 @@ class View implements \Serializable {
 		//Prepare the detection of the very first tag, in order to compute
 		//the offset in XML string as regarded by the parser.
 		$this->firstOpening = true;
-		$bSuccess = xml_parse($this->xmlParser, $this->source);
+
+        $bSuccess = false;
+		try {
+            $bSuccess = xml_parse($this->xmlParser, $this->source);
+        } catch (RequiredAttributeParsingException $ex) {
+		    throw new RequiredAttributeException($ex->getTag(), $this->filename, $ex->getLine(), $ex->getMessage(), $ex);
+        }
 
         if ($bSuccess) {
             $errMsg = '';
@@ -409,7 +383,6 @@ class View implements \Serializable {
 					$errMsg .= '. Last element: ' . $lastElement->getTagName();
 				}
 			}
-			$this->errorMessage($errMsg);
 		}
 
 		xml_parser_free($this->xmlParser);
@@ -423,41 +396,42 @@ class View implements \Serializable {
 		}
 	}
 
-	/**
-	 * Process parsed source and render view,
-	 * using the data universe.
-	 *
-	 * @return string
-	 * @throws RenderingException
-	 * @throws XMLParsingException
-	 */
+    /**
+     * Process parsed source and render view,
+     * using the data universe.
+     * @return string
+     * @throws RenderingException
+     * @throws RequiredAttributeException
+     * @throws XMLParsingException
+     */
 	public function render() {
 		if(! $this->bParsed) {
 			$this->parse();
 		}
 
-
-		if (null != $this->parentViewElement) {
-			$this->rootNode->view = & $this->parentViewElement->view;
-		}
-
 		if (! $this->rootNode) {
-			throw new XMLParsingException('No template file loaded', '', 0);
+			throw new XMLParsingException('No template file loaded', 0);
 		}
 
         $context = new Context($this);
-		$context->figNamespace = $this->figNamespace;
 
 		// DOCTYPE
         // The doctype is necessarily on the root tag, declared as an attribute, example:
         //   fig:doctype="html"
         $this->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
-		$result = $this->rootNode->render($context);
+
+        try {
+            $result = $this->rootNode->render($context);
+        } catch (RequiredAttributeParsingException $ex) {
+            throw new RequiredAttributeException($ex->getTag(), $context->getFilename(), $ex->getLine(), $ex->getMessage(), $ex);
+        } catch (TagRenderingException $ex) {
+            throw new RenderingException($ex->getTag(), $context->getFilename(), $ex->getLine(), $ex->getMessage(), $ex);
+        } catch (FeedClassNotFoundRenderingException $ex) {
+            throw new FeedClassNotFoundException($ex->getClassname(), $context->getFilename(), $ex->getLine(), $ex);
+        }
 
 
-		if(! $this->parentViewElement) {
-			$result = $this->plugIntoSlots($result);
-		}
+		$result = $this->plugIntoSlots($result);
 
 		// Take care of the doctype at top of output
 		if ($this->doctype) {
@@ -561,12 +535,6 @@ class View implements \Serializable {
 
 		$lineNumber = xml_get_current_line_number($xmlParser);
 
-		if($this->parentViewElement) {
-			$view = &$this->parentViewElement->view;
-		}
-		else {
-			$view = &$this;
-		}
 
 		//
 		// Detect special tags
@@ -576,6 +544,9 @@ class View implements \Serializable {
 		}
 		else if ($tagName == $this->figNamespace . TagFigFeed::TAGNAME) {
 		    $newElement = new TagFigFeed($tagName, $lineNumber);
+        }
+		else if ($tagName == $this->figNamespace . TagFigInclude::TAGNAME) {
+		    $newElement = new TagFigInclude($tagName, $lineNumber);
         }
 		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
 		    $newElement = new TagFigMount($tagName, $lineNumber);
@@ -594,12 +565,6 @@ class View implements \Serializable {
 
 		$newElement->setAttributes($this->figNamespace, $attributes);
 
-
-		if( ($this->rootNode === null) && $this->parentViewElement )
-		{
-			$this->rootNode = &$this->parentViewElement;
-			$this->stack[] = &$this->parentViewElement;
-		}
 
 		if($this->rootNode) {
             /** @var ViewElementTag $parentElement */
@@ -656,12 +621,6 @@ class View implements \Serializable {
 		$currentElement->appendCDataChild($cdata);
 	}
 
-
-	function errorMessage($errorMessage) {
-		$lineNumber = xml_get_current_line_number($this->xmlParser);
-		$filename = ($this->filename) ? $this->filename : '(null)';
-		$this->logger->error("$filename($lineNumber): $errorMessage");
-	}
 
 	/**
 	 * Inject the content of the fig:plug nodes

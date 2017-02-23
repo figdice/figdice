@@ -23,7 +23,6 @@
 
 namespace figdice\classes;
 
-use figdice\View;
 use figdice\classes\lexer\Lexer;
 
 /**
@@ -65,8 +64,6 @@ abstract class ViewElement {
 	 * @var ViewElement
 	 */
 	public $nextSibling;
-
-	public $logger;
 
 	/**
 	 * The line in XML file where this element begins.
@@ -117,12 +114,6 @@ abstract class ViewElement {
 	 */
 	public function getLineNumber() {
 		return $this->xmlLineNumber;
-	}
-	/**
-	 * @return View
-	 */
-	public function &getView() {
-		return $this->view;
 	}
 
     /**

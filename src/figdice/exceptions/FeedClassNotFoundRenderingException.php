@@ -8,13 +8,32 @@ namespace figdice\exceptions;
  */
 class FeedClassNotFoundRenderingException extends \Exception
 {
+    protected $tag;
+    protected $classname;
+
     /**
      * FeedClassNotFoundRenderingException constructor.
      * @param string $feedClassName
+     * @param string $tag
      * @param int $line
      */
-    public function __construct($feedClassName, $line)
+    public function __construct($feedClassName, $tag, $line)
     {
         parent::__construct();
+        $this->line = $line;
+        $this->tag = $tag;
+        $this->classname = $feedClassName;
+    }
+    public function getTag()
+    {
+        return $this->tag;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassname()
+    {
+        return $this->classname;
     }
 }

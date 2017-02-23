@@ -41,7 +41,7 @@ class TokenNot extends TokenOperator {
      * @return mixed
      */
     public function evaluate(Context $context) {
-		$operand = $this->operands[0]->evaluate($viewElement);
+		$operand = $this->operands[0]->evaluate($context);
 		return ! $operand;
 	}
 }

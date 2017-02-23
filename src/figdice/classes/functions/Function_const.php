@@ -25,7 +25,6 @@ namespace figdice\classes\functions;
 
 use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\LoggerFactory;
 
 class Function_const implements FigFunction {
 	public function __construct() {
@@ -43,8 +42,7 @@ class Function_const implements FigFunction {
 		if(preg_match('#([^:]+)::#', $constantName, $matches)) {
 			$className = $matches[1];
 			if(! class_exists($className)) {
-				$logger = LoggerFactory::getLogger(__CLASS__);
-				$logger->warning("Undefined class: $className in static: $constantName");
+				// ("Undefined class: $className in static: $constantName");
 				return null;
 			}
 		}
@@ -55,8 +53,7 @@ class Function_const implements FigFunction {
 		}
 		//Undefined symbol: error.
 		else {
-			$logger = LoggerFactory::getLogger(__CLASS__);
-			$logger->warning("Undefined constant: $constantName");
+            //("Undefined constant: $constantName");
 			return null;
 		}
 	}

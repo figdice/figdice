@@ -123,8 +123,6 @@ class TagFigDictionary extends ViewElementTag {
                 ', language=' . $context->view->getLanguage() .
                 ', source=' . $this->getCurrentFilename(),
                 $this->getCurrentFilename() );
-        } catch(DictionaryDuplicateKeyException $ddkex) {
-            $this->getLogger()->error('Duplicate key: "' . $ddkex->getKey() . '" in dictionary: ' . $ddkex->getFilename());
         }
 
 
