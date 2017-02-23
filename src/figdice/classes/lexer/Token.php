@@ -23,15 +23,16 @@
 
 namespace figdice\classes\lexer;
 
+use figdice\classes\Context;
 use \figdice\classes\ViewElementTag;
 
 abstract class Token {
 	public function __construct() {
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @return mixed
-	 */
-	abstract function evaluate(ViewElementTag $viewElement);
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+	abstract function evaluate(Context $context);
 }

@@ -63,8 +63,11 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     // because relative path resolution involves full View class.
     // Here we can only have top-level symbols in our mock.
     $view->expects($this->any())->method('fetchData')->will($this->returnValue($data));
+    // Root Node
+    $view->expects($this->any())->method('getRootNode')->will($this->returnValue($viewElement));
 
-    return $lexer->evaluate($viewElement);
+    $context = new \figdice\classes\Context($view);
+    return $lexer->evaluate($context);
   }
 
 

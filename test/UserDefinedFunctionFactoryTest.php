@@ -21,6 +21,7 @@
  * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use figdice\classes\Context;
 use figdice\FigFunction;
 use figdice\FunctionFactory;
 use figdice\View;
@@ -35,7 +36,10 @@ use figdice\exceptions\LexerUnexpectedCharException;
  */
 class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 
+    /** @var \figdice\classes\ViewElement */
 	protected $viewElement;
+	/** @var View */
+	protected $view;
 
 	protected function setUp() {
 		$this->viewElement = null;
@@ -48,23 +52,17 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		$lexer = new Lexer($expression);
 
 		if (null == $this->viewElement) {
-			$viewElement = $this->prepareViewElement();
-		}
-		else {
-			$viewElement = $this->viewElement;
+			$this->prepareViewElement();
 		}
 
 		// Make sure that the passed expression is successfully parsed,
 		// before asserting stuff on its evaluation.
-		$parseResult = $lexer->parse($viewElement);
+		$parseResult = $lexer->parse($this->viewElement);
 		$this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
-		return $lexer->evaluate($viewElement);
+		return $lexer->evaluate(new Context($this->view));
 	}
 
-	/**
-	 * @return ViewElement
-	 */
 	private function prepareViewElement() {
 		// A Lexer object needs to live inside a View,
 		// and be bound to a ViewElementTag instance.
@@ -75,6 +73,7 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		// In this test, we need a real View object, because
 		// it embeds a real NativeFunctionFactory instance.
 		$view = new View();
+		$this->view = $view;
 
 		$viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
 		$viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
@@ -83,8 +82,7 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 			->will($this->returnValue($viewFile));
 
 		$this->viewElement = $viewElement;
-		return $viewElement;
-	}
+    }
 
 	/**
 	 * @expectedException \figdice\exceptions\FunctionNotFoundException
@@ -97,8 +95,8 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 
 	public function testRegisteredCustomFunctionExecutes()
 	{
-		$viewElement = $this->prepareViewElement();
-		$view = $viewElement->getView();
+        $this->prepareViewElement();
+        $view = $this->view;
 
 		//Create an instance of our custom factory
 		$functionFactory = new CustomFunctionFactory();
@@ -133,7 +131,7 @@ class CustomFunctionFactory extends FunctionFactory {
  * returns the argument multiplied by 2.
  */
 class MyCustomFigFunc implements FigFunction {
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+	public function evaluate(Context $context, $arity, $arguments) {
 		if($arity < 1) {
 			return null;
 		}

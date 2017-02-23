@@ -23,10 +23,10 @@
 
 namespace figdice\classes\lexer;
 
+use figdice\classes\Context;
+use figdice\FigFunction;
 use \figdice\FunctionFactory;
 use \figdice\LoggerFactory;
-use \figdice\classes\ViewElement;
-use \figdice\classes\ViewElementTag;
 use \figdice\exceptions\FunctionNotFoundException;
 
 class TokenFunction extends TokenOperator {
@@ -41,7 +41,7 @@ class TokenFunction extends TokenOperator {
 	private $arity;
 
 	/**
-	 * @var Function
+	 * @var FigFunction
 	 */
 	private $function;
 	/**
@@ -73,14 +73,17 @@ class TokenFunction extends TokenOperator {
 		return $this->arity;
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     * @throws FunctionNotFoundException
+     */
+	public function evaluate(Context $context) {
+	    $viewElement = $context->tag;
 		if($this->function === null) {
 			//Instantiate the Function handler:
       /** @var FunctionFactory[] $factories */
-			$factories = $viewElement->getView()->getFunctionFactories();
+			$factories = $context->view->getFunctionFactories();
 			if ( (null != $factories) && (is_array($factories) ) ) {
 
         foreach ($factories as $factory) {
@@ -100,11 +103,11 @@ class TokenFunction extends TokenOperator {
 		$arguments = array();
 		if($this->operands) {
 			foreach($this->operands as $operandToken) {
-				$arguments[] = $operandToken->evaluate($viewElement);
+				$arguments[] = $operandToken->evaluate($context);
 			}
 		}
 
-		return $this->function->evaluate($viewElement, $this->arity, $arguments);
+		return $this->function->evaluate($context, $this->arity, $arguments);
 	}
 	/**
 	 * @return boolean

@@ -22,7 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenSymbol extends Token {
 	/**
@@ -38,12 +38,12 @@ class TokenSymbol extends Token {
 		$this->name = $name;
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
 		$tokenPath = new TokenPath($this->name);
-		return $tokenPath->evaluate($viewElement);
+		return $tokenPath->evaluate($context);
 	}
 }

@@ -50,8 +50,12 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
 
     // Mock the mounting of root data universe into the view
     $view->expects($this->any())->method('fetchData')->will($this->returnValue($data));
+    // Root node
+    $view->expects($this->any())->method('getRootNode')->will($this->returnValue($viewElement));
 
-    return $lexer->evaluate($viewElement);
+    $context = new \figdice\classes\Context($view);
+
+    return $lexer->evaluate($context);
   }
 
 

@@ -22,7 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class Expression extends Token {
 	/**
@@ -35,7 +35,11 @@ class Expression extends Token {
 		$this->root = $token;
 	}
 
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
 		return $this->root->evaluate($viewElement);
 	}
 }

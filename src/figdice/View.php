@@ -24,6 +24,7 @@
 namespace figdice;
 
 use figdice\classes\AutoloadFeedFactory;
+use figdice\classes\Context;
 use figdice\classes\MagicReflector;
 use figdice\classes\NativeFunctionFactory;
 use figdice\classes\Plug;
@@ -63,12 +64,10 @@ class View implements \Serializable {
 	private $source;
 
 	/**
-	 * The file of the view.
-	 * A View can be actually a subview, invoked by the fig:include directive.
-	 * In this case, the View's File represents the included file.
-	 * @var File
+	 * The source filename.
+	 * @var string
 	 */
-	private $file;
+	private $filename;
 
 	/**
 	 * @var LoggerInterface
@@ -419,7 +418,7 @@ class View implements \Serializable {
 		if(! $bSuccess ) {
 			throw new XMLParsingException(
 					$errMsg,
-					($this->file ? $this->file->getFilename() : '(null)'),
+					($this->filename ? $this->filename : '(null)'),
 					$lineNumber);
 		}
 	}
@@ -445,7 +444,15 @@ class View implements \Serializable {
 		if (! $this->rootNode) {
 			throw new XMLParsingException('No template file loaded', '', 0);
 		}
-		$result = $this->rootNode->render();
+
+        $context = new Context($this);
+		$context->figNamespace = $this->figNamespace;
+
+		// DOCTYPE
+        // The doctype is necessarily on the root tag, declared as an attribute, example:
+        //   fig:doctype="html"
+        $this->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
+		$result = $this->rootNode->render($context);
 
 
 		if(! $this->parentViewElement) {
@@ -525,9 +532,9 @@ class View implements \Serializable {
     }
 
 	/**
-	 * @param $doctype string
+	 * @param string $doctype
 	 */
-	public function setDoctype($doctype)
+	private function setDoctype($doctype)
 	{
 		$this->doctype = $doctype;
 	}
@@ -565,28 +572,27 @@ class View implements \Serializable {
 		// Detect special tags
         //
 		if($tagName == $this->figNamespace . TagFigAttr::TAGNAME) {
-			$newElement = new TagFigAttr($view, $tagName, $lineNumber);
+			$newElement = new TagFigAttr($tagName, $lineNumber);
 		}
 		else if ($tagName == $this->figNamespace . TagFigFeed::TAGNAME) {
-		    $newElement = new TagFigFeed($view, $tagName, $lineNumber);
+		    $newElement = new TagFigFeed($tagName, $lineNumber);
         }
 		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
-		    $newElement = new TagFigMount($view, $tagName, $lineNumber);
+		    $newElement = new TagFigMount($tagName, $lineNumber);
         }
 		else if ($tagName == $this->figNamespace . TagFigCdata::TAGNAME) {
-		    $newElement = new TagFigCdata($view, $tagName, $lineNumber);
+		    $newElement = new TagFigCdata($tagName, $lineNumber);
         }
 		else if ($tagName == $this->figNamespace . TagFigDictionary::TAGNAME) {
-		    $newElement = new TagFigDictionary($view, $tagName, $lineNumber);
+		    $newElement = new TagFigDictionary($tagName, $lineNumber);
         }
 
 
 		else {
-			$newElement = new ViewElementTag($view, $tagName, $lineNumber);
+			$newElement = new ViewElementTag($tagName, $lineNumber);
 		}
 
-		$newElement->setCurrentFile($this->file);
-		$newElement->setAttributes($attributes);
+		$newElement->setAttributes($this->figNamespace, $attributes);
 
 
 		if( ($this->rootNode === null) && $this->parentViewElement )
@@ -653,7 +659,7 @@ class View implements \Serializable {
 
 	function errorMessage($errorMessage) {
 		$lineNumber = xml_get_current_line_number($this->xmlParser);
-		$filename = ($this->file) ? $this->file->getFilename() : '(null)';
+		$filename = ($this->filename) ? $this->filename : '(null)';
 		$this->logger->error("$filename($lineNumber): $errorMessage");
 	}
 
@@ -792,7 +798,7 @@ class View implements \Serializable {
 	 * @return string
 	 */
 	public function getFilename() {
-		return $this->file->getFilename();
+		return $this->filename;
 	}
 	/**
 	 * @return string

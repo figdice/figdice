@@ -30,11 +30,11 @@ class TagFigMount extends ViewElementTag {
 
 	private $mountTarget;
 
-	public function __construct(&$view, $name, $xmlLineNumber) {
-		parent::__construct($view, $name, $xmlLineNumber);
+	public function __construct($name, $xmlLineNumber) {
+		parent::__construct($name, $xmlLineNumber);
 	}
 
-    public function setAttributes(array $attributes)
+    public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
         // whereas we just need to check existence of class attribute.
@@ -53,21 +53,23 @@ class TagFigMount extends ViewElementTag {
 
     }
 
-	public function render($bypassWalk = false) {
-        $this->fig_mount();
+	public function render(Context $context) {
+        $this->fig_mount($context);
         return '';
     }
-    private function fig_mount() {
+    private function fig_mount(Context $context) {
         //When an explicit value="" attribute exists, use its contents as a Lex expression to evaluate.
         if($this->hasAttribute('value')) {
             $valueExpression = $this->getAttribute('value');
-            $value = $this->evaluate($valueExpression);
+            $value = $this->evaluate($context, $valueExpression);
         }
         //Otherwise, no value attribute: then we render the inner contents of the fig:mount into the target variable.
         else {
-            $value = $this->renderChildren(true);
+            $context->pushDoNotRenderFigParams();
+            $value = $this->renderChildren($context);
+            $context->popDoNotRenderFigParams();
         }
 
-        $this->view->mount($this->mountTarget, $value);
+        $context->view->mount($this->mountTarget, $value);
     }
 }

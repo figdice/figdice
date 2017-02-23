@@ -23,15 +23,21 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
 use \figdice\LoggerFactory;
 
 class Function_php implements FigFunction {
 	public function __construct() {
 	}
 
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    /**
+     * @param Context $context
+     * @param int $arity
+     * @param array $arguments
+     * @return bool|mixed
+     */
+    public function evaluate(Context $context, $arity, $arguments) {
 		$funcName = array_shift($arguments);
 		if(! function_exists($funcName)) {
 			$logger = LoggerFactory::getLogger(get_class($this));

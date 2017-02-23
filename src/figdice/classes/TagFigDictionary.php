@@ -32,11 +32,11 @@ class TagFigDictionary extends ViewElementTag {
 
 	private $dicFile;
 
-	public function __construct(&$view, $name, $xmlLineNumber) {
-		parent::__construct($view, $name, $xmlLineNumber);
+	public function __construct($name, $xmlLineNumber) {
+		parent::__construct($name, $xmlLineNumber);
 	}
 
-    public function setAttributes(array $attributes)
+    public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
         // whereas we just need to check existence of class attribute.
@@ -55,8 +55,8 @@ class TagFigDictionary extends ViewElementTag {
 
     }
 
-	public function render($bypassWalk = false) {
-        return $this->fig_dictionary();
+	public function render(Context $context) {
+        return $this->fig_dictionary($context);
     }
 
 
@@ -67,20 +67,20 @@ class TagFigDictionary extends ViewElementTag {
      * we try to compile (serialize) the XML key-value collection and store
      * the serialized form in a 'Dictionary/(langcode)' subfolder of the temp path.
      */
-    private function fig_dictionary() {
+    private function fig_dictionary(Context $context) {
         //If a @source attribute is specified,
         //it means that when the target (view's language) is the same as @source,
         //then don't bother loading dictionary file, nor translating: just render the tag's children.
 
         $file = $this->dicFile;
-        $filename = $this->getView()->getTranslationPath() . '/' . $this->getView()->getLanguage() . '/' . $file;
+        $filename = $context->view->getTranslationPath() . '/' . $context->view->getLanguage() . '/' . $file;
 
         $name = $this->getAttribute('name', null);
         $source = $this->getAttribute('source', null);
         $dictionary = new Dictionary($filename, $source);
 
 
-        if ( ($this->getView()->getLanguage() == '') || ($source == $this->getView()->getLanguage()) ) {
+        if ( ($context->view->getLanguage() == '') || ($source == $context->view->getLanguage()) ) {
             // If the current View does not specify a Language,
             // or if the dictionary to load is same language as View,
             // let's not care about i18n.
@@ -99,8 +99,8 @@ class TagFigDictionary extends ViewElementTag {
 
         try {
             //Determine whether this dictionary was pre-compiled:
-            if($this->getView()->getTempPath()) {
-                $tmpFile = $this->getView()->getTempPath() . '/' . 'Dictionary' . '/' . $this->getView()->getLanguage() . '/' . $file . '.php';
+            if($context->view->getTempPath()) {
+                $tmpFile = $context->getView()->getTempPath() . '/' . 'Dictionary' . '/' . $context->getView()->getLanguage() . '/' . $file . '.php';
                 //If the tmp file already exists,
                 if(file_exists($tmpFile)) {
                     //but is older than the source file,
@@ -120,7 +120,7 @@ class TagFigDictionary extends ViewElementTag {
             }
         } catch(FileNotFoundException $ex) {
             throw new FileNotFoundException('Translation file not found: file=' . $filename .
-                ', language=' . $this->getView()->getLanguage() .
+                ', language=' . $context->view->getLanguage() .
                 ', source=' . $this->getCurrentFilename(),
                 $this->getCurrentFilename() );
         } catch(DictionaryDuplicateKeyException $ddkex) {
@@ -131,7 +131,7 @@ class TagFigDictionary extends ViewElementTag {
         //Hook the dictionary to the current file.
         //(in fact this will bubble up the message as high as possible, ie:
         //to the highest parent which does not bear a dictionary of same name)
-        $this->getCurrentFile()->addDictionary($dictionary, $name);
+        $context->addDictionary($dictionary, $name);
         return '';
     }
 }

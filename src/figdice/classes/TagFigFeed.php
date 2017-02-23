@@ -24,24 +24,26 @@
 namespace figdice\classes;
 
 use figdice\exceptions\FeedClassNotFoundException;
+use figdice\exceptions\FeedClassNotFoundRenderingException;
 use figdice\exceptions\RequiredAttributeException;
+use figdice\exceptions\RequiredAttributeParsingException;
 
 class TagFigFeed extends ViewElementTag {
 	const TAGNAME = 'feed';
 
 	private $feedClass = null;
 
-	public function __construct(&$view, $name, $xmlLineNumber) {
-		parent::__construct($view, $name, $xmlLineNumber);
+	public function __construct($name, $xmlLineNumber) {
+		parent::__construct($name, $xmlLineNumber);
 	}
 
-    public function render($bypassWalk = false)
+    public function render(Context $context)
     {
-        $this->fig_feed();
+        $this->fig_feed($context);
         return '';
     }
 
-    public function setAttributes(array $attributes)
+    public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
         // whereas we just need to check existence of class attribute.
@@ -51,10 +53,11 @@ class TagFigFeed extends ViewElementTag {
 
         $this->feedClass = isset($this->attributes['class']) ? $this->attributes['class'] : null;
         if(null === $this->feedClass) {
-            throw new RequiredAttributeException($this->getTagName(),
-                $this->getCurrentFile()->getFilename(),
+            throw new RequiredAttributeParsingException(
+                $this->getTagName(),
                 $this->xmlLineNumber,
-                'Missing "class" attribute for '.$this->getTagName().' tag, in ' . $this->getCurrentFile()->getFilename() . '(' . $this->xmlLineNumber . ')');
+                'class'
+            );
         }
 
     }
@@ -65,10 +68,10 @@ class TagFigFeed extends ViewElementTag {
      *  - class = the name of the Feed class to instanciate and run.
      *  - target = the mount point in the global universe.
      *
+     * @param Context $context
      * @throws FeedClassNotFoundException
-     * @throws RequiredAttributeException
      */
-    private function fig_feed() {
+    private function fig_feed(Context $context) {
 
         //Set the parameters for the feed class:
         //the parameters are an assoc array made of the
@@ -76,19 +79,19 @@ class TagFigFeed extends ViewElementTag {
         //class and target attributes.
         $feedParameters = array();
         foreach($this->attributes as $attribName=>$attribText) {
-            if( (! $this->view->isFigAttribute($attribName)) &&
+            if( (! $context->view->isFigAttribute($attribName)) &&
                 ($attribName != 'class') && ($attribName != 'target') ) {
-                $feedParameters[$attribName] = $this->evaluate($attribText);
+                $feedParameters[$attribName] = $this->evaluate($context, $attribText);
             }
         }
 
         //TODO: catch exception, to enrich with fig xml file+line, and rethrow.
-        $feedInstance = $this->view->createFeed($this->feedClass, $feedParameters);
+        $feedInstance = $context->view->createFeed($this->feedClass, $feedParameters);
 
         //At this point the feed instance must be created.
         //If not, there was no factory to handle its loading.
         if(! $feedInstance) {
-            throw new FeedClassNotFoundException($this->feedClass, $this->getCurrentFile()->getFilename(), $this->xmlLineNumber);
+            throw new FeedClassNotFoundRenderingException($this->feedClass, $this->xmlLineNumber);
         }
 
         //It is possible to simply invoke a Feed class and
@@ -108,7 +111,7 @@ class TagFigFeed extends ViewElementTag {
         $subUniverse = $feedInstance->run();
 
         if($mountPoint !== null) {
-            $this->view->mount($mountPoint, $subUniverse);
+            $context->view->mount($mountPoint, $subUniverse);
         }
 
     }

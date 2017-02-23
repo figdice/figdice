@@ -64,7 +64,8 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		$parseResult = $lexer->parse($viewElement);
 		$this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
-		return $lexer->evaluate($viewElement);
+		$context = new \figdice\classes\Context($view);
+		return $lexer->evaluate($context);
 	}
 
 

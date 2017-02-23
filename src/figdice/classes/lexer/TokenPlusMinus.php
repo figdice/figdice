@@ -22,7 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenPlusMinus extends TokenOperator {
 	public $sign;
@@ -38,13 +38,13 @@ class TokenPlusMinus extends TokenOperator {
 	public function getNumOperands() {
 		return 2;
 	}
-	/**
-	 * @param ViewElement $viewElement
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
-		$opL = $this->operands[0]->evaluate($viewElement);
-		$opR = $this->operands[1]->evaluate($viewElement);
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
+		$opL = $this->operands[0]->evaluate($context);
+		$opR = $this->operands[1]->evaluate($context);
 		if($this->sign == '+') {
 			if((!is_numeric($opL)) || (!is_numeric($opR))) {
 				return $opL . $opR;

@@ -23,6 +23,7 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use figdice\exceptions\XMLParsingException;
 use \figdice\FigFunction;
 use \figdice\classes\ViewElementTag;
@@ -43,14 +44,13 @@ use \figdice\classes\ViewElementTag;
 class Function_xml implements FigFunction {
 
     /**
-     * @param ViewElementTag $viewElement
+     * @param Context $context
      * @param integer $arity
      * @param array $arguments
-     *
      * @return \DOMXPath
      * @throws XMLParsingException
      */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    public function evaluate(Context $context, $arity, $arguments) {
 		$xmlString = $arguments[0];
 		$xml = new \DOMDocument();
 		$successParse = @ $xml->loadXML($xmlString, LIBXML_NOENT);
@@ -62,8 +62,7 @@ class Function_xml implements FigFunction {
 			if (! $successParse) {
                 $xmlError = libxml_get_last_error();
                 throw new XMLParsingException('xml() function: ' . $xmlError->message,
-                    $viewElement->getCurrentFile()->getFilename(),
-                    $viewElement->getLineNumber());
+                    $context->tag->getLineNumber());
             }
 		}
 		$xpath = new \DOMXPath($xml);

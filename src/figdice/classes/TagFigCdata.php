@@ -31,11 +31,11 @@ class TagFigCdata extends ViewElementTag {
 
 	private $dataFile;
 
-	public function __construct(&$view, $name, $xmlLineNumber) {
-		parent::__construct($view, $name, $xmlLineNumber);
+	public function __construct($name, $xmlLineNumber) {
+		parent::__construct($name, $xmlLineNumber);
 	}
 
-    public function setAttributes(array $attributes)
+    public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
         // whereas we just need to check existence of class attribute.
@@ -53,7 +53,7 @@ class TagFigCdata extends ViewElementTag {
 
     }
 
-	public function render($bypassWalk = false) {
+	public function render(Context $context) {
         return $this->fig_cdata();
     }
     /**

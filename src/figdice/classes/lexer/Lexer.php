@@ -23,6 +23,7 @@
 
 namespace figdice\classes\lexer;
 
+use figdice\classes\Context;
 use figdice\classes\File;
 use figdice\classes\ViewElement;
 use \figdice\classes\ViewElementTag;
@@ -461,12 +462,12 @@ class Lexer {
 	}
 
 	/**
-	 * @param ViewElement $viewElement
+	 * @param Context $context
 	 * @return mixed
 	 */
-	public function evaluate(ViewElementTag $viewElement) {
-		$this->viewElement = $viewElement;
-		return $this->stackRP[0]->evaluate($viewElement);
+	public function evaluate(Context $context) {
+		$this->viewElement = $context->tag;
+		return $this->stackRP[0]->evaluate($context);
 	}
 
 	/**

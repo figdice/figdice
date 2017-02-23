@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2013, Gabriel Zerbib.
- * @version 2.0.0
+ * @copyright 2004-2017, Gabriel Zerbib.
+ * @version 2.5
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -23,7 +23,7 @@
 
 namespace figdice;
 
-use figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 /**
  * Your FigFunction instances are created at most once per View lifecycle.
@@ -35,10 +35,11 @@ use figdice\classes\ViewElementTag;
  * instance in your evalute function.
  */
 interface FigFunction {
-	/**
-	 * @param ViewElementTag $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	function evaluate(ViewElementTag $viewElement, $arity, $arguments);
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return mixed
+     */
+	function evaluate(Context $context, $arity, $arguments);
 }

@@ -24,10 +24,10 @@
 namespace figdice\classes;
 
 class ViewElementCData extends ViewElement implements \Serializable {
-	public function __construct(&$view) {
-		parent::__construct($view);
+	public function __construct() {
+		parent::__construct();
 	}
-	public function render() {
+	public function render(Context $context) {
 		return $this->outputBuffer;
 	}
 	public function appendCDataSibling($cdata) {
