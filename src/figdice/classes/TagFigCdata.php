@@ -54,7 +54,7 @@ class TagFigCdata extends ViewElementTag {
     }
 
 	public function render(Context $context) {
-        return $this->fig_cdata();
+        return $this->fig_cdata($context);
     }
     /**
      * Imports at the current output position
@@ -62,9 +62,9 @@ class TagFigCdata extends ViewElementTag {
      * @return string
      * @throws FileNotFoundException
      */
-    private function fig_cdata() {
+    private function fig_cdata(Context $context) {
         $filename = $this->dataFile;
-        $realfilename = dirname($this->getCurrentFilename()).'/'.$filename;
+        $realfilename = dirname($context->getFilename()).'/'.$filename;
         if(! file_exists($realfilename)) {
             $message = "File not found: $filename called from: " . $this->getCurrentFilename(). '(' . $this->xmlLineNumber . ')';
             throw new FileNotFoundException($message, $filename);

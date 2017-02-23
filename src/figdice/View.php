@@ -137,22 +137,6 @@ class View implements \Serializable {
 
 
 	/**
-	 * The array of named slots defined in the view.
-	 * A slot is a specific ViewElementTag identified
-	 * by a name, whose content is replaced by the content
-	 * of the element that has been pushed (plugged) into the slot.
-	 * @var Slot[]
-	 */
-	private $slots;
-
-	/**
-	 * Array of named elements that are used as content providers
-	 * to fill in slots by the same name.
-	 * @var Plug[]
-	 */
-	private $plugs;
-
-	/**
 	 * Associative array of the named macros.
 	 * A Macro is a ViewElementTag that is rendered
 	 * only upon calling from within another element.
@@ -431,7 +415,7 @@ class View implements \Serializable {
         }
 
 
-		$result = $this->plugIntoSlots($result);
+		$result = $this->plugIntoSlots($context, $result);
 
 		// Take care of the doctype at top of output
 		if ($this->doctype) {
@@ -622,28 +606,30 @@ class View implements \Serializable {
 	}
 
 
-	/**
-	 * Inject the content of the fig:plug nodes
-	 * into the corresponding slots.
-	 *
-	 * @param string $input
-	 * @return string
-	 */
-	private function plugIntoSlots($input) {
-		if(count($this->slots) == 0) {
+    /**
+     * Inject the content of the fig:plug nodes
+     * into the corresponding slots.
+     *
+     * @param Context $context
+     * @param string $input
+     * @return string
+     */
+	private function plugIntoSlots(Context $context, $input) {
+	    $slots = $context->getSlots();
+		if(count($slots) == 0) {
 			// Nothing to do.
 			return $input;
 		}
 
 		$result = $input;
 
-		foreach($this->slots as $slotName => $slot) {
+		foreach($slots as $slotName => $slot) {
 			$plugOutput = '';
 			$slotPos = strpos($result, $slot->getAnchorString());
 
-			if( isset($this->plugs[$slotName]) ) {
-        /** @var Plug[] $plugsForSlot */
-				$plugsForSlot = $this->plugs[$slotName];
+            $plugsForSlot = $context->getPlugs($slotName);
+
+			if( null != $plugsForSlot ) {
 
 				foreach ($plugsForSlot as $plug) {
 
@@ -651,9 +637,9 @@ class View implements \Serializable {
 						$plugElement = $plug->getTag();
 						$plugElement->clearAttribute($this->figNamespace . 'plug');
 
-						$plugRender = $plugElement->render();
+						$plugRender = $plugElement->render($context);
 
-						if ($plugElement->evalFigAttribute('append')) {
+						if ($plugElement->evalFigAttribute($context, 'append')) {
 							$plugOutput .= $plugRender;
 						}
 						else {
@@ -811,20 +797,6 @@ class View implements \Serializable {
 	public function isFigAttribute($attribute) {
 		return (substr($attribute, 0, strlen($this->figNamespace)) == $this->figNamespace);
 	}
-
-	/**
-	 * This method is called by ViewElementTag objects, when processing
-	 * a fig:slot item.
-	 * @param string $slotName
-	 * @param Slot $slot
-	 */
-  public function assignSlot($slotName, Slot & $slot) {
-      $this->slots[$slotName] = & $slot;
-  }
-
-  public function addPlug($slotName, ViewElementTag $element, $renderedString = null, $isAppend = false) {
-    $this->plugs[$slotName] [] = new Plug($element, $renderedString, $isAppend);
-  }
 
 
   public function serialize()

@@ -121,8 +121,8 @@ class TagFigDictionary extends ViewElementTag {
         } catch(FileNotFoundException $ex) {
             throw new FileNotFoundException('Translation file not found: file=' . $filename .
                 ', language=' . $context->view->getLanguage() .
-                ', source=' . $this->getCurrentFilename(),
-                $this->getCurrentFilename() );
+                ', source=' . $context->getFilename(),
+                $context->getFilename() );
         }
 
 

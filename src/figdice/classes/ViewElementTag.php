@@ -159,21 +159,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$this->currentFile = & $file;
 	}
 	/**
-	 * @return File
-	 */
-	public function getCurrentFile() {
-		return $this->currentFile;
-	}
-	/**
-	 * @return string
-	 */
-	protected function getCurrentFilename() {
-		if ( (null != $this->currentFile) && ($this->currentFile instanceof File) ) {
-			return $this->currentFile->getFilename();
-		}
-		return '(null)';
-	}
-	/**
 	 * @return string
 	 */
 	public function getTagName() {
@@ -550,7 +535,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 			$anchorString = '/==SLOT==' . $slotName . '==/';
 			$slot = new Slot($anchorString);
-			$this->view->assignSlot($slotName, $slot);
+			$context->assignSlot($slotName, $slot);
 
 			unset($this->attributes[$context->figNamespace . 'slot']);
 			$result = $this->render($context);
@@ -579,13 +564,13 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			//in the order they were parsed.
 			if ($context->view->hasOption(View::GLOBAL_PLUGS)) {
 				//The plugs are rendered at the end of the rendering of the View.
-				$context->view->addPlug($slotName, $this);
+				$context->addPlug($slotName);
 			}
 			else {
 				// The plugs are rendered in their local context
 				// (but still, remain stuffed at the end of the template rendering)
 				$this->transient(self::TRANSIENT_PLUG_RENDERING);
-				$context->view->addPlug($slotName, $this, $this->render($context), $this->evalFigAttribute($context, 'append'));
+				$context->addPlug($slotName, $this->render($context), $this->evalFigAttribute($context, 'append'));
 			}
 
 			//A fig:plug tag does not produce any in-place output.
@@ -902,7 +887,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//TODO: <fig:param> can hold fig:cond ok, but we must implement no fig:case
 		foreach ($this->children as $child) {
 			if($child instanceof ViewElementTag) {
-				if($child->name == $this->view->figNamespace . 'param') {
+				if($child->name == $context->figNamespace . 'param') {
 
 					//evalute the fig:cond on the param
 					if(! $child->evalCondition($context)) {
@@ -974,20 +959,23 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			$datasetCount = 1;
 		}
 
-		if(!isset($this->iteration) || ($this->iteration == null) ) {
-			$this->iteration = array();
-		}
 		$newIteration = new Iteration($datasetCount);
 		$context->pushIteration($newIteration);
 		$bFirstIteration = true;
 
 		if(is_array($dataset) || (is_object($dataset) && ($dataset instanceof \Countable)) ) {
+
+		    // Indicate that the current tag is entering walk loop,
+            // so as subsequent rendering of self will not cause an infinite loop.
+            $context->setBypassWalk();
 			foreach($dataset as $key => $data) {
 				$context->view->pushStackData($data);
 				$newIteration->iterate($key);
-				$context->pushBypassWalk();
-                $nextContent = $this->render($context);
-                $context->popBypassWalk();
+				// It is necessary to invoke again 'render' on self,
+                // because the walk directive is only here to create a loop,
+                // but the tag must actually be rendered along with all its eval expressions with inner data.
+                $nextContent = $this->renderNoMacro($context);
+
 
                 //Each rendered iteration start again
 				//with the blank part on the right of the preceding CDATA,
@@ -1156,7 +1144,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$instance = $reflection->newInstance();
 		if (! $instance instanceof Filter) {
 		    throw new RenderingException($this->getTagName(),
-                $this->getCurrentFilename(),
+                $context->getFilename(),
                 $this->getLineNumber(),
                 'Class ' . get_class($instance) . ' is not a Filter.');
         }

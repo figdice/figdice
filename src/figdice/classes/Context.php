@@ -37,6 +37,22 @@ class Context
     /** @var Dictionary[] */
     private $dictionaries = [];
 
+    /**
+     * The array of named slots defined in the view.
+     * A slot is a specific ViewElementTag identified
+     * by a name, whose content is replaced by the content
+     * of the element that has been pushed (plugged) into the slot.
+     * @var Slot[]
+     */
+    private $slots = [];
+
+    /**
+     * Array of named elements that are used as content providers
+     * to fill in slots by the same name.
+     * @var Plug[]
+     */
+    private $plugs = [];
+
     public function __construct(View $view)
     {
         $this->view = $view;
@@ -72,15 +88,14 @@ class Context
         return $this->bypassWalk[count($this->bypassWalk) - 1];
     }
 
-    public function pushBypassWalk()
+    /**
+     * Set to true, the flag indicating that the current tag in tree has entered a walk loop.
+     */
+    public function setBypassWalk()
     {
-        array_push($this->bypassWalk, true);
+        $this->bypassWalk[count($this->bypassWalk) - 1] = true;
     }
 
-    public function popBypassWalk()
-    {
-        array_pop($this->bypassWalk);
-    }
 
     /**
      * Returns the data structure
@@ -99,11 +114,13 @@ class Context
     public function pushTag(ViewElementTag $tag)
     {
         array_push($this->breadcrumb, $tag);
+        array_push($this->bypassWalk, false);
         $this->tag = $tag;
     }
     public function popTag()
     {
         $this->tag = array_pop($this->breadcrumb);
+        array_pop($this->bypassWalk);
     }
 
     public function getFilename()
@@ -237,5 +254,43 @@ class Context
         $this->figNamespace = $figNamespace;
         array_push($this->namespaces, $figNamespace);
         array_push($this->filenames, $filename);
+    }
+
+    /**
+     * This method is called by ViewElementTag objects, when processing
+     * a fig:slot item.
+     * @param string $slotName
+     * @param Slot $slot
+     */
+    public function assignSlot($slotName, Slot $slot) {
+        $this->slots[$slotName] = & $slot;
+    }
+
+    /**
+     * @param $slotName
+     * @param ViewElementTag $element
+     * @param string $renderedString
+     * @param bool $isAppend
+     */
+    public function addPlug($slotName, $renderedString = null, $isAppend = false) {
+        $this->plugs[$slotName] [] = new Plug($this->tag, $renderedString, $isAppend);
+    }
+
+
+    /**
+     * @return Slot[]
+     */
+    public function getSlots()
+    {
+        return $this->slots;
+    }
+
+    /**
+     * @param string $slotName
+     * @return Plug[]|null
+     */
+    public function getPlugs($slotName)
+    {
+        return array_key_exists($slotName, $this->plugs) ? $this->plugs[$slotName] : null;
     }
 }
