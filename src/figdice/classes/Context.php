@@ -34,7 +34,10 @@ class Context
     /** @var Iteration[] stack of nested iterations */
     private $iterations = [];
 
-    /** @var Dictionary[] */
+    /**
+     * A stack of arrays of dictionaries.
+     * In the stack, each floor corresponds to the $filenames stack, and is, itself, a map of dictionaries.
+     * @var Dictionary[][] */
     private $dictionaries = [];
 
     /**
@@ -130,38 +133,53 @@ class Context
 
 
     /**
-     * Attaches the specified dictionary under specified name, potentially overwriting it if already present.
-     * If name is the empty string, then the dictionary is anonymous.
-     * Caution: this is a simplified mechanism as compared to the previous versions of FigDice, where
-     * there was some sort of nesting hierarchy with dictionaries along the template inclusions.
-     * The dictionaries are now global.
-     * and cannot override an already loaded dictionary.
+     * Attaches the specified dictionary under specified name.
+     * A named dictionary is attached to the most outer view which does not yet contain the key (so as to
+     * make it available as far away as possible after the include terminates),
+     * or overwrites the current file's named dictionary if no free room found.
+     * An anonymous dictionary is always added to the local file's, and never bubbles up.
      * @param Dictionary $dictionary
      * @param string $name
      */
     public function addDictionary(Dictionary $dictionary, $name) {
+
+        $N = count($this->dictionaries);
+
         if($name) {
-            $this->dictionaries[$name] = $dictionary;
+            // Try to add the named dictionary to the most ancient (outermost) view first.
+
+            for ($i = 0; $i < $N; ++ $i) {
+                // We never overwrite an existing key, except in the topmost floor (current file)
+                if (! array_key_exists($name, $this->dictionaries[$i]) || ($i == $N - 1) ) {
+                    $this->dictionaries[$i][$name] = $dictionary;
+                }
+            }
         }
 
         //Anonymus dictionary:
         else {
             //Prepend the array of dictionaries with the new one,
             //so that it's quicker to search during the translating phase.
-            array_unshift($this->dictionaries, $dictionary);
+            array_unshift($this->dictionaries[$N - 1], $dictionary);
         }
     }
 
 
     /**
-     * @param $name
+     * @param string $name
      * @return Dictionary
      */
     public function getDictionary($name)
     {
+        // Find by name, upwards. Start by the current floor of dictionaries in stack,
+        // and then go back until found.
+        $N = count($this->dictionaries);
+        for ($i = $N - 1; $i >= 0; -- $i) {
+            if (array_key_exists($name, $this->dictionaries[$i]))
+                return $this->dictionaries[$i][$name];
+        }
+
         //TODO: handle error if name not found.
-        if (array_key_exists($name, $this->dictionaries))
-            return $this->dictionaries[$name];
         return null;
     }
 
@@ -205,15 +223,13 @@ class Context
         }
 
         //Walk the array of dictionaries, to try the lookup in all of them.
-        if(count($this->dictionaries)) {
-            foreach($this->dictionaries as $dictionary) {
-                try {
-                    return $dictionary->translate($key);
-                } catch(DictionaryEntryNotFoundException $ex) {
-                    // It is perfectly legitimate to not find a key in the first few registered dictionaries.
-                    // But if in the end, we still didn't find a translation, it will be time to
-                    // throw the exception.
-                }
+        foreach($this->dictionaries[count($this->dictionaries) - 1] as $dictionary) {
+            try {
+                return $dictionary->translate($key);
+            } catch(DictionaryEntryNotFoundException $ex) {
+                // It is perfectly legitimate to not find a key in the first few registered dictionaries.
+                // But if in the end, we still didn't find a translation, it will be time to
+                // throw the exception.
             }
         }
 
@@ -242,6 +258,7 @@ class Context
     public function popInclude()
     {
         array_pop($this->filenames);
+        array_pop($this->dictionaries);
         $this->figNamespace = $this->namespaces[count($this->namespaces) - 1];
     }
 
@@ -254,6 +271,7 @@ class Context
         $this->figNamespace = $figNamespace;
         array_push($this->namespaces, $figNamespace);
         array_push($this->filenames, $filename);
+        array_push($this->dictionaries, []);
     }
 
     /**

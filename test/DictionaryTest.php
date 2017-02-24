@@ -86,19 +86,6 @@ ENDXML;
     $output = preg_replace('#[ \t]+$#m', '', $output);
     $output = preg_replace('#\n+#', ';', $output);
     $this->assertEquals('key1-child;Ma chaîne traduite;key1-parent;key1-parent', $output);
-
-    // Now check that the key1-parent has been cached, because used twice
-    // But because the $cache array is private in Dictionary class,
-    // we use Reflection to break into it.
-    $reflector = new ReflectionClass(get_class(
-      // I know for a fact, that my test XML Parent template loads an "inParent" dic.
-        $dict = $this->view->getRootNode()->getCurrentFile()->getDictionary('inParent'))
-    );
-    $cacheProp = $reflector->getProperty('cache');
-    $cacheProp->setAccessible(true);
-    $cache = $cacheProp->getValue($dict);
-    // And I know for a fact that it translates twice the "key1" key.
-    $this->assertEquals('key1-parent', $cache['key1']);
   }
 
   /**
