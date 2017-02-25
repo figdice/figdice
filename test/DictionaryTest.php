@@ -23,7 +23,6 @@
 
 
 use figdice\View;
-use figdice\classes\File;
 use figdice\classes\ViewElementTag;
 use \org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;

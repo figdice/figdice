@@ -27,9 +27,7 @@ use figdice\classes\AutoloadFeedFactory;
 use figdice\classes\Context;
 use figdice\classes\MagicReflector;
 use figdice\classes\NativeFunctionFactory;
-use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
-use figdice\classes\File;
 use figdice\classes\TagFigCdata;
 use figdice\classes\TagFigDictionary;
 use figdice\classes\TagFigFeed;
@@ -46,7 +44,6 @@ use figdice\exceptions\XMLParsingException;
 
 use figdice\exceptions\RenderingException;
 use figdice\classes\XMLEntityTransformer;
-use figdice\classes\Slot;
 
 /**
  * Main component of the FigDice library.
@@ -294,7 +291,7 @@ class View implements \Serializable {
 	 * @param string|null $workingDirectory
 	 */
 	public function loadString($string, $workingDirectory = null) {
-	  $this->file = new File($workingDirectory . '/(null)');
+	  $this->file = $workingDirectory . '/(null)';
 	  $this->source = $string;
 	}
 	/**
@@ -807,7 +804,7 @@ class View implements \Serializable {
       $data = unserialize($serialized);
 
       $this->bParsed = true;
-      $this->file = new File($data['f']);
+      $this->file = $data['f'];
       $this->figNamespace = $data['ns'];
       $this->rootNode = $data['root'];
   }

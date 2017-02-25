@@ -96,17 +96,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 */
 	private $caseSwitched;
 
-	/**
-	 * The actual file that contains the current tag. Useful for nested includes,
-	 * to determine the real path of the relatively specified filename to include.
-	 * Also useful for translation, because of the stacked model of dictionaries :
-	 * a dictionary is attached to a fig file, so if the fig file was included in a
-	 * parent one, after "returning" from the include, the parent fig file no longer sees
-	 * the dictionaries declared in the child fig.
-	 * @var File
-	 */
-	private $currentFile;
-
 
 	/**
 	 * Indicates whether the XML tag must be rendered as html-void.
@@ -146,18 +135,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$this->xmlLineNumber = $xmlLineNumber;
 	}
 
-	/**
-	 * We accept here a null argument, so as to make it possible
-	 * to source a View by direct String rather that loading a physical file.
-	 * @todo This is not the best approach. It will be preferable to
-	 * provide a native View::loadFromString mechanism, which will handle
-	 * properly the null-file special case.
-	 *
-	 * @param File $file
-	 */
-	public function setCurrentFile(File $file = null) {
-		$this->currentFile = & $file;
-	}
 	/**
 	 * @return string
 	 */

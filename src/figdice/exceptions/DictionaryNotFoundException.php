@@ -23,8 +23,6 @@
 
 namespace figdice\exceptions;
 
-use figdice\classes\File;
-
 class DictionaryNotFoundException extends \Exception {
   private $dictionaryName;
 

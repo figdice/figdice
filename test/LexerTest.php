@@ -32,7 +32,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 
   private function lexParse($expression) {
     $lexer = new Lexer($expression);
-    $parseResult = $lexer->parse(new ViewElementTag(new View(), 'dummy', 0));
+    $context = new \figdice\classes\Context(new View());
+
+    $parseResult = $lexer->parse($context);
     $this->assertTrue($parseResult);
 
     return $lexer->getTree();
@@ -47,15 +49,14 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     // which must respond to the getCurrentFile method.
 
     $view = $this->getMock('\\figdice\\View');
-    $viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
     $viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
-    $viewElement->expects($this->any())
-      ->method('getCurrentFile')
-      ->will($this->returnValue($viewFile));
+
+    $context = new \figdice\classes\Context($view);
+    $context->tag = $viewElement;
 
     // Make sure that the passed expression is successfully parsed,
     // before asserting stuff on its evaluation.
-    $parseResult = $lexer->parse($viewElement);
+    $parseResult = $lexer->parse($context);
     $this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
     // Mock the mounting of root data universe into the view
@@ -66,7 +67,6 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     // Root Node
     $view->expects($this->any())->method('getRootNode')->will($this->returnValue($viewElement));
 
-    $context = new \figdice\classes\Context($view);
     return $lexer->evaluate($context);
   }
 

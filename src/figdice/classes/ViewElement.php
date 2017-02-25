@@ -98,7 +98,7 @@ abstract class ViewElement {
 		if(! isset($context->view->lexers[$expression]) ) {
 			$lexer = new Lexer($expression);
 			$context->view->lexers[$expression] = & $lexer;
-			$lexer->parse($this);
+			$lexer->parse($context);
 		}
 		else {
 			$lexer = & $context->view->lexers[$expression];

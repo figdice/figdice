@@ -25,10 +25,7 @@ use figdice\classes\Context;
 use figdice\FigFunction;
 use figdice\FunctionFactory;
 use figdice\View;
-use figdice\classes\File;
 use figdice\classes\lexer\Lexer;
-use figdice\classes\ViewElementTag;
-use figdice\exceptions\LexerUnexpectedCharException;
 
 
 /**
@@ -55,9 +52,12 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 			$this->prepareViewElement();
 		}
 
+		$context = new Context($this->view);
+		$context->tag = $this->viewElement;
+
 		// Make sure that the passed expression is successfully parsed,
 		// before asserting stuff on its evaluation.
-		$parseResult = $lexer->parse($this->viewElement);
+		$parseResult = $lexer->parse($context);
 		$this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
 		return $lexer->evaluate(new Context($this->view));
@@ -75,11 +75,7 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		$view = new View();
 		$this->view = $view;
 
-		$viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
 		$viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
-		$viewElement->expects($this->any())
-			->method('getCurrentFile')
-			->will($this->returnValue($viewFile));
 
 		$this->viewElement = $viewElement;
     }
