@@ -22,6 +22,8 @@
  */
 
 use figdice\View;
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamWrapper;
 
 /**
  * Unit Test Class for basic View loading
@@ -264,4 +266,37 @@ EXPECTED;
     $rendered = $view->render();
     $this->assertEquals($expected, $rendered);
   }
+    public function testDoctypeOnIncludedViewReplacesExisting()
+    {
+
+        $template1 =
+            '<fig:x>'."\n".
+            '   <div fig:plug="main">'."\n".
+            '   </div>'."\n".
+            '   <fig:include file="outer.html"/>'."\n".
+            '</fig:x>';
+
+        $template2 =
+            '<html fig:doctype="html">'."\n".
+            '   <div fig:slot="main"></div>'."\n".
+            '</html>';
+
+        vfsStream::setup('root');
+        vfsStream::newFile('template1.html')->withContent($template1)->at(vfsStreamWrapper::getRoot());
+        vfsStream::newFile('outer.html')->withContent($template2)->at(vfsStreamWrapper::getRoot());
+
+        $view = new View();
+        $view->loadFile(vfsStream::url('root/template1.html'));
+        $rendered = $view->render();
+
+        $expected =
+            '<!doctype html>'."\n".
+            ''."\n".
+            '   <html>'."\n".
+            '   <div>'."\n".
+            '   </div>'."\n".
+            '</html>'."\n"
+            ;
+        $this->assertEquals($expected, $rendered);
+    }
 }

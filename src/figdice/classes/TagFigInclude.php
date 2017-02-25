@@ -47,10 +47,18 @@ class TagFigInclude extends ViewElementTag
         $view = new View();
         $view->loadFile($realFilename);
 
+
         //Parse the subview (build its own tree).
         $context->pushInclude($realFilename, $view->figNamespace);
 
         $view->parse();
+
+        // If the included template specifies a doctype, use it globally for our context.
+        $doctype = $view->getRootNode()->getAttribute($context->figNamespace . 'doctype');
+        if ($doctype) {
+            $context->setDoctype($doctype);
+        }
+
         $result = $view->getRootNode()->render($context);
 
         $context->popInclude();

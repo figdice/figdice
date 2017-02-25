@@ -193,8 +193,6 @@ class View implements \Serializable {
 	 */
 	public $figNamespace = 'fig:';
 
-	private $doctype = null;
-
 	private $options = [];
 
 	/**
@@ -402,7 +400,8 @@ class View implements \Serializable {
 		// DOCTYPE
         // The doctype is necessarily on the root tag, declared as an attribute, example:
         //   fig:doctype="html"
-        $this->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
+        // However, it can be on the root node of an included template (when using the reverse plug/slot pattern)
+        $context->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
 
         try {
             $result = $this->rootNode->render($context);
@@ -418,8 +417,8 @@ class View implements \Serializable {
 		$result = $this->plugIntoSlots($context, $result);
 
 		// Take care of the doctype at top of output
-		if ($this->doctype) {
-			$result = '<!doctype ' . $this->doctype . '>' . "\n" . $result;
+		if ($context->getDoctype()) {
+			$result = '<!doctype ' . $context->getDoctype() . '>' . "\n" . $result;
 		}
 
 		return $result;
@@ -488,14 +487,6 @@ class View implements \Serializable {
         }
         return $result;
     }
-
-	/**
-	 * @param string $doctype
-	 */
-	private function setDoctype($doctype)
-	{
-		$this->doctype = $doctype;
-	}
 
 
 	private function openTagHandler($xmlParser, $tagName, $attributes) {

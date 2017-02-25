@@ -7,6 +7,9 @@ use figdice\View;
 
 class Context
 {
+    /** @var string */
+    private $doctype = null;
+
     /** @var ViewElementTag */
     public $tag;
     /** @var string */
@@ -310,5 +313,17 @@ class Context
     public function getPlugs($slotName)
     {
         return array_key_exists($slotName, $this->plugs) ? $this->plugs[$slotName] : null;
+    }
+
+    /**
+     * @param string $doctype
+     */
+    public function setDoctype($doctype)
+    {
+        $this->doctype = $doctype;
+    }
+    public function getDoctype()
+    {
+        return $this->doctype;
     }
 }
