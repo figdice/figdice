@@ -206,6 +206,7 @@ class View implements \Serializable {
 		$this->callStackData = array(array());
 		$this->functionFactories = array(new NativeFunctionFactory());
 		$this->language = null;
+		$this->filename = null;
 	}
 
 	/**
@@ -804,7 +805,7 @@ class View implements \Serializable {
       $data = unserialize($serialized);
 
       $this->bParsed = true;
-      $this->file = $data['f'];
+      $this->filename = $data['f'];
       $this->figNamespace = $data['ns'];
       $this->rootNode = $data['root'];
   }

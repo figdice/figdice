@@ -24,6 +24,7 @@
 namespace figdice\test;
 
 use figdice\exceptions\FeedClassNotFoundException;
+use figdice\exceptions\RequiredAttributeException;
 use figdice\Feed;
 use figdice\Filter;
 use figdice\FilterFactory;
@@ -489,6 +490,28 @@ ENDEXPECTED;
         $this->assertEquals($expected, $output);
     }
 
+
+    /**
+     * @expectedException \figdice\exceptions\RequiredAttributeException
+     */
+    public function testFigCDataWithoutFileAttrRaisesException()
+    {
+        $view = new View();
+        $view->loadString('<fig:cdata other-attr="dummy" />');
+        $view->render();
+        $this->assertTrue(false);
+    }
+
+    /**
+     * @expectedException \figdice\exceptions\FileNotFoundException
+     */
+    public function testFigCDataOfFileNotFoundRaisesException()
+    {
+        $view = new View();
+        $view->loadString('<fig:cdata file="not-found" />');
+        $view->render();
+        $this->assertTrue(false);
+    }
 
 }
 
