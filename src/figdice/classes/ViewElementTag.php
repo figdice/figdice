@@ -81,7 +81,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
   /**
    * @var ViewElement[]
    */
-	private $children;
+	protected $children;
 
 
 	/**

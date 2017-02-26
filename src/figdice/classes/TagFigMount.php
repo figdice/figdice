@@ -23,12 +23,13 @@
 
 namespace figdice\classes;
 
-use figdice\exceptions\RequiredAttributeException;
+use figdice\exceptions\RequiredAttributeParsingException;
 
 class TagFigMount extends ViewElementTag {
 	const TAGNAME = 'mount';
 
 	private $mountTarget;
+	private $value;
 
 	public function __construct($name, $xmlLineNumber) {
 		parent::__construct($name, $xmlLineNumber);
@@ -42,15 +43,17 @@ class TagFigMount extends ViewElementTag {
 
         $this->attributes = $attributes;
 
-        $this->mountTarget = isset($this->attributes['target']) ? $this->attributes['target'] : null;
+        $this->mountTarget = $this->getAttribute('target', null);
+        $this->value = $this->getAttribute('value', null);
+
+        unset($this->attributes['target']);
+        unset($this->attributes['value']);
 
         if(null === $this->mountTarget) {
-            throw new RequiredAttributeException($this->getTagName(),
-                $this->getCurrentFile()->getFilename(),
+            throw new RequiredAttributeParsingException($this->getTagName(),
                 $this->xmlLineNumber,
-                'Missing "target" attribute for '.$this->getTagName().' tag, in ' . $this->getCurrentFile()->getFilename() . '(' . $this->xmlLineNumber . ')');
+                'Missing "target" attribute for '.$this->getTagName().' tag (' . $this->xmlLineNumber . ')');
         }
-
     }
 
 	public function render(Context $context) {
@@ -59,9 +62,8 @@ class TagFigMount extends ViewElementTag {
     }
     private function fig_mount(Context $context) {
         //When an explicit value="" attribute exists, use its contents as a Lex expression to evaluate.
-        if($this->hasAttribute('value')) {
-            $valueExpression = $this->getAttribute('value');
-            $value = $this->evaluate($context, $valueExpression);
+        if(null !== $this->value) {
+            $value = $this->evaluate($context, $this->value);
         }
         //Otherwise, no value attribute: then we render the inner contents of the fig:mount into the target variable.
         else {
@@ -71,5 +73,22 @@ class TagFigMount extends ViewElementTag {
         }
 
         $context->view->mount($this->mountTarget, $value);
+    }
+
+    public function serialize()
+    {
+        return serialize([
+            'target' => $this->mountTarget,
+            'value' => $this->value,
+            'tree' => $this->children
+        ]);
+    }
+
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        $this->mountTarget = $data['target'];
+        $this->value = $data['value'];
+        $this->children = $data['tree'];
     }
 }

@@ -45,6 +45,10 @@ class TagFigInclude extends ViewElementTag
         $realFilename = dirname($context->getFilename()).'/'.$file;
         //Create a sub-view, attached to the current element.
         $view = new View();
+
+        if ($context->view->getTempPath() && $context->view->getTemplatesRoot()) {
+            $view->setTempPath($context->view->getTempPath(), $context->view->getTemplatesRoot());
+        }
         $view->loadFile($realFilename);
 
 
@@ -63,5 +67,15 @@ class TagFigInclude extends ViewElementTag
 
         $context->popInclude();
         return $result;
+    }
+
+    public function serialize()
+    {
+        // This is all there is to a fig:cdata tag!
+        return serialize($this->includedFile);
+    }
+    public function unserialize($serialized)
+    {
+        $this->includedFile = unserialize($serialized);
     }
 }

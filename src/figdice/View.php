@@ -58,6 +58,9 @@ class View implements \Serializable {
 
 	const GLOBAL_PLUGS = 'GLOBAL_PLUGS';
 
+	/** @var bool Indicates whether this object was retrieved by unserializing */
+	private $unserialized = false;
+
 	/**
 	 * Textual source of the transformation.
 	 *
@@ -76,6 +79,13 @@ class View implements \Serializable {
 	 * @var string
 	 */
 	private $tempPath;
+
+	/**
+     * The root folder for the templates, from which to derive the filenames of cached views.
+     * @var string
+     */
+	private $templatesRoot;
+
 	/**
 	 * The Filter Factory instance.
      * If no factory is defined, the View will consider that the filter class are already
@@ -275,6 +285,17 @@ class View implements \Serializable {
 	public function loadFile($filename) {
 		$this->filename = $filename;
 
+
+		// If a cache directory was specified,
+        // try to load from it
+		if ($this->tempPath) {
+		    $cacheFile = $this->makeCacheFilename();
+            if (file_exists($cacheFile) && (! file_exists($this->filename) || (filemtime($this->filename) < filemtime($cacheFile)) )) {
+                $this->loadFromSerialized(file_get_contents($cacheFile));
+                return;
+            }
+        }
+
 		if(file_exists($filename)) {
 			$this->source = file_get_contents($filename);
 		}
@@ -285,14 +306,12 @@ class View implements \Serializable {
 	}
 
 	/**
-	 * Instead of loading a file, you can load a string, and optionally pass
-	 * a "working directory" (mainly useful for includes).
-	 * This creates a File object with no real filesystem location.
+	 * Instead of loading a file, you can load a string.
+	 * Includes and cdata files are taken relative to the working directory.
 	 * @param string $string
-	 * @param string|null $workingDirectory
 	 */
-	public function loadString($string, $workingDirectory = null) {
-	  $this->filename = $workingDirectory . '/(null)';
+	public function loadString($string) {
+	  $this->filename = null;
 	  $this->source = $string;
 	}
 	/**
@@ -326,12 +345,12 @@ class View implements \Serializable {
 		}
 
 		if ($this->replacements) {
-        // We cannot rely of html_entity_decode,
-        // because it would replace &amp; and &lt; as well,
-        // whereas we need to keep them unmodified.
-        // We must do it manually, with a modified hardcopy 
-        // of PHP 5.4+ 's get_html_translation_table(ENT_XHTML)
-        $this->source = XMLEntityTransformer::replace($this->source);
+            // We cannot rely of html_entity_decode,
+            // because it would replace &amp; and &lt; as well,
+            // whereas we need to keep them unmodified.
+            // We must do it manually, with a modified hardcopy
+            // of PHP 5.4+ 's get_html_translation_table(ENT_XHTML)
+            $this->source = XMLEntityTransformer::replace($this->source);
 		}
 		
 		$this->xmlParser = xml_parser_create('UTF-8');
@@ -374,7 +393,28 @@ class View implements \Serializable {
 					($this->filename ? $this->filename : '(null)'),
 					$lineNumber);
 		}
-	}
+
+		// Store a serialized version of the parsed tree, if successfully parsed,
+        // and if we've got a cache path.
+        if ( ($this->tempPath) && ($this->filename !== null) && (! $this->unserialized) ) {
+            $cacheFile = $this->makeCacheFilename();
+            file_put_contents($cacheFile, serialize($this));
+        }
+
+
+    }
+
+    /**
+     * The compiled file is at the same subfolder location as the source file,
+     * relative to the templatesRoot directory, but under the tempPath directory.
+     * In other words, tempPath and templatesRoot correspond together.
+     * @return string
+     */
+    private function makeCacheFilename()
+    {
+        $cacheFile = str_replace($this->templatesRoot, $this->tempPath . '/figs', $this->filename) . '.fig';
+        return $cacheFile;
+    }
 
     /**
      * Process parsed source and render view,
@@ -423,15 +463,18 @@ class View implements \Serializable {
 		return $result;
 	}
 
-	/**
-	 * Specifies the folder in which the engine will be able to produce 
-	 * temporary files, for JIT-compilation and caching purposes. The engine will 
-	 * not attempt to use cache-based optimization features if you leave 
-	 * this property blank.
-	 * @param string $path
-	 */
-	public function setTempPath($path) {
+    /**
+     * Specifies the folder in which the engine will be able to produce
+     * temporary files, for JIT-compilation and caching purposes. The engine will
+     * not attempt to use cache-based optimization features if you leave
+     * this property blank.
+     *
+     * @param string $path
+     * @param string $templatesRoot
+     */
+	public function setTempPath($path, $templatesRoot) {
 		$this->tempPath = $path;
+		$this->templatesRoot = $templatesRoot;
 	}
 	/**
 	 * The folder in which FigDice can store its cache
@@ -441,6 +484,18 @@ class View implements \Serializable {
 	public function getTempPath() {
 		return $this->tempPath;
 	}
+	/**
+     * The absolute root of all the tree of templates.
+     * This value is important when deriving the filename for the cache of a template or
+     * its sub-templates (included).
+     * The cache directory contains a tree similar to that of the source templates,
+     * and you must indicate what source root dir corresponds to the root cache dir.
+     * @return string
+     */
+	public function getTemplatesRoot()
+    {
+	    return $this->templatesRoot;
+    }
 	/**
 	 * Returns the Filter Factory instance attachted to the view.
 	 *
@@ -809,5 +864,20 @@ class View implements \Serializable {
       $this->filename = $data['f'];
       $this->figNamespace = $data['ns'];
       $this->rootNode = $data['root'];
+
+      $this->unserialized = true;
   }
+
+    private function loadFromSerialized($data)
+    {
+        /** @var View $view */
+        $view = unserialize($data);
+
+        $this->bParsed = true;
+        $this->filename = $view->filename;
+        $this->figNamespace = $view->figNamespace;
+        $this->rootNode = $view->rootNode;
+
+        $this->unserialized = true;
+    }
 }

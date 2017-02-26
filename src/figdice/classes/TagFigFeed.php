@@ -114,4 +114,19 @@ class TagFigFeed extends ViewElementTag {
         }
 
     }
+
+    public function serialize()
+    {
+        return serialize([
+            'class' => $this->feedClass,
+            'attr' => $this->attributes
+        ]);
+    }
+
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        $this->feedClass = $data['class'];
+        $this->attributes = $data['attr'];
+    }
 }

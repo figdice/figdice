@@ -23,14 +23,15 @@
 
 namespace figdice\classes;
 
-use figdice\exceptions\DictionaryDuplicateKeyException;
 use figdice\exceptions\FileNotFoundException;
-use figdice\exceptions\RequiredAttributeException;
+use figdice\exceptions\RequiredAttributeParsingException;
 
 class TagFigDictionary extends ViewElementTag {
 	const TAGNAME = 'dictionary';
 
 	private $dicFile;
+	private $dicName;
+	private $source;
 
 	public function __construct($name, $xmlLineNumber) {
 		parent::__construct($name, $xmlLineNumber);
@@ -44,13 +45,19 @@ class TagFigDictionary extends ViewElementTag {
 
         $this->attributes = $attributes;
 
-        $this->dicFile = isset($this->attributes['file']) ? $this->attributes['file'] : null;
+        $this->dicFile = $this->getAttribute('file', null);
+        $this->dicName = $this->getAttribute('name', null);
+        $this->source = $this->getAttribute('source', null);
+
+        unset($this->attributes['file']);
+        unset($this->attributes['name']);
+        unset($this->attributes['source']);
+
 
         if(null === $this->dicFile) {
-            throw new RequiredAttributeException($this->getTagName(),
-                $this->getCurrentFile()->getFilename(),
+            throw new RequiredAttributeParsingException($this->getTagName(),
                 $this->xmlLineNumber,
-                'Missing "file" attribute for '.$this->getTagName().' tag, in ' . $this->getCurrentFile()->getFilename() . '(' . $this->xmlLineNumber . ')');
+                'Missing "file" attribute for '.$this->getTagName().' tag (' . $this->xmlLineNumber . ')');
         }
 
     }
@@ -75,12 +82,10 @@ class TagFigDictionary extends ViewElementTag {
         $file = $this->dicFile;
         $filename = $context->view->getTranslationPath() . '/' . $context->view->getLanguage() . '/' . $file;
 
-        $name = $this->getAttribute('name', null);
-        $source = $this->getAttribute('source', null);
-        $dictionary = new Dictionary($filename, $source);
+        $dictionary = new Dictionary($filename, $this->source);
 
 
-        if ( ($context->view->getLanguage() == '') || ($source == $context->view->getLanguage()) ) {
+        if ( ($context->view->getLanguage() == '') || ($this->source == $context->view->getLanguage()) ) {
             // If the current View does not specify a Language,
             // or if the dictionary to load is same language as View,
             // let's not care about i18n.
@@ -89,7 +94,7 @@ class TagFigDictionary extends ViewElementTag {
             // However, we still need to hook the Dictionary object as a placeholder,
             // so that subsequent trans tag for the given dic name and source will
             // simply render their contents.
-            $this->getCurrentFile()->addDictionary($dictionary, $name);
+            $context->addDictionary($dictionary, $this->dicName);
             return '';
         }
 
@@ -129,7 +134,23 @@ class TagFigDictionary extends ViewElementTag {
         //Hook the dictionary to the current file.
         //(in fact this will bubble up the message as high as possible, ie:
         //to the highest parent which does not bear a dictionary of same name)
-        $context->addDictionary($dictionary, $name);
+        $context->addDictionary($dictionary, $this->dicName);
         return '';
+    }
+
+    public function serialize()
+    {
+        return serialize([
+            'file' => $this->dicFile,
+            'name' => $this->dicName,
+            'src' =>  $this->source
+        ]);
+    }
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        $this->dicFile = $data['file'];
+        $this->dicName = $data['name'];
+        $this->source = $data['src'];
     }
 }
