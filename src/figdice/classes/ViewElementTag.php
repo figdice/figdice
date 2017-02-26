@@ -1124,13 +1124,23 @@ class ViewElementTag extends ViewElement implements \Serializable {
     // do not use in production.
 	public function serialize()
     {
-        return serialize([
+        $data = [
             'tag' => $this->name,
             'attr' => $this->attributes,
             'line' => $this->xmlLineNumber,
             'ac' => $this->autoclose,
             'tree' => $this->children,
-        ]);
+        ];
+
+        if ($this->figAuto) $data['auto'] = $this->figAuto;
+        if ($this->figCall) $data['call'] = $this->figCall;
+        if ($this->figCond) $data['cond'] = $this->figCond;
+        if ($this->figMacro) $data['macro'] = $this->figMacro;
+        if ($this->figText) $data['text'] = $this->figText;
+        if ($this->figVoid) $data['void'] = $this->figVoid;
+        if ($this->figWalk) $data['walk'] = $this->figWalk;
+
+        return serialize($data);
     }
     public function unserialize($serialized)
     {
@@ -1140,5 +1150,13 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $this->xmlLineNumber = $data['line'];
         $this->autoclose = $data['ac'];
         $this->children = $data['tree'];
+
+        $this->figAuto = isset($data['auto']) ? $data['auto'] : null;
+        $this->figCall = isset($data['call']) ? $data['call'] : null;
+        $this->figCond = isset($data['cond']) ? $data['cond'] : null;
+        $this->figMacro = isset($data['macro']) ? $data['macro'] : null;
+        $this->figText = isset($data['text']) ? $data['text'] : null;
+        $this->figVoid = isset($data['void']) ? $data['void'] : null;
+        $this->figWalk = isset($data['walk']) ? $data['walk'] : null;
     }
 }
