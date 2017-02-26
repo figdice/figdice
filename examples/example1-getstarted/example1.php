@@ -52,6 +52,14 @@ try {
 //  these values will become available form within the template
 //  as: /document/title
 //      /document/css/textColor
+// NB : THIS IS NOT the "FigDice" way for pushing data into a template.
+//      The "mount" method is only given for those coming from the Twig-like template engines
+//      (i.e. virtually any other engine except FigDice),
+//      where the controller is expected to push the data to be displayed.
+//      In FigDice, as you will learn in Example 4 (Feeds), the best practice pattern is to
+//      supply for the View a set of Feed classes, which the template is free to pull (or not)
+//      according to its own layout design.
+//      But let's use the direct "mount" for now.
 $view->mount('document', array(
 	'title' => 'My first FigDice exercise',
 	'css' => array(
