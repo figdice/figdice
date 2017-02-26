@@ -836,9 +836,16 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			$macroElement = & $context->view->macros[$macroName];
 			$context->view->pushStackData($arguments);
 
+			// Hide any current iteration during macro invocation
+            $context->pushIteration(new Iteration(0));
+
 			//Now render the macro contents, but do not take into account the fig:macro
 			//that its root tag holds.
 			$result = $macroElement->renderNoMacro($context);
+
+			// Restore the previous iteration context
+            $context->popIteration();
+
 			$context->view->popStackData();
 			return $result;
 			//unset($macroElement->iteration);
