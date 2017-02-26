@@ -120,18 +120,6 @@ ENDHTML;
     $this->assertEquals(trim($expected), trim($output));
   }
 	
-  public function testWalkIndexedArray()
-  {
-    $source = <<<ENDXML
-<fig:x fig:walk="/data">
-  <fig:x fig:text="."/>
-</fig:x>
-ENDXML;
-    $this->view->loadString($source);
-    $this->view->mount('data', array('a', 'b', 'c'));
-    $this->assertEquals("a\nb\nc\n", $this->view->render());
-  }
-
 
   public function testLoadXMLwithUTF8AccentsAndDeclaredEntities()
   {
@@ -223,7 +211,7 @@ ENDXML;
     $output = $view->render();
 	  
     $expected = <<<ENDHTML
-<div>
+  <div>
     <a href="two.html">two</a>
   </div>
 

@@ -21,10 +21,20 @@ class MacroTest extends PHPUnit_Framework_TestCase
 
         $view->loadString($template);
 
-        $view->mount('arr', [1, 2]);
-        $rendered = trim( $view->render() );
+        $view->mount('arr', [1, 2, 3]);
+        $rendered = /*trim(*/ $view->render() /*)*/;
 
-        $expected = "1=0\n  \n  \n  2=0";
+        $expected =
+            "  \n".
+            "\n".
+            "          1=0\n".
+            "  \n".
+            "          2=0\n".
+            "  \n".
+            "          3=0\n".
+            "  \n".
+            "  \n"
+        ;
         $this->assertEquals($expected, $rendered);
     }
 }

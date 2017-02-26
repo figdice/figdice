@@ -291,7 +291,7 @@ EXPECTED;
 
         $expected =
             '<!doctype html>'."\n".
-            ''."\n".
+            "   \n".
             '   <html>'."\n".
             '   <div>'."\n".
             '   </div>'."\n".

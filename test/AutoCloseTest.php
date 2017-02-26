@@ -87,7 +87,7 @@ TEMPLATE;
     $expected = <<<EXPECTED
 <html>
   <link href="/assets/style.css" rel="stylesheet" />
-  <script src="/assets/require.js"></script>
+    <script src="/assets/require.js"></script>
 
 </html>
 EXPECTED;
@@ -113,7 +113,7 @@ TEMPLATE;
     $expected = <<<EXPECTED
 <html>
   <link href="/assets/style.css" rel="stylesheet" />
-  <script src="/assets/require.js"></script>
+    <script src="/assets/require.js"></script>
   <link href="/assets/style.css" rel="stylesheet" />
 
 </html>

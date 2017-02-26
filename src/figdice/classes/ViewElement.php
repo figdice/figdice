@@ -59,10 +59,6 @@ abstract class ViewElement {
 	/**
 	 * @var ViewElement
 	 */
-	public $previousSibling;
-	/**
-	 * @var ViewElement
-	 */
 	public $nextSibling;
 
 	/**
@@ -79,7 +75,6 @@ abstract class ViewElement {
 		$this->outputBuffer = null;
 		$this->autoclose = true;
 		$this->parent = null;
-		$this->previousSibling = null;
 	}
 
 

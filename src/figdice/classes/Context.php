@@ -21,6 +21,9 @@ class Context
     /** @var View */
     public $view;
 
+    /** @var ViewElement[] Stack of previous siblings during children rendering loop*/
+    private $previousSibling = [];
+
     /** @var bool[] */
     private $doNotRenderFigParams = [ false ];
 
@@ -61,7 +64,7 @@ class Context
     /**
      * Array of named elements that are used as content providers
      * to fill in slots by the same name.
-     * @var Plug[]
+     * @var Plug[][]
      */
     private $plugs = [];
 
@@ -129,6 +132,7 @@ class Context
         array_push($this->bypassWalk, false);
         array_push($this->caseSwitchwed, false);
         array_push($this->runtimeAttributes, []);
+        array_push($this->previousSibling, null);
         $this->tag = $tag;
     }
     public function popTag()
@@ -137,6 +141,7 @@ class Context
         array_pop($this->caseSwitchwed);
         array_pop($this->bypassWalk);
         array_pop($this->runtimeAttributes);
+        array_pop($this->previousSibling);
     }
 
     public function getFilename()
@@ -298,8 +303,7 @@ class Context
     }
 
     /**
-     * @param $slotName
-     * @param ViewElementTag $element
+     * @param string $slotName
      * @param string $renderedString
      * @param bool $isAppend
      */
@@ -382,5 +386,22 @@ class Context
     public function setParentRuntimeAttribute($name, $value)
     {
         $this->runtimeAttributes[count($this->runtimeAttributes) - 2][$name] = $value;
+    }
+
+    /**
+     * Retain a reference to the element just before, when rendering the children.
+     * @param ViewElement|null $previousSilbing
+     */
+    public function setPreviousSibling(ViewElement $previousSilbing = null)
+    {
+        $this->previousSibling[count($this->previousSibling) - 1] = $previousSilbing;
+    }
+
+    /**
+     * @return ViewElement|null
+     */
+    public function getPreviousSibling()
+    {
+        return (count($this->previousSibling) - 2 > 0) ? $this->previousSibling[count($this->previousSibling) - 2] : null;
     }
 }

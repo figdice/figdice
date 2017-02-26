@@ -40,7 +40,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	private $name;
 
 	protected $attributes;
-	private $runtimeAttributes;
 
     /**
      * The value for fig:auto attribute, or null if not present
@@ -189,23 +188,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		return array_key_exists($name, $this->attributes);
 	}
 
-	/**
-	 * Indicates whether the current tag carries the specified attribute within
-	 * the fig: namespace (where "fig:" is soft-coded according the xmlns:fig).
-	 * @param string $figNamespace
-	 * @param string $name
-	 * @return bool
-	 */
-	private function hasFigAttribute($figNamespace, $name)
-	{
-		return $this->hasAttribute($figNamespace . $name);
-	}
 
 	public function appendChild(ViewElement & $child) {
-		if(0 < count($this->children)) {
-			$this->children[count($this->children) - 1]->nextSibling = & $child;
-			$child->previousSibling = & $this->children[count($this->children) - 1];
-		}
 		$this->children[] = $child;
 	}
 
@@ -323,12 +307,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$newElement = new ViewElementCData();
 		$newElement->outputBuffer .= $cdata;
 		$newElement->parent = & $this;
-		$newElement->previousSibling = null;
-		if(count($this->children))
-		{
-			$newElement->previousSibling = & $this->children[count($this->children) - 1];
-			$newElement->previousSibling->nextSibling = & $newElement;
-		}
 		$this->children[] = & $newElement;
 	}
 
@@ -340,8 +318,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$newElement = new ViewElementCData();
 		$newElement->outputBuffer .= $cdata;
 		$newElement->parent = & $this->parent;
-		$newElement->previousSibling = & $this;
-		$this->nextSibling = & $newElement;
 		$this->parent->children[] = & $newElement;
 	}
 
@@ -725,9 +701,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			if( $this->isMute($context) ) {
 				if(isset($this->children[0]) && ($this->children[0] instanceof ViewElementCData) ) {
 					//TODO: comprendre pourquoi il me reste des blancs avant ?xml
-					$this->children[0]->outputBuffer = ltrim($this->children[0]->outputBuffer);
+					$this->children[0]->outputBuffer = preg_replace('#^[ \\t]*\\n#', '', $this->children[0]->outputBuffer);
 				}
 			}
+
+            $context->setPreviousSibling(null);
 
 			for($iChild = 0; $iChild < count($this->children); ++$iChild) {
 				$child = & $this->children[$iChild];
@@ -748,7 +726,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
 					$subRender = $subRender->render($context);
 				}
 				$result .= $subRender;
+
+                $context->setPreviousSibling($child);
 			}
+			$context->setPreviousSibling(null);
 		}
 		else {
 			$result = $this->outputBuffer;
@@ -964,10 +945,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				//so that the proper indenting is kept, and carriage returns
 				//between each iteration, if applies.
 				if(! $bFirstIteration) {
-					if($this->previousSibling) {
-						if($this->previousSibling instanceof ViewElementCData) {
-							if(($rtrim = rtrim($this->previousSibling->outputBuffer)) < $this->previousSibling->outputBuffer) {
-								$blankRPart = substr($this->previousSibling->outputBuffer, strlen($rtrim));
+					if($previousSibling = $context->getPreviousSibling()) {
+						if($previousSibling instanceof ViewElementCData) {
+							if(($rtrim = rtrim($previousSibling->outputBuffer)) < $previousSibling->outputBuffer) {
+								$blankRPart = substr($previousSibling->outputBuffer, strlen($rtrim));
 								$precedingBlank = strrchr($blankRPart, "\n");
 								if($precedingBlank === false) {
 									$precedingBlank = $blankRPart;
