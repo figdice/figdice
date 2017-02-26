@@ -28,6 +28,12 @@ class Context
     /** @var ViewElementTag[] stack of elements being rendered while descending the tree */
     private $breadcrumb = [];
 
+    /** @var bool[] stack of flag "caseSwitched" of element being rendered */
+    private $caseSwitchwed = [];
+
+    /** @var mixed[][] Stack of array of runtime attributes */
+    private $runtimeAttributes = [];
+
     /** @var array stack of filenames being rendered, along the nested includes */
     private $filenames = [];
 
@@ -121,12 +127,16 @@ class Context
     {
         array_push($this->breadcrumb, $tag);
         array_push($this->bypassWalk, false);
+        array_push($this->caseSwitchwed, false);
+        array_push($this->runtimeAttributes, []);
         $this->tag = $tag;
     }
     public function popTag()
     {
         $this->tag = array_pop($this->breadcrumb);
+        array_pop($this->caseSwitchwed);
         array_pop($this->bypassWalk);
+        array_pop($this->runtimeAttributes);
     }
 
     public function getFilename()
@@ -325,5 +335,52 @@ class Context
     public function getDoctype()
     {
         return $this->doctype;
+    }
+
+    /**
+     * During rendering, indicates whether the current node has a parent
+     * @return bool
+     */
+    public function hasParent()
+    {
+        return count($this->breadcrumb) > 1;
+    }
+
+    /**
+     * Indicates whether the PARENT element of currently rendering tag, has its
+     * caseSwitched flag on.
+     * @return bool
+     */
+    public function isCaseSwitched()
+    {
+        return $this->caseSwitchwed[count($this->caseSwitchwed) - 2];
+    }
+    public function setCaseSwitched()
+    {
+        $this->caseSwitchwed[count($this->caseSwitchwed) - 2] = true;
+    }
+
+    public function clearRuntimeAttributes()
+    {
+        $this->runtimeAttributes[count($this->runtimeAttributes) - 1] = [];
+    }
+
+    /**
+     * @return array of runtime attributes for the currently rendering tag
+     */
+    public function getRuntimeAttributes()
+    {
+        return $this->runtimeAttributes[count($this->runtimeAttributes) - 1];
+    }
+
+    /**
+     * Sets the specified attribute in the parent of the currently rendering tag.
+     * This is used when processing a fig:attr child, to alter the parent's attributes
+     * @param string $name
+     * @param mixed $value
+     */
+    public function setParentRuntimeAttribute($name, $value)
+    {
+        $this->runtimeAttributes[count($this->runtimeAttributes) - 2][$name] = $value;
     }
 }

@@ -130,7 +130,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		parent::__construct();
 		$this->name = $name;
 		$this->attributes = array();
-		$this->runtimeAttributes = array();
 		$this->children = array();
 		$this->xmlLineNumber = $xmlLineNumber;
 	}
@@ -223,7 +222,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$matches = null;
 		$attributes = $this->attributes;
 
-		foreach($this->runtimeAttributes as $attributeName=>$runtimeAttr) {
+		$runtimeAttributes = $context->getRuntimeAttributes();
+
+		foreach($runtimeAttributes as $attributeName=>$runtimeAttr) {
 			$attributes[$attributeName] = $runtimeAttr;
 		}
 
@@ -412,8 +413,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//when the plug is stuffed into its slot, the parent of the plugged node
 		//reports that it was caseSwitched already.
 		if(isset($this->attributes[$context->figNamespace . 'case'])) {
-			if($this->parent) {
-				if($this->parent->caseSwitched) {
+			if($context->hasParent()) {
+				if($context->isCaseSwitched()) {
 					return '';
 				}
 				else {
@@ -423,7 +424,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 						return '';
 					}
 					else {
-						$this->parent->caseSwitched = true;
+						$context->setCaseSwitched();
 					}
 				}
 			}
@@ -448,7 +449,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
             //flag attribute
             // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
             if(isset($this->attributes['flag']) && $this->evaluate($context, $this->attributes['flag'])) {
-                $this->parent->runtimeAttributes[$this->attributes['name']] = new Flag();
+			    $context->setParentRuntimeAttribute($this->attributes['name'], new Flag());
             }
             else {
                 if ($this->hasAttribute('value')) {
@@ -456,7 +457,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
                     if (is_string($value)) {
                         $value = htmlspecialchars($value);
                     }
-                    $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
+                    $context->setParentRuntimeAttribute($this->attributes['name'],  $value);
                 } else {
                     $value = '';
                     /**
@@ -472,7 +473,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
                     }
                     //An XML attribute should not span accross several lines.
                     $value = trim(preg_replace("#[\n\r\t]+#", ' ', $value));
-                    $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
+                    $context->setParentRuntimeAttribute($this->attributes['name'], $value);
                 }
             }
             return '';
@@ -618,7 +619,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
                         $output = (string) $output;
                     } catch(\ErrorException $ex) {
                         throw new RenderingException($this->getTagName(),
-                            $this->getCurrentFilename(),
+                            $context->getFilename(),
                             $this->getLineNumber(),
                             $ex->getMessage()
                         );
@@ -704,7 +705,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			//for potential next iteration of same tag,
 			//because runtime attributes could be conditioned and the condition could eval differently
 			//in next iteration.
-			$this->runtimeAttributes = array();
+            $context->clearRuntimeAttributes();
 		}
 
 
@@ -1176,6 +1177,5 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $this->xmlLineNumber = $data['line'];
         $this->autoclose = $data['ac'];
         $this->children = $data['tree'];
-        $this->runtimeAttributes = [];
     }
 }
