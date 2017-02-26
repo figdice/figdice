@@ -108,4 +108,9 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
   {
     $this->assertEquals(0, $this->lexExpr('some(,)'));
   }
+
+  public function testDotDotsOutsideIterGiveEmpty()
+  {
+      $this->assertEquals('', $this->lexExpr('../x'));
+  }
 }

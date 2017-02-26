@@ -553,4 +553,27 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->lexExpr(' : ');
   }
 
+    /**
+     * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+     */
+    public function testTwoManyDotDotsAreUnimplemented()
+    {
+        $view = new View();
+        $template =
+            '<fig:w fig:walk="/arr">'."\n".
+            '  <fig:t fig:text="../../../x"/>'."\n".
+            '</fig:w>'
+        ;
+        $view->loadString($template);
+        $view->mount('arr', [1, 2, [3, 'y' => 4], 'x' => 7]);
+        $actual = $view->render();
+        $this->assertEquals('', $actual);
+
+        // I wish it were already fine to navigate through the parent iterations in
+        // nested loops, but for now I wrote only the immediate parent loop's access,
+        // with simply "../something".
+        // If anyone wants to contribute...
+        $this->assertTrue(false);
+    }
+
 }

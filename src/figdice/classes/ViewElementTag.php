@@ -26,7 +26,6 @@ namespace figdice\classes;
 use figdice\exceptions\RequiredAttributeParsingException;
 use figdice\exceptions\TagRenderingException;
 use figdice\Filter;
-use Psr\Log\LoggerInterface;
 use figdice\View;
 use figdice\exceptions\RenderingException;
 
@@ -368,11 +367,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 		//================================================================
 		//fig:case
-		//Warning: a fig:case on a tag that has also a fig:plug :
-		//because the plugged node is a reference to the current node,
-		//when the plug is stuffed into its slot, the parent of the plugged node
-		//reports that it was caseSwitched already.
 		if(isset($this->attributes[$context->figNamespace . 'case'])) {
+		    // Keep in mind that the case directive is written directly on the tag,
+            // and there is no "switch" statement on its container.
+            // So we must keep track at the parent level, of the current state of the case children.
 			if($context->hasParent()) {
 				if($context->isCaseSwitched()) {
 					return '';
@@ -758,12 +756,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	}
 
 
-
-
-	/**
-	 * Defines a macro in the dictionary of the
-	 * topmost view.
-	 */
+    /**
+     * Defines a macro in the dictionary of the
+     * topmost view.
+     * @param Context $context
+     * @return string
+     */
 	private function fig_macro(Context $context) {
 		$context->view->macros[$this->figMacro] = & $this;
 		return '';

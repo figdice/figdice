@@ -292,7 +292,7 @@ class View implements \Serializable {
 	 * @param string|null $workingDirectory
 	 */
 	public function loadString($string, $workingDirectory = null) {
-	  $this->file = $workingDirectory . '/(null)';
+	  $this->filename = $workingDirectory . '/(null)';
 	  $this->source = $string;
 	}
 	/**
@@ -314,11 +314,12 @@ class View implements \Serializable {
 	public function setReplacements($bool) {
 	    $this->replacements = $bool;
 	}
-	/**
-	 * Parse source.
-	 * @return void
-	 * @throws XMLParsingException
-	 */
+
+    /**
+     * Parse source.
+     * @throws RequiredAttributeException
+     * @throws XMLParsingException
+     */
 	public function parse() {
 		if($this->bParsed) {
 			return;
@@ -343,7 +344,6 @@ class View implements \Serializable {
 		//the offset in XML string as regarded by the parser.
 		$this->firstOpening = true;
 
-        $bSuccess = false;
 		try {
             $bSuccess = xml_parse($this->xmlParser, $this->source);
         } catch (RequiredAttributeParsingException $ex) {
@@ -380,6 +380,7 @@ class View implements \Serializable {
      * Process parsed source and render view,
      * using the data universe.
      * @return string
+     * @throws FeedClassNotFoundException
      * @throws RenderingException
      * @throws RequiredAttributeException
      * @throws XMLParsingException
@@ -749,7 +750,7 @@ class View implements \Serializable {
 
 	/**
 	 * Called by the ViewElementTag::fig_feed method,
-	 * to instanciate a feed by its class name.
+	 * to instantiate a feed by its class name.
 	 *
 	 * @param string $classname
 	 * @param array $attributes associative array of the extended parameters
