@@ -51,4 +51,14 @@ class TagFigCdata extends ViewElementTag {
         $cdata = file_get_contents($realfilename);
         return $cdata;
     }
+
+    public function serialize()
+    {
+        // This is all there is to a fig:cdata tag!
+        return serialize($this->dataFile);
+    }
+    public function unserialize($serialized)
+    {
+        $this->dataFile = unserialize($serialized);
+    }
 }
