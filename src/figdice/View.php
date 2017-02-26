@@ -289,6 +289,9 @@ class View implements \Serializable {
 		// If a cache directory was specified,
         // try to load from it
 		if ($this->tempPath) {
+		    if (! $this->templatesRoot) {
+		        $this->templatesRoot = dirname($filename);
+            }
 		    $cacheFile = $this->makeCacheFilename();
             if (file_exists($cacheFile) && (! file_exists($this->filename) || (filemtime($this->filename) < filemtime($cacheFile)) )) {
                 $this->loadFromSerialized(file_get_contents($cacheFile));
@@ -397,7 +400,7 @@ class View implements \Serializable {
 		// Store a serialized version of the parsed tree, if successfully parsed,
         // and if we've got a cache path.
         if ( ($this->tempPath) && ($this->filename !== null) && (! $this->unserialized) ) {
-            $cacheFile = $this->makeCacheFilename();
+            $cacheFile = $this->makeCacheFilename(true);
             file_put_contents($cacheFile, serialize($this));
         }
 
@@ -408,11 +411,22 @@ class View implements \Serializable {
      * The compiled file is at the same subfolder location as the source file,
      * relative to the templatesRoot directory, but under the tempPath directory.
      * In other words, tempPath and templatesRoot correspond together.
+     *
+     * @param bool $mkdir Whether to create the intermediate folder structure
      * @return string
      */
-    private function makeCacheFilename()
+    private function makeCacheFilename($mkdir = false)
     {
         $cacheFile = str_replace($this->templatesRoot, $this->tempPath . '/figs', $this->filename) . '.fig';
+        if ($mkdir) {
+            // Create the intermediary folders if not exist.
+            $intermed = dirname($cacheFile);
+            if (! file_exists($intermed)) {
+                // In case of permission problems, or file already exists (and is not a directory),
+                // the regular PHP warnings will be issued.
+                mkdir($intermed, 0700, true);
+            }
+        }
         return $cacheFile;
     }
 
@@ -472,7 +486,7 @@ class View implements \Serializable {
      * @param string $path
      * @param string $templatesRoot
      */
-	public function setTempPath($path, $templatesRoot) {
+	public function setTempPath($path, $templatesRoot = null) {
 		$this->tempPath = $path;
 		$this->templatesRoot = $templatesRoot;
 	}
