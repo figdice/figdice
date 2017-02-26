@@ -84,17 +84,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
    */
 	private $children;
 
-	/**
-	 * If an immediate child has a fig:case attribute,
-	 * if this caseSwitched boolean attribute is set, it will be skipped.
-	 * If caseSwitched is not set,
-	 * the fig:case acts as a fig:cond, and in case of success,
-	 * this caseSwitched boolean is set.
-	 *
-	 * @var boolean
-	 */
-	private $caseSwitched;
-
 
 	/**
 	 * Indicates whether the XML tag must be rendered as html-void.
@@ -361,11 +350,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		return $result;
 	}
 	private function renderNoMacro(Context $context) {
-
-		//Reset the switch status of the element,
-		//so that its immediate children can run the fig:case attribute form fresh.
-		$this->caseSwitched = false;
-
 
 
 		//================================================================
