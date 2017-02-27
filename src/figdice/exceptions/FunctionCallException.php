@@ -37,7 +37,15 @@ namespace figdice\exceptions;
  */
 class FunctionCallException extends \Exception {
 	private $funcName;
-	public function __construct($funcName, $message, $filename, $line) {
+
+    /**
+     * FunctionCallException constructor.
+     * @param string $funcName
+     * @param string $message
+     * @param string $filename
+     * @param int $line
+     */
+    public function __construct($funcName, $message, $filename, $line) {
 		parent::__construct($funcName . ': ' . $message);
 		$this->file = $filename;
 		$this->line = $line;

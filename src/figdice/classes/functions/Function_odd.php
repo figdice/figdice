@@ -23,21 +23,21 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 
 class Function_odd implements FigFunction {
 	public function __construct() {
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
-		$iteration = $viewElement->getIteration();
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return bool
+     */
+    public function evaluate(Context $context, $arity, $arguments) {
+		$iteration = $context->getIteration();
 		$position = $iteration->getPosition();
 		return (($position % 2) == 1);
 	}

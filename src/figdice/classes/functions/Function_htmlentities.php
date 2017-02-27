@@ -11,29 +11,31 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
 use \figdice\exceptions\FunctionCallException;
 
 class Function_htmlentities implements FigFunction {
 	public function __construct() {
 	}
 
-	/**
-	 * Function's arguments:
-	 *  string to escape
-	 * 
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    /**
+     * Function's arguments:
+     *  string to escape
+     *
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return mixed|string
+     * @throws FunctionCallException
+     */
+	public function evaluate(Context $context, $arity, $arguments) {
 		if($arity != 1) {
 			throw new FunctionCallException(
 				'htmlentities',
 				'Expects exactly 1 argument.',
-				$viewElement->getCurrentFile()->getFilename(), 
-				$viewElement->getLineNumber()
+				$context->getFilename(),
+				$context->tag->getLineNumber()
 			);
 		}
 

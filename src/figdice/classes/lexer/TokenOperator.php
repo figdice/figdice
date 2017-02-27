@@ -38,7 +38,7 @@ abstract class TokenOperator extends Token {
 	protected $priority;
 
 	/**
-	 * @var array
+	 * @var Token[]
 	 */
 	protected $operands;
 

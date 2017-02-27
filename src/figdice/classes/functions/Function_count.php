@@ -23,24 +23,38 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 
+/**
+ * The count function can be invoked with 0 or 1 arguments.
+ * 1 arg is: a countable collection, and it returns the count.
+ * 0 arg is: inside an iteration, it returns the total count of the iterating collection.
+ */
 class Function_count implements FigFunction {
 	public function __construct() {
 	}
-	
-	/**
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
-		$param = $arguments[0];
 
-		if(is_array($param))
-			return count($param);
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return int|mixed
+     */
+    public function evaluate(Context $context, $arity, $arguments) {
+
+        if ($arity == 1) {
+            $param = $arguments[0];
+            if (is_array($param)) {
+                return count($param);
+            }
+        }
+        else if ($arity == 0) {
+            if ($iter = $context->getIteration()) {
+                return $iter->getCount();
+            }
+        }
+
 		return 0;
 	}
 }

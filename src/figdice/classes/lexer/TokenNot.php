@@ -22,7 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenNot extends TokenOperator {
 	/**
@@ -36,12 +36,12 @@ class TokenNot extends TokenOperator {
 		return 1;
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
-		$operand = $this->operands[0]->evaluate($viewElement);
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
+		$operand = $this->operands[0]->evaluate($context);
 		return ! $operand;
 	}
 }

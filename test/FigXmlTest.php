@@ -24,6 +24,7 @@
 namespace figdice\test;
 
 use figdice\exceptions\FeedClassNotFoundException;
+use figdice\exceptions\RequiredAttributeException;
 use figdice\Feed;
 use figdice\Filter;
 use figdice\FilterFactory;
@@ -119,18 +120,6 @@ ENDHTML;
     $this->assertEquals(trim($expected), trim($output));
   }
 	
-  public function testWalkIndexedArray()
-  {
-    $source = <<<ENDXML
-<fig:x fig:walk="/data">
-  <fig:x fig:text="."/>
-</fig:x>
-ENDXML;
-    $this->view->loadString($source);
-    $this->view->mount('data', array('a', 'b', 'c'));
-    $this->assertEquals("a\nb\nc\n", $this->view->render());
-  }
-
 
   public function testLoadXMLwithUTF8AccentsAndDeclaredEntities()
   {
@@ -222,12 +211,36 @@ ENDXML;
     $output = $view->render();
 	  
     $expected = <<<ENDHTML
-<div>
+  <div>
     <a href="two.html">two</a>
   </div>
 
 ENDHTML;
     $this->assertEquals($expected, $output);
+  }
+
+
+  public function testCond()
+  {
+      $source1 = <<<ENDXML
+<html>
+<a fig:cond="12">Yes</a>
+<b fig:cond="2 - 2">No</b>
+</html>
+ENDXML;
+
+      $view = new View();
+      $view->loadString($source1);
+      $output = $view->render();
+
+      $expected = <<<ENDEXPECTED
+<html>
+<a>Yes</a>
+
+</html>
+ENDEXPECTED;
+      $this->assertEquals($expected, $output);
+
   }
 
   public function testCase()
@@ -465,6 +478,28 @@ ENDEXPECTED;
         $this->assertEquals($expected, $output);
     }
 
+
+    /**
+     * @expectedException \figdice\exceptions\RequiredAttributeException
+     */
+    public function testFigCDataWithoutFileAttrRaisesException()
+    {
+        $view = new View();
+        $view->loadString('<fig:cdata other-attr="dummy" />');
+        $view->render();
+        $this->assertTrue(false);
+    }
+
+    /**
+     * @expectedException \figdice\exceptions\FileNotFoundException
+     */
+    public function testFigCDataOfFileNotFoundRaisesException()
+    {
+        $view = new View();
+        $view->loadString('<fig:cdata file="not-found" />');
+        $view->render();
+        $this->assertTrue(false);
+    }
 
 }
 

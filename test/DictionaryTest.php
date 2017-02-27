@@ -23,7 +23,6 @@
 
 
 use figdice\View;
-use figdice\classes\File;
 use figdice\classes\ViewElementTag;
 use \org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
@@ -76,29 +75,50 @@ ENDXML;
     $this->assertEquals($expected, trim($this->view->render()) );
   }
 
+
+
   public function testDictionaryLoadedFromIncludedTemplate()
   {
     $this->view->loadFile(__DIR__.'/resources/DictionaryTestParent.xml');
     $this->view->setTranslationPath(__DIR__.'/resources/dict');
     $this->view->setLanguage('fr');
-    $output = trim($this->view->render());
+
+    // We will need to access the resolved dictionaries in their post-rendering state.
+      // The dictionaries are accessible through the Context object, which the view instantiates at render time,
+      // as a local variable. There is no access to the Context.
+      // We prepare a man-in-the-middle spoof ViewElementTag root node for the view.
+    $this->view->parse();
+    // After the parsing, the view has its root node. We will facade it
+      // with an object that knows to capture the Context instance it will receive when asked to render.
+      $rootNode = new ContextCheaterViewElementTag($this->view->getRootNode());
+      $reflectorView = new ReflectionClass($this->view);
+      $reflectorProp = $reflectorView->getProperty('rootNode');
+      $reflectorProp->setAccessible(true);
+      $reflectorProp->setValue($this->view, $rootNode);
+
+
+      $output = trim($this->view->render());
     $output = preg_replace('#^[ \t]+#m', '', $output);
     $output = preg_replace('#[ \t]+$#m', '', $output);
     $output = preg_replace('#\n+#', ';', $output);
     $this->assertEquals('key1-child;Ma chaîne traduite;key1-parent;key1-parent', $output);
 
-    // Now check that the key1-parent has been cached, because used twice
-    // But because the $cache array is private in Dictionary class,
-    // we use Reflection to break into it.
-    $reflector = new ReflectionClass(get_class(
-      // I know for a fact, that my test XML Parent template loads an "inParent" dic.
-        $dict = $this->view->getRootNode()->getCurrentFile()->getDictionary('inParent'))
-    );
-    $cacheProp = $reflector->getProperty('cache');
-    $cacheProp->setAccessible(true);
-    $cache = $cacheProp->getValue($dict);
-    // And I know for a fact that it translates twice the "key1" key.
-    $this->assertEquals('key1-parent', $cache['key1']);
+
+
+
+      // Now check that the key1-parent has been cached, because used twice
+      // But because the $cache array is private in Dictionary class,
+      // we use Reflection to break into it.
+      $reflector = new ReflectionClass(get_class(
+          // I know for a fact, that my test XML Parent template loads an "inParent" dic.
+              $dict = $rootNode->context->getDictionary('inParent'))
+      );
+      $cacheProp = $reflector->getProperty('cache');
+      $cacheProp->setAccessible(true);
+      $cache = $cacheProp->getValue($dict);
+      // And I know for a fact that it translates twice the "key1" key.
+      $this->assertEquals('key1-parent', $cache['key1']);
+
   }
 
   /**
@@ -149,7 +169,7 @@ DIC;
     // Indicate where the source dictionary is located
     $view->setTranslationPath(vfsStream::url('root'));
     // Indicate where the compiled dictionaries are located.
-    $view->setTempPath(vfsStream::url('root'));
+    $view->setCachePath(vfsStream::url('root'));
 
     $viewString = <<<ENDTEMPLATE
 <fig:template>
@@ -249,4 +269,28 @@ ENDTEMPLATE;
     $view->setTranslationPath(vfsStream::url('root'));
     $view->render();
   }
+}
+
+/**
+ * This class is used as a spoof for Root Node in View.
+ * It captures the instance of Context that it is passed, when asked to render.
+ */
+class ContextCheaterViewElementTag extends ViewElementTag
+{
+    public function __construct(ViewElementTag $realRootNode)
+    {
+        parent::__construct($realRootNode->getTagName(), $realRootNode->xmlLineNumber);
+        $this->realRootNode = $realRootNode;
+    }
+
+    /** @var \figdice\classes\Context */
+    public $context;
+    /** @var ViewElementTag */
+    private $realRootNode;
+
+    public function render(\figdice\classes\Context $context)
+    {
+        $this->context = $context;
+        return $this->realRootNode->render($context);
+    }
 }

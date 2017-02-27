@@ -32,7 +32,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 
   private function lexParse($expression) {
     $lexer = new Lexer($expression);
-    $parseResult = $lexer->parse(new ViewElementTag(new View(), 'dummy', 0));
+    $context = new \figdice\classes\Context(new View());
+
+    $parseResult = $lexer->parse($context);
     $this->assertTrue($parseResult);
 
     return $lexer->getTree();
@@ -47,15 +49,14 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     // which must respond to the getCurrentFile method.
 
     $view = $this->getMock('\\figdice\\View');
-    $viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
     $viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
-    $viewElement->expects($this->any())
-      ->method('getCurrentFile')
-      ->will($this->returnValue($viewFile));
+
+    $context = new \figdice\classes\Context($view);
+    $context->tag = $viewElement;
 
     // Make sure that the passed expression is successfully parsed,
     // before asserting stuff on its evaluation.
-    $parseResult = $lexer->parse($viewElement);
+    $parseResult = $lexer->parse($context);
     $this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
     // Mock the mounting of root data universe into the view
@@ -63,8 +64,10 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     // because relative path resolution involves full View class.
     // Here we can only have top-level symbols in our mock.
     $view->expects($this->any())->method('fetchData')->will($this->returnValue($data));
+    // Root Node
+    $view->expects($this->any())->method('getRootNode')->will($this->returnValue($viewElement));
 
-    return $lexer->evaluate($viewElement);
+    return $lexer->evaluate($context);
   }
 
 
@@ -549,5 +552,28 @@ class LexerTest extends PHPUnit_Framework_TestCase {
   {
     $this->lexExpr(' : ');
   }
+
+    /**
+     * @expectedException \figdice\exceptions\LexerUnexpectedCharException
+     */
+    public function testTwoManyDotDotsAreUnimplemented()
+    {
+        $view = new View();
+        $template =
+            '<fig:w fig:walk="/arr">'."\n".
+            '  <fig:t fig:text="../../../x"/>'."\n".
+            '</fig:w>'
+        ;
+        $view->loadString($template);
+        $view->mount('arr', [1, 2, [3, 'y' => 4], 'x' => 7]);
+        $actual = $view->render();
+        $this->assertEquals('', $actual);
+
+        // I wish it were already fine to navigate through the parent iterations in
+        // nested loops, but for now I wrote only the immediate parent loop's access,
+        // with simply "../something".
+        // If anyone wants to contribute...
+        $this->assertTrue(false);
+    }
 
 }

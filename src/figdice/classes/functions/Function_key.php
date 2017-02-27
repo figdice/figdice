@@ -23,24 +23,21 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 
 class Function_key implements FigFunction {
 	public function __construct() {
 	}
 
-	/**
-	 * @param {@link ViewElement} $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
-		/**
-		 * @var Iteration
-		 */
-		$iteration = $viewElement->getIteration();
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return mixed|string
+     */
+	public function evaluate(Context $context, $arity, $arguments) {
+		$iteration = $context->getIteration();
 		return $iteration->getKey();
 	}
 }

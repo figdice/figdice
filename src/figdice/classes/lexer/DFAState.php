@@ -24,15 +24,8 @@
 namespace figdice\classes\lexer;
 
 use \figdice\exceptions\LexerUnexpectedCharException;
-use \figdice\LoggerFactory;
-use Psr\Log\LoggerInterface;
 
 abstract class DFAState {
-	/**
-	 * @var LoggerInterface
-	 */
-	private $logger;
-
 	/**
 	 * @var boolean
 	 */
@@ -115,24 +108,17 @@ abstract class DFAState {
 	 */
 	protected function throwError($lexer, $char) {
 		$message = 'Unexpected char: ' . $char;
-		$message = get_class($this) . ': file: ' . $lexer->getViewFile()->getFilename() . '(' . $lexer->getViewLine() . '): ' . $message . ' in expression: ' . $lexer->getExpression();
-		if(! $this->logger) {
-			$this->logger = LoggerFactory::getLogger(get_class($this));
-		}
-		$this->logger->error($message);
-		throw new LexerUnexpectedCharException($message, $lexer->getViewFile()->getFilename(), $lexer->getViewLine());
+		$message = get_class($this) . ': file: ' . $lexer->getViewFile() . '(' . $lexer->getViewLine() . '): ' . $message . ' in expression: ' . $lexer->getExpression();
+		throw new LexerUnexpectedCharException($message, $lexer->getViewFile(), $lexer->getViewLine());
 	}
 
-	/**
-	 * @param Lexer $lexer
-	 * @param string $message
-	 */
+    /**
+     * @param Lexer $lexer
+     * @param string $message
+     * @throws LexerUnexpectedCharException
+     */
 	protected function throwErrorWithMessage($lexer, $message) {
-		$message = get_class($this) . ': file: ' . $lexer->getViewFile()->getFilename() . '(' . $lexer->getViewLine() . '): ' . $message . ' in expression: ' . $lexer->getExpression();
-		if(! $this->logger) {
-			$this->logger = LoggerFactory::getLogger(get_class($this));
-		}
-		$this->logger->error($message);
-		throw new LexerUnexpectedCharException($message, $lexer->getViewFile()->getFilename(), $lexer->getViewLine());
+		$message = get_class($this) . ': file: ' . $lexer->getViewFile() . '(' . $lexer->getViewLine() . '): ' . $message . ' in expression: ' . $lexer->getExpression();
+		throw new LexerUnexpectedCharException($message, $lexer->getViewFile(), $lexer->getViewLine());
 	}
 }

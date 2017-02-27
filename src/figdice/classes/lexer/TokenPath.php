@@ -1,30 +1,8 @@
 <?php
-/**
- * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2017, Gabriel Zerbib.
- * @version 2.3.4
- * @package FigDice
- *
- * This file is part of FigDice.
- *
- * FigDice is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * FigDice is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 namespace figdice\classes\lexer;
 
+use figdice\classes\Context;
 use figdice\classes\MagicReflector;
-use \figdice\classes\ViewElementTag;
 
 class TokenPath extends Token {
 	/**
@@ -44,11 +22,11 @@ class TokenPath extends Token {
 		$this->path[] = $pathElement;
 	}
 
-	/**
-	 * @param ViewElementTag $viewElement
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
 		$count = count($this->path);
 
 		$data = null;
@@ -56,7 +34,7 @@ class TokenPath extends Token {
 		for($i = 0; $i < $count; ++$i) {
 
 			if($this->path[$i] instanceof Token) {
-				$symbolName = $this->path[$i]->evaluate($viewElement);
+				$symbolName = $this->path[$i]->evaluate($context);
 			}
 			else if($this->path[$i] instanceof PathElementRoot) {
 				$symbolName = '/';
@@ -75,7 +53,7 @@ class TokenPath extends Token {
 			//anchor the path research to the point of the universe
 			//which the first-level path element refers to.
 			if($data === null) {
-				$data = $viewElement->getData($symbolName);
+				$data = $context->getData($symbolName);
 				if( $data === null )
 					break;
 			}

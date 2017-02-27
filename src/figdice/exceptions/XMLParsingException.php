@@ -30,9 +30,8 @@ class XMLParsingException extends \Exception {
      * @param string $filename
      * @param int $line
      */
-    public function __construct($message, $filename, $line) {
+    public function __construct($message, $line) {
 		parent::__construct($message);
-		$this->file = $filename;
 		$this->line = $line;
 	}
 }

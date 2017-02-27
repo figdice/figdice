@@ -22,6 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
+use figdice\classes\Context;
 use \figdice\classes\ViewElementTag;
 
 class TokenMod extends TokenBinop {
@@ -31,18 +32,18 @@ class TokenMod extends TokenBinop {
 	public function __construct() {
 		parent::__construct(self::PRIORITY_MUL_DIV );
 	}
-	/**
-	 * @param ViewElement $viewElement
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
 		$opL = $this->operands[0];
 		$opR = $this->operands[1];
 
-		$valR = $opR->evaluate($viewElement);
+		$valR = $opR->evaluate($context);
 		if($valR == 0) {
 			return 0;
 		}
-		return $opL->evaluate($viewElement) % $valR;
+		return $opL->evaluate($context) % $valR;
 	}
 }

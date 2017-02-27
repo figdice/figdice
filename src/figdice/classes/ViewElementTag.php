@@ -23,17 +23,13 @@
 
 namespace figdice\classes;
 
+use figdice\exceptions\RequiredAttributeParsingException;
+use figdice\exceptions\TagRenderingException;
 use figdice\Filter;
-use Psr\Log\LoggerInterface;
 use figdice\View;
-use figdice\LoggerFactory;
 use figdice\exceptions\RenderingException;
-use figdice\exceptions\DictionaryDuplicateKeyException;
-use figdice\exceptions\RequiredAttributeException;
-use figdice\exceptions\FeedClassNotFoundException;
-use figdice\exceptions\FileNotFoundException;
 
-class ViewElementTag extends ViewElement {
+class ViewElementTag extends ViewElement implements \Serializable {
 
 
 	/**
@@ -42,35 +38,65 @@ class ViewElementTag extends ViewElement {
 	 */
 	private $name;
 
-	private $attributes;
-	private $runtimeAttributes;
+	protected $attributes;
+
+    /**
+     * The value for fig:auto attribute, or null if not present
+     * @var string
+     */
+    private $figAuto = null;
+    /**
+     * The value for fig:call attribute, or null if not present
+     * @var string
+     */
+    private $figCall = null;
+    /**
+     * The value for fig:case attribute, or null if not present
+     * @var string
+     */
+    private $figCase = null;
+    /**
+     * The value for fig:cond attribute, or null if not present
+     * @var string
+     */
+    private $figCond = null;
+    /**
+     * The value for fig:filter attribute, or null if not present
+     * @var string
+     */
+	private $figFilter = null;
+    /**
+     * The value for fig:macro attribute, or null if not present
+     * @var string
+     */
+	private $figMacro = null;
+    /**
+     * The value for fig:mute attribute, or null if not present
+     * @var string
+     */
+	private $figMute = null;
+    /**
+     * The value for fig:text attribute, or null if not present
+     * @var string
+     */
+	private $figText = null;
+    /**
+     * The value for fig:void attribute, or null if not present
+     * @var string
+     */
+	private $figVoid = null;
+    /**
+     * The value for fig:walk attribute, or null if not present
+     * @var string
+     */
+	private $figWalk = null;
+
+
 
   /**
    * @var ViewElement[]
    */
-	private $children;
-
-	/**
-	 * If an immediate child has a fig:case attribute,
-	 * if this caseSwitched boolean attribute is set, it will be skipped.
-	 * If caseSwitched is not set,
-	 * the fig:case acts as a fig:cond, and in case of success,
-	 * this caseSwitched boolean is set.
-	 *
-	 * @var boolean
-	 */
-	private $caseSwitched;
-
-	/**
-	 * The actual file that contains the current tag. Useful for nested includes,
-	 * to determine the real path of the relatively specified filename to include.
-	 * Also useful for translation, because of the stacked model of dictionaries :
-	 * a dictionary is attached to a fig file, so if the fig file was included in a
-	 * parent one, after "returning" from the include, the parent fig file no longer sees
-	 * the dictionaries declared in the child fig.
-	 * @var File
-	 */
-	private $currentFile;
+	protected $children;
 
 
 	/**
@@ -97,60 +123,109 @@ class ViewElementTag extends ViewElement {
 	 */
 	private $transientFlags = [];
 
-	/** @var Iteration[] */
-  private $iteration = null;
-
 	/**
 	 * 
-	 * @param View $view
 	 * @param string $name
 	 * @param integer $xmlLineNumber
 	 */
-	public function __construct(View $view, $name, $xmlLineNumber) {
-		parent::__construct($view);
+	public function __construct($name, $xmlLineNumber) {
+		parent::__construct();
 		$this->name = $name;
 		$this->attributes = array();
-		$this->runtimeAttributes = array();
 		$this->children = array();
 		$this->xmlLineNumber = $xmlLineNumber;
 	}
 
-	/**
-	 * We accept here a null argument, so as to make it possible
-	 * to source a View by direct String rather that loading a physical file.
-	 * @todo This is not the best approach. It will be preferable to
-	 * provide a native View::loadFromString mechanism, which will handle
-	 * properly the null-file special case.
-	 *
-	 * @param File & $file
-	 */
-	public function setCurrentFile(File & $file = null) {
-		$this->currentFile = & $file;
-	}
-	/**
-	 * @return File
-	 */
-	public function getCurrentFile() {
-		return $this->currentFile;
-	}
-	/**
-	 * @return string
-	 */
-	protected function getCurrentFilename() {
-		if ( (null != $this->currentFile) && ($this->currentFile instanceof File) ) {
-			return $this->currentFile->getFilename();
-		}
-		return '(null)';
-	}
 	/**
 	 * @return string
 	 */
 	public function getTagName() {
 		return $this->name;
 	}
-	public function setAttributes(array $attributes) {
-		$this->attributes = $attributes;
+	private function checkAndCropAttr($figNamespace, array & $attributes, $name)
+    {
+        $value = null;
+        if (array_key_exists($key = $figNamespace . $name, $attributes)) {
+            $value = $attributes[$key];
+            unset($attributes[$key]);
+        }
+        return $value;
+    }
+	public function setAttributes($figNamespace, array $attributes) {
+	    $this->figAuto = $this->checkAndCropAttr($figNamespace, $attributes, 'auto');
+	    $this->figCall = $this->checkAndCropAttr($figNamespace, $attributes, 'call');
+	    $this->figCase = $this->checkAndCropAttr($figNamespace, $attributes, 'case');
+	    $this->figCond = $this->checkAndCropAttr($figNamespace, $attributes, 'cond');
+	    $this->figFilter = $this->checkAndCropAttr($figNamespace, $attributes, 'filter');
+	    $this->figMacro = $this->checkAndCropAttr($figNamespace, $attributes, 'macro');
+	    $this->figMute = $this->checkAndCropAttr($figNamespace, $attributes, 'mute');
+	    $this->figText = $this->checkAndCropAttr($figNamespace, $attributes, 'text');
+	    $this->figVoid = $this->checkAndCropAttr($figNamespace, $attributes, 'void');
+	    $this->figWalk = $this->checkAndCropAttr($figNamespace, $attributes, 'walk');
+
+	    // Now take care of the remaining non-fig attributes
+		$this->parseAttributes($figNamespace, $attributes);
 	}
+	protected function parseAttributes($figNamespace, array $attributes)
+    {
+        // TODO: split the attributes by adhoc parts
+
+        // A fig:call attribute on a tag, indicates that all the other attributes
+        // are arguments for the macro. They all are considered as expressions,
+        // and therefore there is no need to search for adhoc inside.
+        if (! $this->figCall) {
+
+            foreach ($attributes as $name => $value) {
+                // Process the non-fig attributes only
+                if (strpos($name, $figNamespace) === 0) {
+                    continue;
+                }
+
+                // a flag attribute is to be processed differently because it isn't a key=value pair.
+                // TODO: not sure we already have Flags at this stage of the cycle. I think
+                // we only have plain real XML text attributes.
+                if ( $value instanceof Flag) {
+                    continue;
+                }
+
+                // Search for adhocs
+                if (preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
+                    $parts = [];
+                    $previousPosition = 0;
+                    for($i = 0; $i < count($matches[0]); ++ $i) {
+                        $expression = $matches[1][$i][0];
+                        $position = $matches[1][$i][1];
+                        if ($position > $previousPosition + 1) {
+                            // +1 because we exclude the leading {
+                            $parts []= substr($value, $previousPosition, $position - 1 - $previousPosition);
+                        }
+                        $parts []= new AdHoc($expression);
+                        // +1 because we contiunue past the trailing }
+                        $previousPosition = $position + strlen($expression) + 1;
+                    }
+                    // And finish with the trailing static part, past the last }
+                    if ($previousPosition < strlen($value)) {
+                        $parts []= substr($value, $previousPosition);
+                    }
+
+                    // At this stage, $parts is an index array of pieces,
+                    // each piece is either a scalar string, or an instance of AdHoc.
+                    // If there is only one part, let's simplify the array
+                    if (count($parts) == 1) {
+                        $parts = $parts[0];
+                    }
+
+                    // $parts can safely replace the origin value in $attributes,
+                    // because the serializing and rendering engine are aware.
+                    $attributes[$name] = $parts;
+                }
+
+            }
+        }
+
+        $this->attributes = $attributes;
+    }
+
 	public function clearAttribute($name) {
 		unset($this->attributes[$name]);
 	}
@@ -168,109 +243,104 @@ class ViewElementTag extends ViewElement {
 		return array_key_exists($name, $this->attributes);
 	}
 
-	/**
-	 * Indicates whether the current tag carries the specified attribute within
-	 * the fig: namespace (where "fig:" is soft-coded according the xmlns:fig).
-	 * @param $name
-	 * @return bool
-	 */
-	private function hasFigAttribute($name)
-	{
-		return $this->hasAttribute($this->view->figNamespace . $name);
-	}
 
 	public function appendChild(ViewElement & $child) {
-		if(0 < count($this->children)) {
-			$this->children[count($this->children) - 1]->nextSibling = & $child;
-			$child->previousSibling = & $this->children[count($this->children) - 1];
-		}
 		$this->children[] = $child;
 	}
-	/**
-	 * Returns a string containing the space-separated
-	 * list of XML attributes of an element.
-	 *
-	 * @return string
-	 */
-	function buildXMLAttributesString() {
+
+    /**
+     * Returns a string containing the space-separated
+     * list of XML attributes of an element.
+     *
+     * @param Context $context
+     * @return string
+     * @throws TagRenderingException
+     */
+	private function buildXMLAttributesString(Context $context) {
 		$result = '';
 		$matches = null;
 		$attributes = $this->attributes;
 
-		foreach($this->runtimeAttributes as $attributeName=>$runtimeAttr) {
+		$runtimeAttributes = $context->getRuntimeAttributes();
+
+		foreach($runtimeAttributes as $attributeName=>$runtimeAttr) {
 			$attributes[$attributeName] = $runtimeAttr;
 		}
 
 		foreach($attributes as $attribute=>$value) {
 
-			if( ! $this->view->isFigAttribute($attribute)) {
-        // a flag attribute is to be processed differently because it isn't a key=value pair.
-				if ( !($value instanceof Flag) ) {
-					if(preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
-						for($i = 0; $i < count($matches[0]); ++ $i) {
-							$expression = $matches[1][$i][0];
+			if( ! $context->view->isFigAttribute($attribute)) {
+                // a flag attribute is to be processed differently because
+                // it isn't a key=value pair.
 
-							//Evaluate expression now:
+                if ($value instanceof Flag) {
+                    // Flag attribute: there is no value. We print only the name of the flag.
+                    $result .= " $attribute";
+                }
 
-							$evaluatedValue = $this->evaluate($expression);
-							if($evaluatedValue instanceof ViewElement) {
-								$evaluatedValue = $evaluatedValue->render();
-							}
-							if(is_array($evaluatedValue)) {
-								if(empty($evaluatedValue)) {
-									$evaluatedValue = '';
-								}
-								else {
-									$message = 'Attribute ' . $attribute . '="' . $value . '" in tag "' . $this->name . '" evaluated to array.';
-									$message = get_class($this) . ': file: ' . $this->currentFile->getFilename() . '(' . $this->xmlLineNumber . '): ' . $message;
-									throw new RenderingException($this->getTagName(), $this->getCurrentFilename(), $this->getLineNumber(), $message);
-								}
-							}
-							else if (is_object($evaluatedValue)
-								&& ($evaluatedValue instanceof \DOMNode)) {
 
-								// Treat the special case of DOMNode descendants,
-								// for which we can evalute the text contents
-								$evaluatedValue = $evaluatedValue->nodeValue;
-							}
+                else {
 
-							//The outcome of the evaluatedValue, coming from DB or other, might contain non-standard HTML characters.
-							//We assume that the FIG library targets HTML rendering.
-							//Therefore, let's have the outcome comply with HTML.
-							if(is_object($evaluatedValue)) {
-								//TODO: Log some warning!
-								$evaluatedValue = '### Object of class: ' . get_class($evaluatedValue) . ' ###';
-							}
-							else {
-								$evaluatedValue = htmlspecialchars($evaluatedValue);
-							}
-	
+				    // We're potentially in presence of:
+                    // - a plain scalar
+                    // - an AdHoc instance
+                    // - an array of the above.
 
-							//Store evaluated value in $matches structure:
-							$matches[0][$i][2] = $evaluatedValue;
-						}
+                    if (! is_array($value)) {
+                        $value = [$value];
+                    }
+                    $combined = '';
+                    foreach ($value as $part) {
+                        if ($part instanceof AdHoc) {
+                            $evaluatedValue = $this->evaluate($context, $part->string);
 
-						//Now replace expressions right-to-left:
-						for($i = count($matches[0]) - 1; $i >= 0; -- $i) {
-							$evaluatedValue = $matches[0][$i][2];
-							$outerExpressionPosition = $matches[0][$i][1];
-							$outerExpressionLength = strlen($matches[0][$i][0]);
-							$value = substr_replace($value, $evaluatedValue, $outerExpressionPosition, $outerExpressionLength);
-						}
-					}
+                            if($evaluatedValue instanceof ViewElement) {
+                                $evaluatedValue = $evaluatedValue->render($context);
+                            }
+                            if(is_array($evaluatedValue)) {
+                                if(empty($evaluatedValue)) {
+                                    $evaluatedValue = '';
+                                }
+                                else {
+                                    $message = 'Adhoc {' . $part->string . '} of attribute ' . $attribute . ' in tag "' . $this->name . '" evaluated to array.';
+                                    throw new TagRenderingException($this->getTagName(), $this->getLineNumber(), $message);
+                                }
+                            }
+                            else if (is_object($evaluatedValue)
+                                && ($evaluatedValue instanceof \DOMNode)) {
 
+                                // Treat the special case of DOMNode descendants,
+                                // for which we can evalute the text contents
+                                $evaluatedValue = $evaluatedValue->nodeValue;
+                            }
+
+                            //The outcome of the evaluatedValue, coming from DB or other, might contain non-standard HTML characters.
+                            //We assume that the FIG library targets HTML rendering.
+                            //Therefore, let's have the outcome comply with HTML.
+                            if(is_object($evaluatedValue)) {
+                                //TODO: Log some warning!
+                                $evaluatedValue = '### Object of class: ' . get_class($evaluatedValue) . ' ###';
+                            }
+                            else {
+                                $evaluatedValue = htmlspecialchars($evaluatedValue);
+                            }
+
+                            $part = $evaluatedValue;
+                        }
+
+                        // Append to what we had already (and if $part was a string in the first place,
+                        // we use its direct value;
+                        $combined .= $part;
+
+
+                    }
+                    $value = $combined;
+
+                    $result .= " $attribute=\"$value\"";
 				}
+            }
 
-        if ($value instanceof Flag) {
-          // Flag attribute: there is no value. We print only the name of the flag.
-          $result .= " $attribute";
         }
-        else {
-          $result .= " $attribute=\"$value\"";
-        }
-			}
-
-		}
 		return $result;
 	}
 	function appendCDataChild($cdata)
@@ -278,11 +348,12 @@ class ViewElementTag extends ViewElement {
 		if (trim($cdata) != '') {
 			$this->autoclose = false;
 		}
+		/** @var ViewElement $lastChild */
 		$lastChild = null;
 
 		//Position, if applies, a reference to element's a previous sibling.
 		if( count($this->children) )
-			$lastChild = & $this->children[count($this->children) - 1];
+			$lastChild = $this->children[count($this->children) - 1];
 
 		//If lastChild exists append a sibling to it.
 		if($lastChild)
@@ -294,98 +365,74 @@ class ViewElementTag extends ViewElement {
 		//Create a brand new node whose parent is the last node in stack.
 		//Do not push this new node onto Depth Stack, beacuse CDATA
 		//is necessarily autoclose.
-		$newElement = new ViewElementCData($this->view);
-		$newElement->outputBuffer .= $cdata;
+		$newElement = new ViewElementCData();
+		$newElement->outputBuffer = $cdata;
 		$newElement->parent = & $this;
-		$newElement->previousSibling = null;
-		if(count($this->children))
-		{
-			$newElement->previousSibling = & $this->children[count($this->children) - 1];
-			$newElement->previousSibling->nextSibling = & $newElement;
-		}
 		$this->children[] = & $newElement;
 	}
 
-	function appendCDataSibling($cdata)
+	public function appendCDataSibling($cdata)
 	{
 		//Create a brand new node whose parent is the last node in stack.
 		//Do not push this new node onto Depth Stack, beacuse CDATA
 		//is necessarily autoclose.
-		$newElement = new ViewElementCData($this->view);
+		$newElement = new ViewElementCData();
 		$newElement->outputBuffer .= $cdata;
 		$newElement->parent = & $this->parent;
-		$newElement->previousSibling = & $this;
-		$this->nextSibling = & $newElement;
 		$this->parent->children[] = & $newElement;
 	}
 
-	/**
-	 * Computes the fig:cond condition that the tag holds,
-	 * if it is found in the attributes,
-	 * and returns its result.
-	 * Returns true if there was no condition attached to the tag.
-	 *
-	 * @return boolean
-	 */
-	private function evalCondition() {
-		$condExpr = $this->getAttribute($this->view->figNamespace . 'cond');
-		if($condExpr) {
-			return $this->evaluate($condExpr);
-		}
-		return true;
+    /**
+     * Computes the fig:cond condition that the tag holds,
+     * if it is found in the attributes,
+     * and returns its result.
+     * Returns true if there was no condition attached to the tag.
+     *
+     * @param Context $context
+     * @return bool
+     */
+	private function evalCondition(Context $context) {
+		return (null !== $this->figCond) ? $this->evaluate($context, $this->figCond) : true;
 	}
 
 
 	/**
 	 * Render a node tree (recursively).
 	 *
-	 * @param boolean $bypassWalk used by the self-rendering walk tag when calling render on itself.
+     * @param Context $context
 	 * @return string
 	 */
-	public function render($bypassWalk = false) {
+	public function render(Context $context) {
+	    $context->pushTag($this);
 		//================================================================
 		//fig:macro
 		//There is no condition to a macro definition.
 		//A tag bearing the fig:macro directive is not implied mute.
 		//It can render as a regular outer tag. If needed, it must be explicitly muted.
-		if($this->hasAttribute($this->view->figNamespace . 'macro')) {
-			return $this->fig_macro();
+		if(null !== $this->figMacro) {
+		    $result = $this->fig_macro($context);
 		}
+		else {
+            $result = $this->renderNoMacro($context);
 
-		$result = $this->renderNoMacro($bypassWalk);
-
-		// Clear transient flags
-		$this->transientFlags = [];
+            // Clear transient flags
+            $this->transientFlags = [];
+        }
+        $context->popTag();
 		return $result;
 	}
-	private function renderNoMacro($bypassWalk = false) {
-
-		//Reset the switch status of the element,
-		//so that its immediate children can run the fig:case attribute form fresh.
-		$this->caseSwitched = false;
-
-    //================================================================
-    // fig:doctype
-    // Take care of it before rendering the children, so as to replace existing doctype definition
-    // in view in an intuitive way (what comes later in the doc, overrides what was earlier).
-    // Otherwise, because of recursion, the outmost doctype declaration would be the final one.
-    // TODO: performance issue with checking the doctype attribute on every tag. I would like to check only the
-    // root node of each template file (includes).
-    if ($this->hasFigAttribute('doctype')) {
-      $this->getView()->setDoctype($this->getFigAttribute('doctype'));
-    }
+	private function renderNoMacro(Context $context) {
 
 
 		//================================================================
 		//fig:cond
-		//(fig:condition is deprecated)
 		//If the tag holds a fig:walk directive as well as the fig:cond,
 		//do not take into account this fig:cond unless the rendering is inside the looping phase,
 		//because the condition pertains to every single iteration, rather than to the global loop.
-		// TODO: contradictory with the Wiki doc. Missing a unit test here to prove the point.
-		if($this->hasAttribute($this->view->figNamespace . 'cond')) {
-			if(! ($this->hasAttribute($this->view->figNamespace . 'walk') && $bypassWalk) ) {
-				if(! $this->evalCondition()) {
+        // See WalkTest::testCondOnWalkAppliesToEachIter() for proof.
+		if(null !== $this->figCond) {
+			if((null === $this->figWalk) || $context->isBypassWalk()) {
+				if(! $this->evalCondition($context)) {
 					return '';
 				}
 			}
@@ -393,113 +440,84 @@ class ViewElementTag extends ViewElement {
 
 		//================================================================
 		//fig:case
-		//Warning: a fig:case on a tag that has also a fig:plug :
-		//because the plugged node is a reference to the current node,
-		//when the plug is stuffed into its slot, the parent of the plugged node
-		//reports that it was caseSwitched already.
-		if(isset($this->attributes[$this->view->figNamespace . 'case'])) {
-			if($this->parent) {
-				if($this->parent->caseSwitched) {
+		if($this->figCase) {
+		    // Keep in mind that the case directive is written directly on the tag,
+            // and there is no "switch" statement on its container.
+            // So we must keep track at the parent level, of the current state of the case children.
+			if($context->hasParent()) {
+				if($context->isCaseSwitched()) {
 					return '';
 				}
 				else {
-					$condExpr = $this->attributes[$this->view->figNamespace . 'case'];
-					$condVal = $this->evaluate($condExpr);
+					$condExpr = $this->figCase;
+					$condVal = $this->evaluate($context, $condExpr);
 					if(! $condVal) {
 						return '';
 					}
 					else {
-						$this->parent->caseSwitched = true;
+						$context->setCaseSwitched();
 					}
 				}
 			}
 		}
 
-		//================================================================
-		//fig:feed
-		if($this->name == $this->view->figNamespace . 'feed') {
-			$this->fig_feed();
-			return '';
-		}
 
-		//================================================================
-		if($this->name == $this->view->figNamespace . 'mount') {
-			$this->fig_mount();
-			return '';
-		}
-
-		//================================================================
-		//fig:include
-		if( ($this->name == $this->view->figNamespace . 'include') && ! isset($this->bRendering) ) {
-			return $this->fig_include();
-		}
-
-		//================================================================
-		//fig:cdata
-		if( ($this->name == $this->view->figNamespace . 'cdata') && ! isset($this->bRendering) ) {
-			return $this->fig_cdata();
-		}
 
 		//================================================================
 		//fig:trans
-		if($this->name == $this->view->figNamespace . 'trans') {
-			return $this->fig_trans();
-		}
-		//================================================================
-		//fig:dictionary
-		if($this->name == $this->view->figNamespace . 'dictionary') {
-			return $this->fig_dictionary();
+		if($this->name == $context->figNamespace . 'trans') {
+			return $this->fig_trans($context);
 		}
 
 		//================================================================
 		//fig:attr
 		//Add to the parent tag the given attribute. Do not render.
-		if( $this->name == $this->view->figNamespace . 'attr' ) {
+		if( $this->name == $context->figNamespace . 'attr' ) {
 			if(!isset($this->attributes['name'])) {
 				//name is a required attribute for fig:attr.
-				throw new RequiredAttributeException($this->view->figNamespace . 'attr', $this->currentFile->getFilename(), $this->xmlLineNumber, 'Missing required name attribute for attr tag.');
+				throw new RequiredAttributeParsingException($this->name, $this->xmlLineNumber, 'name');
 			}
-      //flag attribute
-      // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
-      if(isset($this->attributes['flag']) && $this->evaluate($this->attributes['flag'])) {
-        $this->parent->runtimeAttributes[$this->attributes['name']] = new Flag();
-      }
-      else {
-        if ($this->hasAttribute('value')) {
-          $value = $this->evaluate($this->attributes['value']);
-          if (is_string($value)) {
-            $value = htmlspecialchars($value);
-          }
-          $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
-        } else {
-          $value = '';
-          /**
-           * @var ViewElement
-           */
-          $child = null;
-          foreach ($this->children as $child) {
-            $renderChild = $child->render();
-            if ($renderChild === false) {
-              throw new \Exception();
+            //flag attribute
+            // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
+            if(isset($this->attributes['flag']) && $this->evaluate($context, $this->attributes['flag'])) {
+			    $context->setParentRuntimeAttribute($this->attributes['name'], new Flag());
             }
-            $value .= $renderChild;
-          }
-          //An XML attribute should not span accross several lines.
-          $value = trim(preg_replace("#[\n\r\t]+#", ' ', $value));
-          $this->parent->runtimeAttributes[$this->attributes['name']] = $value;
+            else {
+                if ($this->hasAttribute('value')) {
+                    $value = $this->evaluate($context, $this->attributes['value']);
+                    if (is_string($value)) {
+                        $value = htmlspecialchars($value);
+                    }
+                    $context->setParentRuntimeAttribute($this->attributes['name'],  $value);
+                } else {
+                    $value = '';
+                    /**
+                     * @var ViewElement
+                     */
+                    $child = null;
+                    foreach ($this->children as $child) {
+                        $renderChild = $child->render($context);
+                        if ($renderChild === false) {
+                            throw new \Exception();
+                        }
+                        $value .= $renderChild;
+                    }
+                    //An XML attribute should not span accross several lines.
+                    $value = trim(preg_replace("#[\n\r\t]+#", ' ', $value));
+                    $context->setParentRuntimeAttribute($this->attributes['name'], $value);
+                }
+            }
+            return '';
         }
-      }
-			return '';
-		}
 
 
 
 		//================================================================
 		//fig:walk
 		//Loop over evaluated dataset.
-		if(! $bypassWalk) {
-			if($this->hasFigAttribute('walk')) {
-				return $this->fig_walk();
+		if(! $context->isBypassWalk()) {
+			if(null !== $this->figWalk) {
+				return $this->fig_walk($context);
 			}
 		}
 
@@ -507,8 +525,8 @@ class ViewElementTag extends ViewElement {
 		//fig:call
 		//A tag with the fig:call directive is necessarily mute.
 		//It is used as a placeholder only for the directive.
-		if($this->hasFigAttribute('call')) {
-			return $this->fig_call();
+		if(null !== $this->figCall) {
+			return $this->fig_call($context);
 		}
 
 
@@ -521,19 +539,19 @@ class ViewElementTag extends ViewElement {
 		//Then, render the slot element, as a default content in case
 		//nothing is plugged into it.
 		//In case of plug for this slot, the complete slot tag (outer) is replaced.
-		if($slotName = $this->getFigAttribute('slot')) {
+		if($slotName = $this->getFigAttribute($context->figNamespace, 'slot')) {
 			//Store a reference to current node, into the View's map of slots
 
 			$anchorString = '/==SLOT==' . $slotName . '==/';
 			$slot = new Slot($anchorString);
-			$this->view->assignSlot($slotName, $slot);
+			$context->assignSlot($slotName, $slot);
 
-			unset($this->attributes[$this->view->figNamespace . 'slot']);
-			$result = $this->render();
+			unset($this->attributes[$context->figNamespace . 'slot']);
+			$result = $this->render($context);
 			if($result === false)
 				throw new \Exception();
 			$slot->setLength(strlen($result));
-			$this->attributes[$this->view->figNamespace . 'slot'] = $slotName;
+			$this->attributes[$context->figNamespace . 'slot'] = $slotName;
 			return $anchorString . $result;
 		}
 
@@ -547,21 +565,21 @@ class ViewElementTag extends ViewElement {
 		//its content is appended to whatever was already filled into the slot.
 		//The entire plug+append tag (outer) is appended to the slot placeholder
 		//(the slot's outer tag being removed).
-		if(($slotName = $this->getFigAttribute('plug')) && ! $this->isTransient(self::TRANSIENT_PLUG_RENDERING)) {
+		if(($slotName = $this->getFigAttribute($context->figNamespace, 'plug')) && ! $this->isTransient(self::TRANSIENT_PLUG_RENDERING)) {
 
 			//Keep track of the callback node (the fig:plug node).
 			//The callbacks are maintained as a chain. Several callbacks
 			//can enchain one after the other,
 			//in the order they were parsed.
-			if ($this->view->hasOption(View::GLOBAL_PLUGS)) {
+			if ($context->view->hasOption(View::GLOBAL_PLUGS)) {
 				//The plugs are rendered at the end of the rendering of the View.
-				$this->view->addPlug($slotName, $this);
+				$context->addPlug($slotName);
 			}
 			else {
 				// The plugs are rendered in their local context
 				// (but still, remain stuffed at the end of the template rendering)
 				$this->transient(self::TRANSIENT_PLUG_RENDERING);
-				$this->view->addPlug($slotName, $this, $this->render(), $this->evalFigAttribute('append'));
+				$context->addPlug($slotName, $this->render($context), $this->evalFigAttribute($context, 'append'));
 			}
 
 			//A fig:plug tag does not produce any in-place output.
@@ -575,10 +593,12 @@ class ViewElementTag extends ViewElement {
 		//
 		//This attribute means that the tag should render auto-closed, even though it
 		//may be exploded for the purpose of assigning fig:attr children.
-		if(isset($this->attributes[$this->view->figNamespace . 'auto'])) {
-			$expression = $this->attributes[$this->view->figNamespace . 'auto'];
-			if($this->evaluate($expression)) {
-				$this->attributes[$this->view->figNamespace . 'text'] = '';
+		if(null !== $this->figAuto) {
+			$expression = $this->figAuto;
+			if($this->evaluate($context, $expression)) {
+			    // The empty string here is important, rather than null,
+                // because it is needed by the part that renders the children of a fig:auto tag.
+				$this->figText = '';
 				$this->autoclose = true;
 			}
 		}
@@ -588,10 +608,10 @@ class ViewElementTag extends ViewElement {
 		//
 		//This attribute means that the tag should render as HTML-void (such as: <br>)
 		//and its contents discarded.
-		if(isset($this->attributes[$this->view->figNamespace . 'void'])) {
-			$expression = $this->attributes[$this->view->figNamespace . 'void'];
-			if($this->evaluate($expression)) {
-				$this->attributes[$this->view->figNamespace . 'text'] = '';
+		if(null !== $this->figVoid) {
+			$expression = $this->figVoid;
+			if($this->evaluate($context, $expression)) {
+				$this->figText = null;
 				$this->voidtag = true;
 			}
 		}
@@ -608,67 +628,67 @@ class ViewElementTag extends ViewElement {
 		//
 		//Only the immediate Tag children of name fig:attr are parsed,
 		//so that it is still possible to have dynamic attributes to a tag bearing fig:text.
-		if(isset($this->attributes[$this->view->figNamespace . 'text'])) {
-			$content = & $this->attributes[$this->view->figNamespace . 'text'];
+		if(null !== $this->figText) {
+            $content = $this->figText;
 
-			$output = $this->evaluate($content);
-			if($output === null) {
-				$this->outputBuffer = '';
-			}
-			else {
+            $output = $this->evaluate($context, $content);
+            if($output === null) {
+                $this->outputBuffer = '';
+            }
+            else {
 
-			  // Unfortunately there is no auto __toString
-			  // for DOMNode objects (not even DOMText...)
-			  if (is_object($output)
-			      && ($output instanceof \DOMNode)) {
-			    $output = $output->nodeValue;
-			  }
+                // Unfortunately there is no auto __toString
+                // for DOMNode objects (not even DOMText...)
+                if (is_object($output)
+                    && ($output instanceof \DOMNode)) {
+                    $output = $output->nodeValue;
+                }
 
-        if (is_object($output)) {
-          // Try to convert object to string, using PHP's cast mechanism (possibly involving __toString() method).
-          try {
-            $output = (string) $output;
-          } catch(\ErrorException $ex) {
-            throw new RenderingException($this->getTagName(),
-              $this->getCurrentFilename(),
-              $this->getLineNumber(),
-              $ex->getMessage()
-              );
-          }
+                if (is_object($output)) {
+                    // Try to convert object to string, using PHP's cast mechanism (possibly involving __toString() method).
+                    try {
+                        $output = (string) $output;
+                    } catch(\ErrorException $ex) {
+                        throw new RenderingException($this->getTagName(),
+                            $context->getFilename(),
+                            $this->getLineNumber(),
+                            $ex->getMessage()
+                        );
+                    }
+                }
+
+                // Since we're in a fig:text directive, make sure we'll output a string (even if we got a bool)
+                $output = (string) $output;
+                $this->outputBuffer = $output;
+				
+				
+				
+                if (trim($output) != '') {
+                    //We clear the autoclose flag only if there is any meaningful
+                    //inner content.
+                    $this->autoclose = false;
+                }
+            }
+
+            if(! $this->isMute($context)) {
+                //Take care of inner fig:attr
+                for($iChild = 0; $iChild < count($this->children); ++$iChild) {
+                    $child = & $this->children[$iChild];
+                    if($child instanceof TagFigAttr) {
+                        $child->render($context);
+                    }
+                }
+            }
         }
-
-        // Since we're in a fig:text directive, make sure we'll output a string (even if we got a bool)
-        $output = (string) $output;
-				$this->outputBuffer = $output;
-				
-				
-				
-				if (trim($output) != '') {
-					//We clear the autoclose flag only if there is any meaningful
-					//inner content.
-					$this->autoclose = false;
-				}
-			}
-
-			if(! $this->isMute()) {
-				//Take care of inner fig:attr
-				for($iChild = 0; $iChild < count($this->children); ++$iChild) {
-					$child = & $this->children[$iChild];
-					if($child instanceof TagFigAttr) {
-						$child->render();
-					}
-				}
-			}
-		}
 
 
 		//Now proceed with the children...
-		$result = $this->renderChildren();
+		$result = $this->renderChildren($context);
 
 
 
 		//Let's apply the potential filter on the inner parts.
-		$result = $this->applyOutputFilter($result);
+		$result = $this->applyOutputFilter($context, $result);
 
 		//And then, render the outer XML part of the tag, if not mute.
 
@@ -679,15 +699,15 @@ class ViewElementTag extends ViewElement {
 		//Use short-circuit test if no fig:mute attribute, in order not
 		//to evaluate needlessly.
 		//Every fig: tag is mute by nature.
-		if(! $this->isMute()) {
-			$xmlAttributesString = $this->buildXMLAttributesString();
+		if(! $this->isMute($context)) {
+			$xmlAttributesString = $this->buildXMLAttributesString($context);
 
 			if ($this->voidtag) {
 				$result = '<' . $this->name . $xmlAttributesString . '>';
 			}
 			else {
 				if($result instanceof ViewElementTag) {
-					$innerResults = $result->render();
+					$innerResults = $result->render($context);
 				}
 				else {
 					$innerResults = $result;
@@ -716,30 +736,35 @@ class ViewElementTag extends ViewElement {
 			//for potential next iteration of same tag,
 			//because runtime attributes could be conditioned and the condition could eval differently
 			//in next iteration.
-			$this->runtimeAttributes = array();
+            $context->clearRuntimeAttributes();
 		}
 
 
 		return $result;
 	}
 
-	private function renderChildren($doNotRenderFigParam = false) {
+	protected function renderChildren(Context $context) {
+
+        $doNotRenderFigParam = $context->isDoNotRenderFigParams();
+
 		$result = '';
 		//If a fig treatment happened already, then outputBuffer contains
 		//the result to use. Otherwise, it needs to be calculated recursively
 		//with the children.
 		if($this->outputBuffer === null) {
 			//A mute tag that does not have any content rendered yet, should not output the consecutive blank cdata.
-			if( $this->isMute() ) {
+			if( $this->isMute($context) ) {
 				if(isset($this->children[0]) && ($this->children[0] instanceof ViewElementCData) ) {
 					//TODO: comprendre pourquoi il me reste des blancs avant ?xml
-					$this->children[0]->outputBuffer = ltrim($this->children[0]->outputBuffer);
+					$this->children[0]->outputBuffer = preg_replace('#^[ \\t]*\\n#', '', $this->children[0]->outputBuffer);
 				}
 			}
 
+            $context->setPreviousSibling(null);
+
 			for($iChild = 0; $iChild < count($this->children); ++$iChild) {
 				$child = & $this->children[$iChild];
-				if($doNotRenderFigParam && ($child instanceof ViewElementTag) && ($child->getTagName() == $this->view->figNamespace . 'param') ) {
+				if($doNotRenderFigParam && ($child instanceof ViewElementTag) && ($child->getTagName() == $context->figNamespace . 'param') ) {
 					//This situation is encountered when a sourced fig:trans tag has a fig:param immediate child:
 					//the fig:param is used to resolve the translation, but it must not be rendered in the value of the
 					//fig:trans tag (because it is sourced, it means that the translation is not to be taken from an external dictionary,
@@ -747,16 +772,19 @@ class ViewElementTag extends ViewElement {
 					continue;
 				}
 
-				$subRender = $child->render();
+				$subRender = $child->render($context);
 				//Caution: it used to work fine, and then I got a: Could not
 				//convert ViewElementTag to string,
 				//as I called a macro with a fig:param being some XML piece, instead of a plain value.
 				//So I added this additional step: the rendering of the said ViewElementTag.
 				if($subRender instanceof ViewElement) {
-					$subRender = $subRender->render();
+					$subRender = $subRender->render($context);
 				}
 				$result .= $subRender;
+
+                $context->setPreviousSibling($child);
 			}
+			$context->setPreviousSibling(null);
 		}
 		else {
 			$result = $this->outputBuffer;
@@ -765,27 +793,29 @@ class ViewElementTag extends ViewElement {
 		return $result;
 	}
 
-	/**
-	 * Evaluates the expression written in specified attribute.
-	 * If attribute does not exist, returns false.
-	 * @param string $name Attribute name
-	 * @return mixed
-	 */
-	private function evalAttribute($name) {
+    /**
+     * Evaluates the expression written in specified attribute.
+     * If attribute does not exist, returns false.
+     * @param Context $context
+     * @param string $name Attribute name
+     * @return mixed
+     */
+	private function evalAttribute(Context $context, $name) {
 		$expression = $this->getAttribute($name, false);
 		if($expression) {
-			return $this->evaluate($expression);
+			return $this->evaluate($context, $expression);
 		}
 		return false;
 	}
 
-	/**
-	 * @param string $name the fig attribute to evaluate
-	 * @return mixed or false if attribute not found.
-	 */
-	public function evalFigAttribute($name)
+    /**
+     * @param Context $context
+     * @param string $name the fig attribute to evaluate
+     * @return mixed or false if attribute not found.
+     */
+	public function evalFigAttribute(Context $context, $name)
 	{
-		return $this->evalAttribute($this->view->figNamespace . $name);
+		return $this->evalAttribute($context, $context->figNamespace . $name);
 	}
 
 	public function getAttribute($name, $default = null) {
@@ -794,170 +824,40 @@ class ViewElementTag extends ViewElement {
 		}
 		return $default;
 	}
-	private function getFigAttribute($name, $default = null) {
-		return $this->getAttribute($this->view->figNamespace . $name, $default);
-	}
-
-	private function fig_mount() {
-		$target = $this->getAttribute('target');
-		//When an explicit value="" attribute exists, use its contents as a Lex expression to evaluate.
-		if($this->hasAttribute('value')) {
-			$valueExpression = $this->getAttribute('value');
-			$value = $this->evaluate($valueExpression);
-		}
-		//Otherwise, no value attribute: then we render the inner contents of the fig:mount into the target variable.
-		else {
-			$value = $this->renderChildren(true);
-		}
-
-		$this->view->mount($target, $value);
-	}
-
-	/**
-	 * Process <fig:feed> tag.
-	 * This tag accepts the following attributes:
-	 *  - class = the name of the Feed class to instanciate and run.
-	 *  - target = the mount point in the global universe.
-	 *
-	 * @access private
-	 * @return void
-	 */
-	private function fig_feed() {
-		if($this->logger == null) {
-			$this->logger = LoggerFactory::getLogger(get_class($this));
-		}
-
-		$className = isset($this->attributes['class']) ? $this->attributes['class'] : null;
-		if(null === $className) {
-			$this->logger->error('Missing class attribute for fig:feed.');
-			throw new RequiredAttributeException($this->getTagName(), $this->getCurrentFile()->getFilename(), $this->xmlLineNumber, 'Missing "class" attribute for fig:feed tag, in ' . $this->getCurrentFile()->getFilename() . '(' . $this->xmlLineNumber . ')');
-		}
-
-		//Set the parameters for the feed class:
-		//the parameters are an assoc array made of the
-		//scalar attributes of the fig:feed tag other than fig:* and
-		//class and target attributes.
-		$feedParameters = array();
-		foreach($this->attributes as $attribName=>$attribText) {
-			if( (! $this->view->isFigAttribute($attribName)) && 
-					($attribName != 'class') && ($attribName != 'target') ) {
-				$feedParameters[$attribName] = $this->evaluate($attribText);
-			}
-		}
-
-		//TODO: catch exception, to enrich with fig xml file+line, and rethrow.
-		$feedInstance = $this->view->createFeed($className, $feedParameters);
-
-		//At this point the feed instance must be created.
-		//If not, there was no factory to handle its loading.
-		if(! $feedInstance) {
-			throw new FeedClassNotFoundException($className, $this->getCurrentFile()->getFilename(), $this->xmlLineNumber);
-		}
-
-		//It is possible to simply invoke a Feed class and
-		//discard its result, by not defining a target to the tag.
-		$mountPoint = null;
-		if(isset($this->attributes['target'])) {
-			$mountPoint = $this->attributes['target'];
-		}
-
-
-		//TODO: check if it still always needed to know the fig file from within the feed.
-		//$feedInstance->setFigFile($this->view->getFilename());
-
-		$feedInstance->setParameters($feedParameters);
-
-		// The run method of the Feed might throw a FeedRuntimeException...
-		// It means that the problem encountered is severe enough, for the Feed to
-		// request that the View rendering should stop.
-		// In this case, the controller is responsible for treating accordingly.
-		$subUniverse = $feedInstance->run();
-
-		if($mountPoint !== null) {
-			$this->view->mount($mountPoint, $subUniverse);
-		}
-
-	}
-
-	/**
-	 * Imports at the current output position
-	 * the contents of specified file unparsed, rendered as is.
-	 * @return string
-	 * @throws FileNotFoundException
-	 */
-	private function fig_cdata() {
-		$filename = $this->attributes['file'];
-		$realfilename = dirname($this->getCurrentFilename()).'/'.$filename;
-		if(! file_exists($realfilename)) {
-			$message = "File not found: $filename called from: " . $this->getCurrentFilename(). '(' . $this->xmlLineNumber . ')';
-			throw new FileNotFoundException($message, $filename);
-		}
-		$cdata = file_get_contents($realfilename);
-		return $cdata;
-	}
-
-	/**
-	 * Creates a sub-view object, invokes its parsing phase,
-	 * and renders it as the child of the current tag.
-	 * @return string or false
-	 */
-	private function fig_include() {
-		//Extract from the attributes the file to include.
-		if (! $this->hasAttribute('file')) {
-		  throw new RequiredAttributeException($this->name,
-		    $this->getCurrentFilename(),
-		    $this->getLineNumber(), 
-		    'Missing required attribute: "file" in tag: "'. $this->name .'"' .
-		      ' in file: ' .$this->getCurrentFilename(). '(' .$this->getLineNumber(). ')');
-		}
-		$file = $this->attributes['file'];
-
-		//Create a sub-view, attached to the current element.
-		$view = new View();
-		$view->inherit($this);
-		$view->loadFile(dirname($this->getCurrentFilename()).'/'.$file, $this->getCurrentFile());
-
-		//Make the current node aware that it is being rendered
-		//as an include directive (therefore, it will be skipped
-		//when the subview tries to render it).
-		$this->bRendering = true;
-
-		//Parse the subview (build its own tree).
-		$view->parse();
-
-		$result = $view->render();
-		unset($this->bRendering);
-		return $result;
+	private function getFigAttribute($figNamespace, $name, $default = null) {
+		return $this->getAttribute($figNamespace . $name, $default);
 	}
 
 
-	/**
-	 * Defines a macro in the dictionary of the
-	 * topmost view.
-	 */
-	private function fig_macro() {
-		$macroName = $this->attributes[$this->view->figNamespace . 'macro'];
-		$this->view->macros[$macroName] = & $this;
+    /**
+     * Defines a macro in the dictionary of the
+     * topmost view.
+     * @param Context $context
+     * @return string
+     */
+	private function fig_macro(Context $context) {
+		$context->view->macros[$this->figMacro] = & $this;
 		return '';
 	}
 
-	/**
-	 * Renders the call to a macro.
-	 * No need to hollow the tag that bears the fig:call attribute,
-	 * because the output of the macro call replaces completely the
-	 * whole caller tag.
-	 * @return string
-	 */
-	private function fig_call() {
+    /**
+     * Renders the call to a macro.
+     * No need to hollow the tag that bears the fig:call attribute,
+     * because the output of the macro call replaces completely the
+     * whole caller tag.
+     * @param Context $context
+     * @return string
+     */
+	private function fig_call(Context $context) {
 		//Retrieve the name of the macro to call.
-		$macroName = $this->attributes[$this->view->figNamespace . 'call'];
+		$macroName = $this->figCall;
 
 		//Prepare the arguments to pass to the macro:
 		//all the non-fig: attributes, evaluated.
 		$arguments = array();
 		foreach($this->attributes as $attribName => $attribValue) {
-			if( ! $this->view->isFigAttribute($attribName) ) {
-				$value = $this->evaluate($attribValue);
+			if( ! $context->view->isFigAttribute($attribName) ) {
+				$value = $this->evaluate($context, $attribValue);
 				$arguments[$attribName] = $value;
 			}
 		}
@@ -965,33 +865,39 @@ class ViewElementTag extends ViewElement {
 
 		//Fetch the parameters specified as immediate children
 		//of the macro call : <fig:param name="" value=""/>
-		$arguments = array_merge($arguments, $this->collectParamChildren());
+		$arguments = array_merge($arguments, $this->collectParamChildren($context));
 
 		//Retrieve the macro contents.
-		if(isset($this->view->macros[$macroName])) {
-			$macroElement = & $this->view->macros[$macroName];
-			$this->view->pushStackData($arguments);
-			if(isset($this->iteration)) {
-				$macroElement->iteration = &$this->iteration;
-			}
+		if(isset($context->view->macros[$macroName])) {
+		    /** @var ViewElementTag $macroElement */
+			$macroElement = & $context->view->macros[$macroName];
+			$context->view->pushStackData($arguments);
+
+			// Hide any current iteration during macro invocation
+            $context->pushIteration(new Iteration(0));
 
 			//Now render the macro contents, but do not take into account the fig:macro
 			//that its root tag holds.
-			$result = $macroElement->renderNoMacro();
-			$this->view->popStackData();
+			$result = $macroElement->renderNoMacro($context);
+
+			// Restore the previous iteration context
+            $context->popIteration();
+
+			$context->view->popStackData();
 			return $result;
 			//unset($macroElement->iteration);
 		}
 		return '';
 	}
 
-	/**
-	 * Returns an array of named values obtained by the immediate :param children of the tag.
-	 * The array is to be merged with the other arguments provided by inline 
-	 * attributes of the :call tag. 
-	 * @return array
-	 */
-	private function collectParamChildren() {
+    /**
+     * Returns an array of named values obtained by the immediate :param children of the tag.
+     * The array is to be merged with the other arguments provided by inline
+     * attributes of the :call tag.
+     * @param Context $context
+     * @return array
+     */
+	private function collectParamChildren(Context $context) {
 		$arguments = array();
 
 		//Fetch the parameters specified as immediate children
@@ -999,20 +905,20 @@ class ViewElementTag extends ViewElement {
 		//TODO: <fig:param> can hold fig:cond ok, but we must implement no fig:case
 		foreach ($this->children as $child) {
 			if($child instanceof ViewElementTag) {
-				if($child->name == $this->view->figNamespace . 'param') {
+				if($child->name == $context->figNamespace . 'param') {
 
 					//evalute the fig:cond on the param
-					if(! $child->evalCondition()) {
+					if(! $child->evalCondition($context)) {
 						continue;
 					}
 					//If param is specified with an immediate value="" attribute :
 					if(isset($child->attributes['value'])) {
-						$arguments[$child->attributes['name']] = $this->evaluate($child->attributes['value']);
+						$arguments[$child->attributes['name']] = $this->evaluate($context, $child->attributes['value']);
 					}
 					//otherwise, the actual value is not scalar but is
 					//a nodeset in itself. Let's pre-render it and use it as text for the argument.
 					else {
-						$arguments[$child->attributes['name']] = $child->render();
+						$arguments[$child->attributes['name']] = $child->render($context);
 					}
 				}
 			}
@@ -1020,41 +926,42 @@ class ViewElementTag extends ViewElement {
 		return $arguments;
 	}
 
-	/**
-	 * Applies a filter to the inner contents of an element.
-	 * Returns the filtered output.
-	 *
-	 * @param string $buffer the inner contents of the element, after rendering.
-	 * @return string
-	 * 
-	 */
-	private function applyOutputFilter($buffer) {
+    /**
+     * Applies a filter to the inner contents of an element.
+     * Returns the filtered output.
+     *
+     * @param Context $context
+     * @param string $buffer the inner contents of the element, after rendering.
+     * @return string
+     */
+	private function applyOutputFilter(Context $context, $buffer) {
 		//TODO: Currently the filtering works only on non-slot tags.
 		//If applied on a slot tag, the transform is made on the special placeholder /==SLOT=.../
 		//rather than the future contents of the slot.
-		if(isset($this->attributes[$this->view->figNamespace . 'filter'])) {
-			$filterClass = $this->attributes[$this->view->figNamespace . 'filter'];
-			$filter = $this->instantiateFilter($filterClass);
+		if($this->figFilter) {
+			$filterClass = $this->figFilter;
+			$filter = $this->instantiateFilter($context, $filterClass);
 			$buffer = $filter->transform($buffer);
 		}
 		return $buffer;
 	}
-	/**
-	 * Iterates the rendering of the current element,
-	 * over the data specified in the fig:walk attribute.
-	 *
-	 * @return string
-	 */
-	private function fig_walk() {
-		$figIterateAttribute = $this->attributes[$this->view->figNamespace . 'walk'];
-		$dataset = $this->evaluate($figIterateAttribute);
+
+    /**
+     * Iterates the rendering of the current element,
+     * over the data specified in the fig:walk attribute.
+     *
+     * @param Context $context
+     * @return string
+     */
+	private function fig_walk(Context $context) {
+		$figIterateAttribute = $this->figWalk;
+		$dataset = $this->evaluate($context, $figIterateAttribute);
 
 		//Walking on nothing gives no ouptut.
 		if(null == $dataset) {
 			return '';
 		}
 
-		$dataBackup = $this->data;
 		$outputBuffer = '';
 
 		if(is_object($dataset) && ($dataset instanceof \Countable) ) {
@@ -1070,28 +977,33 @@ class ViewElementTag extends ViewElement {
 			$datasetCount = 1;
 		}
 
-		if(!isset($this->iteration) || ($this->iteration == null) ) {
-			$this->iteration = array();
-		}
 		$newIteration = new Iteration($datasetCount);
-		array_push($this->iteration, $newIteration);
+		$context->pushIteration($newIteration);
 		$bFirstIteration = true;
 
 		if(is_array($dataset) || (is_object($dataset) && ($dataset instanceof \Countable)) ) {
-			foreach($dataset as $key => $data) {
-				$this->view->pushStackData($data);
-				$newIteration->iterate($key);
-				$nextContent = $this->render(/*bypassWalk*/true);
 
-				//Each rendered iteration start again
+		    // Indicate that the current tag is entering walk loop,
+            // so as subsequent rendering of self will not cause an infinite loop.
+            $context->setBypassWalk();
+			foreach($dataset as $key => $data) {
+				$context->view->pushStackData($data);
+				$newIteration->iterate($key);
+				// It is necessary to invoke again 'render' on self,
+                // because the walk directive is only here to create a loop,
+                // but the tag must actually be rendered along with all its eval expressions with inner data.
+                $nextContent = $this->renderNoMacro($context);
+
+
+                //Each rendered iteration start again
 				//with the blank part on the right of the preceding CDATA,
 				//so that the proper indenting is kept, and carriage returns
 				//between each iteration, if applies.
 				if(! $bFirstIteration) {
-					if($this->previousSibling) {
-						if($this->previousSibling instanceof ViewElementCData) {
-							if(($rtrim = rtrim($this->previousSibling->outputBuffer)) < $this->previousSibling->outputBuffer) {
-								$blankRPart = substr($this->previousSibling->outputBuffer, strlen($rtrim));
+					if($previousSibling = $context->getPreviousSibling()) {
+						if($previousSibling instanceof ViewElementCData) {
+							if(($rtrim = rtrim($previousSibling->outputBuffer)) < $previousSibling->outputBuffer) {
+								$blankRPart = substr($previousSibling->outputBuffer, strlen($rtrim));
 								$precedingBlank = strrchr($blankRPart, "\n");
 								if($precedingBlank === false) {
 									$precedingBlank = $blankRPart;
@@ -1109,94 +1021,20 @@ class ViewElementTag extends ViewElement {
 				}
 
 				$outputBuffer .= $nextContent;
-				$this->view->popStackData();
+				$context->view->popStackData();
 			}
 		}
-		$this->data = &$dataBackup;
-		array_pop($this->iteration);
+		$context->popIteration();
 		return $outputBuffer;
 	}
 
-	/**
-	 * Loads a language XML file, to be used within the current view.
-	 *
-	 * If a Temp path was specified in the View,
-	 * we try to compile (serialize) the XML key-value collection and store
-	 * the serialized form in a 'Dictionary/(langcode)' subfolder of the temp path.
-	 */
-	private function fig_dictionary() {
-		//If a @source attribute is specified,
-		//it means that when the target (view's language) is the same as @source,
-		//then don't bother loading dictionary file, nor translating: just render the tag's children.
 
-		$file = $this->attributes['file'];
-		$filename = $this->getView()->getTranslationPath() . '/' . $this->getView()->getLanguage() . '/' . $file;
-
-		$name = $this->getAttribute('name', null);
-		$source = $this->getAttribute('source', null);
-		$dictionary = new Dictionary($filename, $source);
-
-
-		if ( ($this->getView()->getLanguage() == '') || ($source == $this->getView()->getLanguage()) ) {
-			// If the current View does not specify a Language,
-			// or if the dictionary to load is same language as View,
-			// let's not care about i18n.
-			// We will activate i18n only if the dictionary explicitly specifies a source,
-			// which means that we cannot simply rely on contents of the fig:trans tags.
-			// However, we still need to hook the Dictionary object as a placeholder,
-			// so that subsequent trans tag for the given dic name and source will
-			// simply render their contents.
-			$this->getCurrentFile()->addDictionary($dictionary, $name);
-			return '';
-		}
-
-		//TODO: Please optimize here: cache the realpath of the loaded dictionaries,
-		//so as not to re-load an already loaded dictionary in same View hierarchy.
-
-
-		try {
-			//Determine whether this dictionary was pre-compiled:
-			if($this->getView()->getTempPath()) {
-				$tmpFile = $this->getView()->getTempPath() . '/' . 'Dictionary' . '/' . $this->getView()->getLanguage() . '/' . $file . '.php';
-				//If the tmp file already exists,
-				if(file_exists($tmpFile)) {
-					//but is older than the source file,
-					if(filemtime($tmpFile) < filemtime($filename)) {
-						Dictionary::compile($filename, $tmpFile);
-					}
-				}
-				else {
-					Dictionary::compile($filename, $tmpFile);
-				}
-				$dictionary->restore($tmpFile);
-			}
-
-			//If we don't even have a temp folder specified, load the dictionary for the first time.
-			else {
-					$dictionary->load();
-			}
-		} catch(FileNotFoundException $ex) {
-			throw new FileNotFoundException('Translation file not found: file=' . $filename . 
-				', language=' . $this->getView()->getLanguage() . 
-				', source=' . $this->getCurrentFilename(), 
-				$this->getCurrentFilename() );
-		} catch(DictionaryDuplicateKeyException $ddkex) {
-			$this->getLogger()->error('Duplicate key: "' . $ddkex->getKey() . '" in dictionary: ' . $ddkex->getFilename());
-		}
-
-
-		//Hook the dictionary to the current file.
-		//(in fact this will bubble up the message as high as possible, ie:
-		//to the highest parent which does not bear a dictionary of same name)
-		$this->getCurrentFile()->addDictionary($dictionary, $name);
-		return '';
-	}
-
-	/**
-	 * Translates a caption given its key and dictionary name.
-	 * @return string
-	 */
-	private function fig_trans() {
+    /**
+     * Translates a caption given its key and dictionary name.
+     * @param Context $context
+     * @return string
+     */
+	private function fig_trans(Context $context) {
 
 		//If a @source attribute is specified, and is equal to
 		//the view's target language, then don't bother translating:
@@ -1210,17 +1048,19 @@ class ViewElementTag extends ViewElement {
 	  $dictionaryName = $this->getAttribute('dict', null);
 
 		// Do we have a dictionary ?
-		$dictionary = $this->getCurrentFile()->getDictionary($dictionaryName);
+		$dictionary = $context->getDictionary($dictionaryName);
 		// Maybe not, but at this stage it is not important, I only need
 		// to know its source
 		$dicSource = ($dictionary ? $dictionary->getSource() : null);
 		if (
 
 			( (null == $source) &&	//no source on the trans tag
-			 ($dicSource == $this->getView()->getLanguage()) )
+			 ($dicSource == $context->getView()->getLanguage()) )
 			||
-			($source == $this->getView()->getLanguage()) ) {
-			$value = $this->renderChildren(true /*Do not render fig:param immediate children */);
+			($source == $context->getView()->getLanguage()) ) {
+		    $context->pushDoNotRenderFigParams();
+			$value = $this->renderChildren($context /*Do not render fig:param immediate children */);
+			$context->popDoNotRenderFigParams();
 		}
 
 		else {
@@ -1229,12 +1069,11 @@ class ViewElementTag extends ViewElement {
 			if(null == $key) {
 				//Missing @key attribute : consider the text contents as the key.
 				//throw new SyntaxErrorException($this->getCurrentFile()->getFilename(), $this->xmlLineNumber, $this->name, 'Missing @key attribute.');
-				$key = $this->renderChildren();
+				$key = $this->renderChildren($context);
 			}
-			//Ask current file to translate key:
+			//Ask current context to translate key:
 
-      //TODO: Optionally catch the DictionaryEntryNotFoundException exception so as to report in log instead.
-  		$value = $this->getCurrentFile()->translate($key, $dictionaryName, $this->xmlLineNumber);
+            $value = $context->translate($key, $dictionaryName, $this->xmlLineNumber);
 		}
 
 		//Fetch the parameters specified as immediate children
@@ -1246,12 +1085,12 @@ class ViewElementTag extends ViewElement {
 				if($child->name == $this->view->figNamespace . 'param') {
 					//If param is specified with an immediate value="" attribute :
 					if(isset($child->attributes['value'])) {
-						$arguments[$child->attributes['name']] = $this->evaluate($child->attributes['value']);
+						$arguments[$child->attributes['name']] = $this->evaluate($context, $child->attributes['value']);
 					}
 					//otherwise, the actual value is not scalar but is
 					//a nodeset in itself. Let's pre-render it and use it as text for the argument.
 					else {
-						$arguments[$child->attributes['name']] = $child->render();
+						$arguments[$child->attributes['name']] = $child->render($context);
 					}
 				}
 			}
@@ -1270,7 +1109,7 @@ class ViewElementTag extends ViewElement {
 			}
 			//Otherwise, use the inline attribute.
 			else {
-				$attributeValue = $this->evalAttribute($attributeName);
+				$attributeValue = $this->evalAttribute($context, $attributeName);
 			}
 			$value = str_replace('{' . $attributeName . '}', $attributeValue, $value);
 		}
@@ -1280,95 +1119,52 @@ class ViewElementTag extends ViewElement {
 		//So in the meantime we output the key.
 		if($value == '') {
 			$value = $key;
-			LoggerFactory::getLogger('Dictionary')->error(
-			  'Empty translation: key=' . $key . 
-			  ', dictionary=' . $dictionaryName . 
-			  ', language=' . $this->getView()->getLanguage() . 
-			  ', file=' . $this->getCurrentFilename() . ', line=' . $this->xmlLineNumber);
+			// TODO: One might want to be notified, either by an exception or another mechanism (Context logging?).
 		}
 		
 		return $value;
 	}
 
-	/**
-	 * Returns the Iteration object to which the current tag
-	 * is related, if applies. 
-	 *
-	 * @return Iteration
-	 */
-	public function getIteration() {
-		$current = & $this;
-		while($current) {
-			//The iteration property is either undefined,
-			//or an array. If an array, it can be empty.
-			//All these mean that the tag is not itself in an 
-			//iterating process.
-			//But if iteration property is a non-empty array,
-			//use its end-most element. 
-			if(isset($current->iteration) && (count($current->iteration))) {
-				return $current->iteration[count($current->iteration) - 1];
-			}
 
-			$current = & $current->parent;
-		}
-		return new Iteration(0);
-	}
-
-	/**
-	 * Determines whether the current Tag bears the mute/hollow directive,
-	 * in which case it should render only its inner parts,
-	 * without an outer tag.
-	 * A <fig: > tag is always mute.
-	 *
-	 * @return boolean
-	 */
-	private function isMute() {
-		if($this->view->isFigAttribute($this->name)) {
+    /**
+     * Determines whether the current Tag bears the mute directive,
+     * in which case we render only its inner parts,
+     * without an outer tag.
+     * A <fig: > tag is always mute.
+     *
+     * @param Context $context
+     * @return bool
+     */
+	private function isMute(Context $context) {
+	    // <fig:...> tag?
+		if($context->view->isFigAttribute($this->name)) {
 			return true;
 		}
 
-		$expression = '';
-		if(isset($this->attributes[$this->view->figNamespace . 'mute']))
-			$expression = $this->attributes[$this->view->figNamespace . 'mute'];
-		if($expression)
-			return $this->evaluate($expression);
-		return false;
+        return ($this->figMute) ? $this->evaluate($context, $this->figMute) : false;
 	}
 
     /**
+     * @param Context $context
      * @param string $className
      * @return Filter
-     * @throws FileNotFoundException
      * @throws RenderingException
-     * @throws \ReflectionException in case the specified class cannot be found.
      */
-	private function instantiateFilter($className) {
-		if($this->view->getFilterFactory())
-			return $this->view->getFilterFactory()->create($className);
+	private function instantiateFilter(Context $context, $className) {
+		if($context->view->getFilterFactory())
+			return $context->view->getFilterFactory()->create($className);
 
 		$reflection = new \ReflectionClass($className);
 		$instance = $reflection->newInstance();
 		if (! $instance instanceof Filter) {
 		    throw new RenderingException($this->getTagName(),
-                $this->getCurrentFilename(),
+                $context->getFilename(),
                 $this->getLineNumber(),
                 'Class ' . get_class($instance) . ' is not a Filter.');
         }
         return $instance;
 	}
 
-	/**
-	 * Returns the logger instance,
-	 * or creates one beforehand, if null.
-	 *
-	 * @return LoggerInterface
-	 */
-	private function getLogger() {
-		if(! $this->logger) {
-			$this->logger = LoggerFactory::getLogger(get_class($this));
-		}
-		return $this->logger;
-	}
 
 
 	/**
@@ -1391,4 +1187,51 @@ class ViewElementTag extends ViewElement {
      * @internal
 	 */
 	const TRANSIENT_PLUG_RENDERING = 'TRANSIENT_PLUG_RENDERING';
+
+
+	// TODO: this is just a attempt at serializing the View object (and its tree of tags)
+    // do not use in production.
+	public function serialize()
+    {
+        $data = [
+            'tag' => $this->name,
+            'attr' => $this->attributes,
+            'line' => $this->xmlLineNumber,
+            'ac' => $this->autoclose,
+            'tree' => $this->children,
+        ];
+
+        if ($this->figAuto) $data['auto'] = $this->figAuto;
+        if ($this->figCall) $data['call'] = $this->figCall;
+        if ($this->figCase) $data['case'] = $this->figCase;
+        if ($this->figCond) $data['cond'] = $this->figCond;
+        if ($this->figFilter) $data['filter'] = $this->figFilter;
+        if ($this->figMacro) $data['macro'] = $this->figMacro;
+        if ($this->figMute) $data['mute'] = $this->figMute;
+        if ($this->figText) $data['text'] = $this->figText;
+        if ($this->figVoid) $data['void'] = $this->figVoid;
+        if ($this->figWalk) $data['walk'] = $this->figWalk;
+
+        return serialize($data);
+    }
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        $this->name = $data['tag'];
+        $this->attributes = $data['attr'];
+        $this->xmlLineNumber = $data['line'];
+        $this->autoclose = $data['ac'];
+        $this->children = $data['tree'];
+
+        $this->figAuto = isset($data['auto']) ? $data['auto'] : null;
+        $this->figCall = isset($data['call']) ? $data['call'] : null;
+        $this->figCase = isset($data['case']) ? $data['case'] : null;
+        $this->figCond = isset($data['cond']) ? $data['cond'] : null;
+        $this->figFilter = isset($data['filter']) ? $data['filter'] : null;
+        $this->figMacro = isset($data['macro']) ? $data['macro'] : null;
+        $this->figMute = isset($data['mute']) ? $data['mute'] : null;
+        $this->figText = isset($data['text']) ? $data['text'] : null;
+        $this->figVoid = isset($data['void']) ? $data['void'] : null;
+        $this->figWalk = isset($data['walk']) ? $data['walk'] : null;
+    }
 }

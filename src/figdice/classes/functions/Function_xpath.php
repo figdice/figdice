@@ -23,21 +23,24 @@
 
 namespace figdice\classes\functions;
 
+use DOMAttr;
+use DOMNodeList;
+use DOMText;
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
 use \figdice\classes\FigDOMNodeList;
-use \figdice\LoggerFactory;
 
 class Function_xpath implements FigFunction {
 	public function __construct() {
 	}
 
-	/**
-	 * @param {@link ViewElement} $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return \DOMElement|FigDOMNodeList|mixed
+     */
+    public function evaluate(Context $context, $arity, $arguments) {
 		$domxpath = $arguments[0];
 		$query = $arguments[1];
 		if($arity == 3) {
@@ -50,7 +53,7 @@ class Function_xpath implements FigFunction {
 
 		//Some special situations:
 
-		if($result instanceof \DOMNodeList) {
+		if($result instanceof DOMNodeList) {
 			//The empty nodelist yields to empty result.
 			if($result->length == 0) {
 				return null;

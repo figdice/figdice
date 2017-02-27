@@ -22,7 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenLBracket extends TokenOperator {
 	public function __construct() {
@@ -35,13 +35,14 @@ class TokenLBracket extends TokenOperator {
 	public function getNumOperands() {
 		return 0;
 	}
-	
-	/**
-	 * @param ViewElement $viewElement
-	 * @codeCoverageIgnore
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+
+    /**
+     * @codeCoverageIgnore
+     * @param Context $context
+     * @return mixed
+     * @throws \Exception
+     */
+    public function evaluate(Context $context) {
 		throw new \Exception('Abnormal evaluation of left square bracket token.');
 	}
 }

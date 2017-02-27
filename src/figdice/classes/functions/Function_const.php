@@ -23,27 +23,26 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 
 class Function_const implements FigFunction {
 	public function __construct() {
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments one element: name of global constant, or class constant (myClass::myConst)
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments one element: name of global constant, or class constant (myClass::myConst)
+     * @return mixed|null
+     */
+    public function evaluate(Context $context, $arity, $arguments) {
 		$constantName = trim($arguments[0]);
 		
 		if(preg_match('#([^:]+)::#', $constantName, $matches)) {
 			$className = $matches[1];
 			if(! class_exists($className)) {
-				$logger = LoggerFactory::getLogger(__CLASS__);
-				$logger->warning("Undefined class: $className in static: $constantName");
+				// ("Undefined class: $className in static: $constantName");
 				return null;
 			}
 		}
@@ -52,11 +51,9 @@ class Function_const implements FigFunction {
 		if(defined($constantName)) {
 			return constant($constantName);
 		}
-		//Undefined symbol: error.
+		//Undefined symbol: assume the value is same as constant name
 		else {
-			$logger = LoggerFactory::getLogger(__CLASS__);
-			$logger->warning("Undefined constant: $constantName");
-			return null;
+			return $constantName;
 		}
 	}
 }

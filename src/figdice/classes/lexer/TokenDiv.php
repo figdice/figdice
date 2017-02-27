@@ -22,7 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenDiv extends TokenBinop {
 	/**
@@ -32,17 +32,18 @@ class TokenDiv extends TokenBinop {
 		parent::__construct(self::PRIORITY_MUL_DIV );
 	}
 	/**
-	 * @param ViewElement $viewElement
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
 		$opL = $this->operands[0];
 		$opR = $this->operands[1];
 
-		$valR = $opR->evaluate($viewElement);
+		$valR = $opR->evaluate($context);
 		if($valR == 0) {
 			return 0;
 		}
-		return $opL->evaluate($viewElement) / $valR;
+		return $opL->evaluate($context) / $valR;
 	}
 }
