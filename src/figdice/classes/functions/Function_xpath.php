@@ -23,6 +23,9 @@
 
 namespace figdice\classes\functions;
 
+use DOMAttr;
+use DOMNodeList;
+use DOMText;
 use figdice\classes\Context;
 use \figdice\FigFunction;
 use \figdice\classes\FigDOMNodeList;
@@ -50,7 +53,7 @@ class Function_xpath implements FigFunction {
 
 		//Some special situations:
 
-		if($result instanceof \DOMNodeList) {
+		if($result instanceof DOMNodeList) {
 			//The empty nodelist yields to empty result.
 			if($result->length == 0) {
 				return null;

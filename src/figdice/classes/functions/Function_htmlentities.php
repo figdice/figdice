@@ -13,7 +13,6 @@ namespace figdice\classes\functions;
 
 use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
 use \figdice\exceptions\FunctionCallException;
 
 class Function_htmlentities implements FigFunction {
@@ -35,7 +34,7 @@ class Function_htmlentities implements FigFunction {
 			throw new FunctionCallException(
 				'htmlentities',
 				'Expects exactly 1 argument.',
-				$context->tag->getCurrentFile()->getFilename(),
+				$context->getFilename(),
 				$context->tag->getLineNumber()
 			);
 		}

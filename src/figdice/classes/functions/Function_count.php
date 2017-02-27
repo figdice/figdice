@@ -26,6 +26,11 @@ namespace figdice\classes\functions;
 use figdice\classes\Context;
 use \figdice\FigFunction;
 
+/**
+ * The count function can be invoked with 0 or 1 arguments.
+ * 1 arg is: a countable collection, and it returns the count.
+ * 0 arg is: inside an iteration, it returns the total count of the iterating collection.
+ */
 class Function_count implements FigFunction {
 	public function __construct() {
 	}
@@ -37,10 +42,19 @@ class Function_count implements FigFunction {
      * @return int|mixed
      */
     public function evaluate(Context $context, $arity, $arguments) {
-		$param = $arguments[0];
 
-		if(is_array($param))
-			return count($param);
+        if ($arity == 1) {
+            $param = $arguments[0];
+            if (is_array($param)) {
+                return count($param);
+            }
+        }
+        else if ($arity == 0) {
+            if ($iter = $context->getIteration()) {
+                return $iter->getCount();
+            }
+        }
+
 		return 0;
 	}
 }

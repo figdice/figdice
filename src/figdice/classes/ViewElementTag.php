@@ -51,15 +51,30 @@ class ViewElementTag extends ViewElement implements \Serializable {
      */
     private $figCall = null;
     /**
+     * The value for fig:case attribute, or null if not present
+     * @var string
+     */
+    private $figCase = null;
+    /**
      * The value for fig:cond attribute, or null if not present
      * @var string
      */
     private $figCond = null;
     /**
+     * The value for fig:filter attribute, or null if not present
+     * @var string
+     */
+	private $figFilter = null;
+    /**
      * The value for fig:macro attribute, or null if not present
      * @var string
      */
 	private $figMacro = null;
+    /**
+     * The value for fig:mute attribute, or null if not present
+     * @var string
+     */
+	private $figMute = null;
     /**
      * The value for fig:text attribute, or null if not present
      * @var string
@@ -127,38 +142,90 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	public function getTagName() {
 		return $this->name;
 	}
+	private function checkAndCropAttr($figNamespace, array & $attributes, $name)
+    {
+        $value = null;
+        if (array_key_exists($key = $figNamespace . $name, $attributes)) {
+            $value = $attributes[$key];
+            unset($attributes[$key]);
+        }
+        return $value;
+    }
 	public function setAttributes($figNamespace, array $attributes) {
-        if (array_key_exists($key = $figNamespace . 'auto', $attributes)) {
-            $this->figAuto = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'call', $attributes)) {
-            $this->figCall = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'cond', $attributes)) {
-            $this->figCond = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'macro', $attributes)) {
-            $this->figMacro = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'text', $attributes)) {
-            $this->figText = $attributes[$key];
-            unset($attributes[$key]);
-        }
-	    if (array_key_exists($key = $figNamespace . 'void', $attributes)) {
-	        $this->figVoid = $attributes[$key];
-	        unset($attributes[$key]);
-        }
-	    if (array_key_exists($key = $figNamespace . 'walk', $attributes)) {
-	        $this->figWalk = $attributes[$key];
-	        unset($attributes[$key]);
+	    $this->figAuto = $this->checkAndCropAttr($figNamespace, $attributes, 'auto');
+	    $this->figCall = $this->checkAndCropAttr($figNamespace, $attributes, 'call');
+	    $this->figCase = $this->checkAndCropAttr($figNamespace, $attributes, 'case');
+	    $this->figCond = $this->checkAndCropAttr($figNamespace, $attributes, 'cond');
+	    $this->figFilter = $this->checkAndCropAttr($figNamespace, $attributes, 'filter');
+	    $this->figMacro = $this->checkAndCropAttr($figNamespace, $attributes, 'macro');
+	    $this->figMute = $this->checkAndCropAttr($figNamespace, $attributes, 'mute');
+	    $this->figText = $this->checkAndCropAttr($figNamespace, $attributes, 'text');
+	    $this->figVoid = $this->checkAndCropAttr($figNamespace, $attributes, 'void');
+	    $this->figWalk = $this->checkAndCropAttr($figNamespace, $attributes, 'walk');
+
+	    // Now take care of the remaining non-fig attributes
+		$this->parseAttributes($figNamespace, $attributes);
+	}
+	protected function parseAttributes($figNamespace, array $attributes)
+    {
+        // TODO: split the attributes by adhoc parts
+
+        // A fig:call attribute on a tag, indicates that all the other attributes
+        // are arguments for the macro. They all are considered as expressions,
+        // and therefore there is no need to search for adhoc inside.
+        if (! $this->figCall) {
+
+            foreach ($attributes as $name => $value) {
+                // Process the non-fig attributes only
+                if (strpos($name, $figNamespace) === 0) {
+                    continue;
+                }
+
+                // a flag attribute is to be processed differently because it isn't a key=value pair.
+                // TODO: not sure we already have Flags at this stage of the cycle. I think
+                // we only have plain real XML text attributes.
+                if ( $value instanceof Flag) {
+                    continue;
+                }
+
+                // Search for adhocs
+                if (preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
+                    $parts = [];
+                    $previousPosition = 0;
+                    for($i = 0; $i < count($matches[0]); ++ $i) {
+                        $expression = $matches[1][$i][0];
+                        $position = $matches[1][$i][1];
+                        if ($position > $previousPosition + 1) {
+                            // +1 because we exclude the leading {
+                            $parts []= substr($value, $previousPosition, $position - 1 - $previousPosition);
+                        }
+                        $parts []= new AdHoc($expression);
+                        // +1 because we contiunue past the trailing }
+                        $previousPosition = $position + strlen($expression) + 1;
+                    }
+                    // And finish with the trailing static part, past the last }
+                    if ($previousPosition < strlen($value)) {
+                        $parts []= substr($value, $previousPosition);
+                    }
+
+                    // At this stage, $parts is an index array of pieces,
+                    // each piece is either a scalar string, or an instance of AdHoc.
+                    // If there is only one part, let's simplify the array
+                    if (count($parts) == 1) {
+                        $parts = $parts[0];
+                    }
+
+                    // $parts can safely replace the origin value in $attributes,
+                    // because the serializing and rendering engine are aware.
+                    $attributes[$name] = $parts;
+                }
+
+            }
         }
 
-		$this->attributes = $attributes;
-	}
+        $this->attributes = $attributes;
+    }
+
 	public function clearAttribute($name) {
 		unset($this->attributes[$name]);
 	}
@@ -203,72 +270,77 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		foreach($attributes as $attribute=>$value) {
 
 			if( ! $context->view->isFigAttribute($attribute)) {
-        // a flag attribute is to be processed differently because it isn't a key=value pair.
-				if ( !($value instanceof Flag) ) {
-					if(preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
-						for($i = 0; $i < count($matches[0]); ++ $i) {
-							$expression = $matches[1][$i][0];
+                // a flag attribute is to be processed differently because
+                // it isn't a key=value pair.
 
-							//Evaluate expression now:
+                if ($value instanceof Flag) {
+                    // Flag attribute: there is no value. We print only the name of the flag.
+                    $result .= " $attribute";
+                }
 
-							$evaluatedValue = $this->evaluate($context, $expression);
-							if($evaluatedValue instanceof ViewElement) {
-								$evaluatedValue = $evaluatedValue->render($context);
-							}
-							if(is_array($evaluatedValue)) {
-								if(empty($evaluatedValue)) {
-									$evaluatedValue = '';
-								}
-								else {
-									$message = 'Attribute ' . $attribute . '="' . $value . '" in tag "' . $this->name . '" evaluated to array.';
-									throw new TagRenderingException($this->getTagName(), $this->getLineNumber(), $message);
-								}
-							}
-							else if (is_object($evaluatedValue)
-								&& ($evaluatedValue instanceof \DOMNode)) {
 
-								// Treat the special case of DOMNode descendants,
-								// for which we can evalute the text contents
-								$evaluatedValue = $evaluatedValue->nodeValue;
-							}
+                else {
 
-							//The outcome of the evaluatedValue, coming from DB or other, might contain non-standard HTML characters.
-							//We assume that the FIG library targets HTML rendering.
-							//Therefore, let's have the outcome comply with HTML.
-							if(is_object($evaluatedValue)) {
-								//TODO: Log some warning!
-								$evaluatedValue = '### Object of class: ' . get_class($evaluatedValue) . ' ###';
-							}
-							else {
-								$evaluatedValue = htmlspecialchars($evaluatedValue);
-							}
-	
+				    // We're potentially in presence of:
+                    // - a plain scalar
+                    // - an AdHoc instance
+                    // - an array of the above.
 
-							//Store evaluated value in $matches structure:
-							$matches[0][$i][2] = $evaluatedValue;
-						}
+                    if (! is_array($value)) {
+                        $value = [$value];
+                    }
+                    $combined = '';
+                    foreach ($value as $part) {
+                        if ($part instanceof AdHoc) {
+                            $evaluatedValue = $this->evaluate($context, $part->string);
 
-						//Now replace expressions right-to-left:
-						for($i = count($matches[0]) - 1; $i >= 0; -- $i) {
-							$evaluatedValue = $matches[0][$i][2];
-							$outerExpressionPosition = $matches[0][$i][1];
-							$outerExpressionLength = strlen($matches[0][$i][0]);
-							$value = substr_replace($value, $evaluatedValue, $outerExpressionPosition, $outerExpressionLength);
-						}
-					}
+                            if($evaluatedValue instanceof ViewElement) {
+                                $evaluatedValue = $evaluatedValue->render($context);
+                            }
+                            if(is_array($evaluatedValue)) {
+                                if(empty($evaluatedValue)) {
+                                    $evaluatedValue = '';
+                                }
+                                else {
+                                    $message = 'Adhoc {' . $part->string . '} of attribute ' . $attribute . ' in tag "' . $this->name . '" evaluated to array.';
+                                    throw new TagRenderingException($this->getTagName(), $this->getLineNumber(), $message);
+                                }
+                            }
+                            else if (is_object($evaluatedValue)
+                                && ($evaluatedValue instanceof \DOMNode)) {
 
+                                // Treat the special case of DOMNode descendants,
+                                // for which we can evalute the text contents
+                                $evaluatedValue = $evaluatedValue->nodeValue;
+                            }
+
+                            //The outcome of the evaluatedValue, coming from DB or other, might contain non-standard HTML characters.
+                            //We assume that the FIG library targets HTML rendering.
+                            //Therefore, let's have the outcome comply with HTML.
+                            if(is_object($evaluatedValue)) {
+                                //TODO: Log some warning!
+                                $evaluatedValue = '### Object of class: ' . get_class($evaluatedValue) . ' ###';
+                            }
+                            else {
+                                $evaluatedValue = htmlspecialchars($evaluatedValue);
+                            }
+
+                            $part = $evaluatedValue;
+                        }
+
+                        // Append to what we had already (and if $part was a string in the first place,
+                        // we use its direct value;
+                        $combined .= $part;
+
+
+                    }
+                    $value = $combined;
+
+                    $result .= " $attribute=\"$value\"";
 				}
+            }
 
-        if ($value instanceof Flag) {
-          // Flag attribute: there is no value. We print only the name of the flag.
-          $result .= " $attribute";
         }
-        else {
-          $result .= " $attribute=\"$value\"";
-        }
-			}
-
-		}
 		return $result;
 	}
 	function appendCDataChild($cdata)
@@ -276,11 +348,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		if (trim($cdata) != '') {
 			$this->autoclose = false;
 		}
+		/** @var ViewElement $lastChild */
 		$lastChild = null;
 
 		//Position, if applies, a reference to element's a previous sibling.
 		if( count($this->children) )
-			$lastChild = & $this->children[count($this->children) - 1];
+			$lastChild = $this->children[count($this->children) - 1];
 
 		//If lastChild exists append a sibling to it.
 		if($lastChild)
@@ -293,12 +366,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//Do not push this new node onto Depth Stack, beacuse CDATA
 		//is necessarily autoclose.
 		$newElement = new ViewElementCData();
-		$newElement->outputBuffer .= $cdata;
+		$newElement->outputBuffer = $cdata;
 		$newElement->parent = & $this;
 		$this->children[] = & $newElement;
 	}
 
-	function appendCDataSibling($cdata)
+	public function appendCDataSibling($cdata)
 	{
 		//Create a brand new node whose parent is the last node in stack.
 		//Do not push this new node onto Depth Stack, beacuse CDATA
@@ -367,7 +440,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 		//================================================================
 		//fig:case
-		if(isset($this->attributes[$context->figNamespace . 'case'])) {
+		if($this->figCase) {
 		    // Keep in mind that the case directive is written directly on the tag,
             // and there is no "switch" statement on its container.
             // So we must keep track at the parent level, of the current state of the case children.
@@ -376,7 +449,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 					return '';
 				}
 				else {
-					$condExpr = $this->attributes[$context->figNamespace . 'case'];
+					$condExpr = $this->figCase;
 					$condVal = $this->evaluate($context, $condExpr);
 					if(! $condVal) {
 						return '';
@@ -865,8 +938,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//TODO: Currently the filtering works only on non-slot tags.
 		//If applied on a slot tag, the transform is made on the special placeholder /==SLOT=.../
 		//rather than the future contents of the slot.
-		if(isset($this->attributes[$context->figNamespace . 'filter'])) {
-			$filterClass = $this->attributes[$context->figNamespace . 'filter'];
+		if($this->figFilter) {
+			$filterClass = $this->figFilter;
 			$filter = $this->instantiateFilter($context, $filterClass);
 			$buffer = $filter->transform($buffer);
 		}
@@ -1063,16 +1136,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * @return bool
      */
 	private function isMute(Context $context) {
+	    // <fig:...> tag?
 		if($context->view->isFigAttribute($this->name)) {
 			return true;
 		}
 
-		$expression = '';
-		if(isset($this->attributes[$context->figNamespace . 'mute']))
-			$expression = $this->attributes[$context->figNamespace . 'mute'];
-		if($expression)
-			return $this->evaluate($context, $expression);
-		return false;
+        return ($this->figMute) ? $this->evaluate($context, $this->figMute) : false;
 	}
 
     /**
@@ -1134,8 +1203,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
         if ($this->figAuto) $data['auto'] = $this->figAuto;
         if ($this->figCall) $data['call'] = $this->figCall;
+        if ($this->figCase) $data['case'] = $this->figCase;
         if ($this->figCond) $data['cond'] = $this->figCond;
+        if ($this->figFilter) $data['filter'] = $this->figFilter;
         if ($this->figMacro) $data['macro'] = $this->figMacro;
+        if ($this->figMute) $data['mute'] = $this->figMute;
         if ($this->figText) $data['text'] = $this->figText;
         if ($this->figVoid) $data['void'] = $this->figVoid;
         if ($this->figWalk) $data['walk'] = $this->figWalk;
@@ -1153,8 +1225,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
         $this->figAuto = isset($data['auto']) ? $data['auto'] : null;
         $this->figCall = isset($data['call']) ? $data['call'] : null;
+        $this->figCase = isset($data['case']) ? $data['case'] : null;
         $this->figCond = isset($data['cond']) ? $data['cond'] : null;
+        $this->figFilter = isset($data['filter']) ? $data['filter'] : null;
         $this->figMacro = isset($data['macro']) ? $data['macro'] : null;
+        $this->figMute = isset($data['mute']) ? $data['mute'] : null;
         $this->figText = isset($data['text']) ? $data['text'] : null;
         $this->figVoid = isset($data['void']) ? $data['void'] : null;
         $this->figWalk = isset($data['walk']) ? $data['walk'] : null;

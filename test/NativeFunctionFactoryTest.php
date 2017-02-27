@@ -51,8 +51,6 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		// it embeds a real NativeFunctionFactory instance.
 		$view = $this->view;
 
-		$viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
-
 		// Make sure that the passed expression is successfully parsed,
 		// before asserting stuff on its evaluation.
         $context = new \figdice\classes\Context($view);
@@ -95,7 +93,18 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 	public function testCountOfArrayIsCount() {
 		$this->view->mount('myArray', array(1,2,3));
 		$this->assertEquals(3, $this->lexExpr(' count( /myArray ) '));
-	} 
+	}
+	public function testCountWithoutArgInsideIteration()
+    {
+        $data = ['a', 'b', 'c'];
+        $template = '<fig:w fig:walk="/data" fig:text="count()"/>';
+
+        $view = new View();
+        $view->loadString($template);
+        $view->mount('data', $data);
+        $output = $view->render();
+        $this->assertEquals('333', $output);
+    }
 	public function testSumOfArrayIsOk() {
 		$this->view->mount('myArray', array(1,2,3));
 		$this->assertEquals(6, $this->lexExpr(' sum( /myArray ) '));
@@ -121,6 +130,10 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 	public function testGlobalConst() {
 		define('MY_GLOBAL_TEST_CONST', 12);
 		$this->assertEquals(MY_GLOBAL_TEST_CONST, $this->lexExpr(" const( 'MY_GLOBAL_TEST_CONST' ) ") );
+	}
+	public function testGlobalConstUndefinedReturnsConstName() {
+	    $randomValue = 'CERTAINLY_UNDEFINED_FIGDICE_TEST_CONSTANT_'.mt_srand();
+		$this->assertEquals($randomValue, $this->lexExpr(" const( '$randomValue' ) ") );
 	}
 	public function testClassConstForUndefinedClassIsNull() {
 		$this->assertNull( $this->lexExpr(" const( 'MyTestUndefinedClass::someConst' ) ") );
@@ -246,4 +259,14 @@ ENDXML;
 		$this->assertFalse( $this->lexExpr("php('no_chance_that_this_function_exists_in_php', 12)") );
 	}
 
+	public function testAverage()
+    {
+        $this->view->mount('values', [
+            ['x' => 7],
+            ['x' => 21],
+            ['x' => 17],
+        ]);
+
+        $this->assertEquals(15.0, $this->lexExpr('average(/values/x)'));
+    }
 }
