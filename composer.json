@@ -4,7 +4,7 @@
   "description": "Template Engine, XML-centric and attribute-driven",
   "keywords": ["template","templating","presentation","views","xml","html"],
   "homepage": "http://www.figdice.org/",
-  "version": "2.5-dev",
+  "version": "3.0-dev",
   "license": ["GPL-3.0"],
   "authors": [
     {
@@ -21,8 +21,7 @@
     "psr-4": { "figdice\\": "src/figdice" }
   },
   "require-dev": {
-    "phpunit/phpunit": "4.0.*",
-    "mikey179/vfsStream": "v1.2.0",
-    "psr/log": "1.0.*@dev"
+    "phpunit/phpunit": "4.8.*",
+    "mikey179/vfsStream": "v1.2.0"
   }
 }
