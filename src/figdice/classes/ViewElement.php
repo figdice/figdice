@@ -116,4 +116,6 @@ abstract class ViewElement {
      * @return string
      */
 	abstract public function render(Context $context);
+
+    abstract public function appendCDataSibling($cdata);
 }

@@ -276,11 +276,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		if (trim($cdata) != '') {
 			$this->autoclose = false;
 		}
+		/** @var ViewElement $lastChild */
 		$lastChild = null;
 
 		//Position, if applies, a reference to element's a previous sibling.
 		if( count($this->children) )
-			$lastChild = & $this->children[count($this->children) - 1];
+			$lastChild = $this->children[count($this->children) - 1];
 
 		//If lastChild exists append a sibling to it.
 		if($lastChild)
@@ -293,12 +294,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//Do not push this new node onto Depth Stack, beacuse CDATA
 		//is necessarily autoclose.
 		$newElement = new ViewElementCData();
-		$newElement->outputBuffer .= $cdata;
+		$newElement->outputBuffer = $cdata;
 		$newElement->parent = & $this;
 		$this->children[] = & $newElement;
 	}
 
-	function appendCDataSibling($cdata)
+	public function appendCDataSibling($cdata)
 	{
 		//Create a brand new node whose parent is the last node in stack.
 		//Do not push this new node onto Depth Stack, beacuse CDATA

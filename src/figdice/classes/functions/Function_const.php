@@ -51,10 +51,9 @@ class Function_const implements FigFunction {
 		if(defined($constantName)) {
 			return constant($constantName);
 		}
-		//Undefined symbol: error.
+		//Undefined symbol: assume the value is same as constant name
 		else {
-            //("Undefined constant: $constantName");
-			return null;
+			return $constantName;
 		}
 	}
 }

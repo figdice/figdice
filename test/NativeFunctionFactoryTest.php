@@ -122,6 +122,10 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		define('MY_GLOBAL_TEST_CONST', 12);
 		$this->assertEquals(MY_GLOBAL_TEST_CONST, $this->lexExpr(" const( 'MY_GLOBAL_TEST_CONST' ) ") );
 	}
+	public function testGlobalConstUndefinedReturnsConstName() {
+	    $randomValue = 'CERTAINLY_UNDEFINED_FIGDICE_TEST_CONSTANT_'.mt_srand();
+		$this->assertEquals($randomValue, $this->lexExpr(" const( '$randomValue' ) ") );
+	}
 	public function testClassConstForUndefinedClassIsNull() {
 		$this->assertNull( $this->lexExpr(" const( 'MyTestUndefinedClass::someConst' ) ") );
 	}
@@ -246,4 +250,14 @@ ENDXML;
 		$this->assertFalse( $this->lexExpr("php('no_chance_that_this_function_exists_in_php', 12)") );
 	}
 
+	public function testAverage()
+    {
+        $this->view->mount('values', [
+            ['x' => 7],
+            ['x' => 21],
+            ['x' => 17],
+        ]);
+
+        $this->assertEquals(15.0, $this->lexExpr('average(/values/x)'));
+    }
 }
