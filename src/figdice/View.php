@@ -406,7 +406,11 @@ class View implements \Serializable {
      *
      * then     cacheFile is          /tmp/figdice/figs/sub/footer.html.fig
      *
-     * CAUTION: this does not work if all the above are relative paths.
+     * CAUTION: Relative path for the initial template file, is converted to absolute
+     * using the current working directory (the way file_get_contents works).
+     *
+     * You can work with exotic files (non local filesystem) provided that they are specified
+     * with full (valid) scheme. @see http://php.net/manual/en/function.parse-url.php
      * @param string $cachePath
      * @param string $templatesRoot
      * @param string $filename
@@ -415,6 +419,13 @@ class View implements \Serializable {
      */
     private function makeCacheFilename($cachePath, $templatesRoot, $filename, $mkdir = false)
     {
+        // If the template filename is relative (ie. not starting by / and not specifying a scheme)
+        // then we first prefis it with the current working directory. And then we continue as if
+        // absolute.
+        if ( (substr($filename, 0, 1) != '/')  && ! parse_url($filename, PHP_URL_SCHEME)) {
+            $filename = getcwd() . '/' . $filename;
+        }
+
         $cacheFile = str_replace($templatesRoot, $cachePath . '/figs', $filename) . '.fig';
         if ($mkdir) {
             // Create the intermediary folders if not exist.
