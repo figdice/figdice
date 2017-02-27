@@ -35,7 +35,7 @@ class Function_htmlentities implements FigFunction {
 			throw new FunctionCallException(
 				'htmlentities',
 				'Expects exactly 1 argument.',
-				$context->tag->getCurrentFile()->getFilename(),
+				$context->getFilename(),
 				$context->tag->getLineNumber()
 			);
 		}

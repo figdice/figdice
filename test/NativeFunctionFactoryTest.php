@@ -95,7 +95,18 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 	public function testCountOfArrayIsCount() {
 		$this->view->mount('myArray', array(1,2,3));
 		$this->assertEquals(3, $this->lexExpr(' count( /myArray ) '));
-	} 
+	}
+	public function testCountWithoutArgInsideIteration()
+    {
+        $data = ['a', 'b', 'c'];
+        $template = '<fig:w fig:walk="/data" fig:text="count()"/>';
+
+        $view = new View();
+        $view->loadString($template);
+        $view->mount('data', $data);
+        $output = $view->render();
+        $this->assertEquals('333', $output);
+    }
 	public function testSumOfArrayIsOk() {
 		$this->view->mount('myArray', array(1,2,3));
 		$this->assertEquals(6, $this->lexExpr(' sum( /myArray ) '));
