@@ -51,6 +51,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
      */
     private $figCall = null;
     /**
+     * The value for fig:case attribute, or null if not present
+     * @var string
+     */
+    private $figCase = null;
+    /**
      * The value for fig:cond attribute, or null if not present
      * @var string
      */
@@ -139,6 +144,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
         }
         if (array_key_exists($key = $figNamespace . 'call', $attributes)) {
             $this->figCall = $attributes[$key];
+            unset($attributes[$key]);
+        }
+        if (array_key_exists($key = $figNamespace . 'case', $attributes)) {
+            $this->figCase = $attributes[$key];
             unset($attributes[$key]);
         }
         if (array_key_exists($key = $figNamespace . 'cond', $attributes)) {
@@ -382,7 +391,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 		//================================================================
 		//fig:case
-		if(isset($this->attributes[$context->figNamespace . 'case'])) {
+		if($this->figCase) {
 		    // Keep in mind that the case directive is written directly on the tag,
             // and there is no "switch" statement on its container.
             // So we must keep track at the parent level, of the current state of the case children.
@@ -391,7 +400,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 					return '';
 				}
 				else {
-					$condExpr = $this->attributes[$context->figNamespace . 'case'];
+					$condExpr = $this->figCase;
 					$condVal = $this->evaluate($context, $condExpr);
 					if(! $condVal) {
 						return '';
@@ -1145,6 +1154,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
         if ($this->figAuto) $data['auto'] = $this->figAuto;
         if ($this->figCall) $data['call'] = $this->figCall;
+        if ($this->figCase) $data['case'] = $this->figCase;
         if ($this->figCond) $data['cond'] = $this->figCond;
         if ($this->figMacro) $data['macro'] = $this->figMacro;
         if ($this->figMute) $data['mute'] = $this->figMute;
@@ -1165,6 +1175,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
         $this->figAuto = isset($data['auto']) ? $data['auto'] : null;
         $this->figCall = isset($data['call']) ? $data['call'] : null;
+        $this->figCase = isset($data['case']) ? $data['case'] : null;
         $this->figCond = isset($data['cond']) ? $data['cond'] : null;
         $this->figMacro = isset($data['macro']) ? $data['macro'] : null;
         $this->figMute = isset($data['mute']) ? $data['mute'] : null;
