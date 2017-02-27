@@ -104,8 +104,8 @@ class TagFigDictionary extends ViewElementTag {
 
         try {
             //Determine whether this dictionary was pre-compiled:
-            if($context->view->getTempPath()) {
-                $tmpFile = $context->getView()->getTempPath() . '/' . 'Dictionary' . '/' . $context->getView()->getLanguage() . '/' . $file . '.php';
+            if($context->view->getCachePath()) {
+                $tmpFile = $context->getView()->getCachePath() . '/' . 'Dictionary' . '/' . $context->getView()->getLanguage() . '/' . $file . '.php';
                 //If the tmp file already exists,
                 if(file_exists($tmpFile)) {
                     //but is older than the source file,

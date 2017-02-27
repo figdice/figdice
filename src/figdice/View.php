@@ -1,24 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2017, Gabriel Zerbib.
- * @version 2.5
  * @package FigDice
- *
- * This file is part of FigDice.
- *
- * FigDice is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * FigDice is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace figdice;
@@ -49,10 +32,13 @@ use figdice\classes\XMLEntityTransformer;
  * Main component of the FigDice library.
  * The View object represents the transform lifecycle from a template into a rendered document.
  *
- * After creating a View instance, you may register one or more {@link FeedFactory} objects (see {@see registerFeedFactory}),
- * and you may register one or more {@link FunctionFactory} object (see {@see registerFunctionFactory}) and one {@see FilterFactory} (see {@see setFilterFactory}).
+ * After creating a View instance, you may register one or more {@link FeedFactory} objects
+ * (see {@see registerFeedFactory}),
+ * and you may register one or more {@link FunctionFactory} object (see {@see registerFunctionFactory})
+ * and one {@see FilterFactory} (see {@see setFilterFactory}).
  *
- * Then you would {@see loadFile} an XML source file, and finally {@see render} it to obtain its final result (which you would typically output to the browser).
+ * Then you would {@see loadFile} an XML source file, and finally {@see render} it to obtain its final
+ * result (which you would typically output to the browser).
  */
 class View implements \Serializable {
 
@@ -78,7 +64,7 @@ class View implements \Serializable {
 	 * The directory where to store temporary files (results of compilation).
 	 * @var string
 	 */
-	private $tempPath;
+	private $cachePath;
 
 	/**
      * The root folder for the templates, from which to derive the filenames of cached views.
@@ -288,12 +274,14 @@ class View implements \Serializable {
 
 		// If a cache directory was specified,
         // try to load from it
-		if ($this->tempPath) {
+		if ($this->cachePath) {
 		    if (! $this->templatesRoot) {
 		        $this->templatesRoot = dirname($filename);
             }
-		    $cacheFile = $this->makeCacheFilename();
-            if (file_exists($cacheFile) && (! file_exists($this->filename) || (filemtime($this->filename) < filemtime($cacheFile)) )) {
+		    $cacheFile = $this->makeCacheFilename($this->cachePath, $this->templatesRoot, $this->filename);
+            if ( file_exists($cacheFile)
+                 && (! file_exists($this->filename) || (filemtime($this->filename) < filemtime($cacheFile)) )
+            ) {
                 $this->loadFromSerialized(file_get_contents($cacheFile));
                 return;
             }
@@ -399,8 +387,8 @@ class View implements \Serializable {
 
 		// Store a serialized version of the parsed tree, if successfully parsed,
         // and if we've got a cache path.
-        if ( ($this->tempPath) && ($this->filename !== null) && (! $this->unserialized) ) {
-            $cacheFile = $this->makeCacheFilename(true);
+        if ( ($this->cachePath) && ($this->filename !== null) && (! $this->unserialized) ) {
+            $cacheFile = $this->makeCacheFilename($this->cachePath, $this->templatesRoot, $this->filename, true);
             file_put_contents($cacheFile, serialize($this));
         }
 
@@ -412,12 +400,22 @@ class View implements \Serializable {
      * relative to the templatesRoot directory, but under the tempPath directory.
      * In other words, tempPath and templatesRoot correspond together.
      *
+     * Example: if  cachePath is      /tmp/figdice
+     *          and templatesRoot is  /var/www/html/app/templates
+     *          and filename is       /var/www/html/app/templates/sub/footer.html
+     *
+     * then     cacheFile is          /tmp/figdice/figs/sub/footer.html.fig
+     *
+     * CAUTION: this does not work if all the above are relative paths.
+     * @param string $cachePath
+     * @param string $templatesRoot
+     * @param string $filename
      * @param bool $mkdir Whether to create the intermediate folder structure
      * @return string
      */
-    private function makeCacheFilename($mkdir = false)
+    private function makeCacheFilename($cachePath, $templatesRoot, $filename, $mkdir = false)
     {
-        $cacheFile = str_replace($this->templatesRoot, $this->tempPath . '/figs', $this->filename) . '.fig';
+        $cacheFile = str_replace($templatesRoot, $cachePath . '/figs', $filename) . '.fig';
         if ($mkdir) {
             // Create the intermediary folders if not exist.
             $intermed = dirname($cacheFile);
@@ -486,17 +484,18 @@ class View implements \Serializable {
      * @param string $path
      * @param string $templatesRoot
      */
-	public function setTempPath($path, $templatesRoot = null) {
-		$this->tempPath = $path;
-		$this->templatesRoot = $templatesRoot;
+	public function setCachePath($path, $templatesRoot = null) {
+	    // Suppress the trailing slash
+		$this->cachePath = preg_replace('#/+$#', '', $path);
+		$this->templatesRoot = preg_replace('#/+$#', '', $templatesRoot);
 	}
 	/**
 	 * The folder in which FigDice can store its cache
 	 * (currently only Dictionary cache)
 	 * @return string
 	 */
-	public function getTempPath() {
-		return $this->tempPath;
+	public function getCachePath() {
+		return $this->cachePath;
 	}
 	/**
      * The absolute root of all the tree of templates.

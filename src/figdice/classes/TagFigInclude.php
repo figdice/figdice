@@ -46,8 +46,8 @@ class TagFigInclude extends ViewElementTag
         //Create a sub-view, attached to the current element.
         $view = new View();
 
-        if ($context->view->getTempPath() && $context->view->getTemplatesRoot()) {
-            $view->setTempPath($context->view->getTempPath(), $context->view->getTemplatesRoot());
+        if ($context->view->getCachePath() && $context->view->getTemplatesRoot()) {
+            $view->setCachePath($context->view->getCachePath(), $context->view->getTemplatesRoot());
         }
         $view->loadFile($realFilename);
 

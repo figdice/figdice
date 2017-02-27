@@ -169,7 +169,7 @@ DIC;
     // Indicate where the source dictionary is located
     $view->setTranslationPath(vfsStream::url('root'));
     // Indicate where the compiled dictionaries are located.
-    $view->setTempPath(vfsStream::url('root'));
+    $view->setCachePath(vfsStream::url('root'));
 
     $viewString = <<<ENDTEMPLATE
 <fig:template>
