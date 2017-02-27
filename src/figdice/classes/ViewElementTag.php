@@ -164,11 +164,65 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	    $this->figWalk = $this->checkAndCropAttr($figNamespace, $attributes, 'walk');
 
 	    // Now take care of the remaining non-fig attributes
-		$this->parseAttributes($attributes);
+		$this->parseAttributes($figNamespace, $attributes);
 	}
-	protected function parseAttributes(array $attributes)
+	protected function parseAttributes($figNamespace, array $attributes)
     {
         // TODO: split the attributes by adhoc parts
+
+        // A fig:call attribute on a tag, indicates that all the other attributes
+        // are arguments for the macro. They all are considered as expressions,
+        // and therefore there is no need to search for adhoc inside.
+        if (! $this->figCall) {
+
+            foreach ($attributes as $name => $value) {
+                // Process the non-fig attributes only
+                if (strpos($name, $figNamespace) === 0) {
+                    continue;
+                }
+
+                // a flag attribute is to be processed differently because it isn't a key=value pair.
+                // TODO: not sure we already have Flags at this stage of the cycle. I think
+                // we only have plain real XML text attributes.
+                if ( $value instanceof Flag) {
+                    continue;
+                }
+
+                // Search for adhocs
+                if (preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
+                    $parts = [];
+                    $previousPosition = 0;
+                    for($i = 0; $i < count($matches[0]); ++ $i) {
+                        $expression = $matches[1][$i][0];
+                        $position = $matches[1][$i][1];
+                        if ($position > $previousPosition + 1) {
+                            // +1 because we exclude the leading {
+                            $parts []= substr($value, $previousPosition, $position - 1 - $previousPosition);
+                        }
+                        $parts []= new AdHoc($expression);
+                        // +1 because we contiunue past the trailing }
+                        $previousPosition = $position + strlen($expression) + 1;
+                    }
+                    // And finish with the trailing static part, past the last }
+                    if ($previousPosition < strlen($value)) {
+                        $parts []= substr($value, $previousPosition);
+                    }
+
+                    // At this stage, $parts is an index array of pieces,
+                    // each piece is either a scalar string, or an instance of AdHoc.
+                    // If there is only one part, let's simplify the array
+                    if (count($parts) == 1) {
+                        $parts = $parts[0];
+                    }
+
+                    // $parts can safely replace the origin value in $attributes,
+                    // because the serializing and rendering engine are aware.
+                    $attributes[$name] = $parts;
+                }
+
+            }
+        }
+
         $this->attributes = $attributes;
     }
 

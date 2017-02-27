@@ -51,8 +51,6 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		// it embeds a real NativeFunctionFactory instance.
 		$view = $this->view;
 
-		$viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
-
 		// Make sure that the passed expression is successfully parsed,
 		// before asserting stuff on its evaluation.
         $context = new \figdice\classes\Context($view);
