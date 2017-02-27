@@ -61,6 +61,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
      */
     private $figCond = null;
     /**
+     * The value for fig:filter attribute, or null if not present
+     * @var string
+     */
+	private $figFilter = null;
+    /**
      * The value for fig:macro attribute, or null if not present
      * @var string
      */
@@ -137,48 +142,33 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	public function getTagName() {
 		return $this->name;
 	}
+	private function checkAndCropAttr($figNamespace, array & $attributes, $name)
+    {
+        $value = null;
+        if (array_key_exists($key = $figNamespace . $name, $attributes)) {
+            $value = $attributes[$key];
+            unset($attributes[$key]);
+        }
+        return $value;
+    }
 	public function setAttributes($figNamespace, array $attributes) {
-        if (array_key_exists($key = $figNamespace . 'auto', $attributes)) {
-            $this->figAuto = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'call', $attributes)) {
-            $this->figCall = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'case', $attributes)) {
-            $this->figCase = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'cond', $attributes)) {
-            $this->figCond = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'macro', $attributes)) {
-            $this->figMacro = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'mute', $attributes)) {
-            $this->figMute = $attributes[$key];
-            unset($attributes[$key]);
-        }
-        if (array_key_exists($key = $figNamespace . 'text', $attributes)) {
-            $this->figText = $attributes[$key];
-            unset($attributes[$key]);
-        }
-	    if (array_key_exists($key = $figNamespace . 'void', $attributes)) {
-	        $this->figVoid = $attributes[$key];
-	        unset($attributes[$key]);
-        }
-	    if (array_key_exists($key = $figNamespace . 'walk', $attributes)) {
-	        $this->figWalk = $attributes[$key];
-	        unset($attributes[$key]);
-        }
+	    $this->figAuto = $this->checkAndCropAttr($figNamespace, $attributes, 'auto');
+	    $this->figCall = $this->checkAndCropAttr($figNamespace, $attributes, 'call');
+	    $this->figCase = $this->checkAndCropAttr($figNamespace, $attributes, 'case');
+	    $this->figCond = $this->checkAndCropAttr($figNamespace, $attributes, 'cond');
+	    $this->figFilter = $this->checkAndCropAttr($figNamespace, $attributes, 'filter');
+	    $this->figMacro = $this->checkAndCropAttr($figNamespace, $attributes, 'macro');
+	    $this->figMute = $this->checkAndCropAttr($figNamespace, $attributes, 'mute');
+	    $this->figText = $this->checkAndCropAttr($figNamespace, $attributes, 'text');
+	    $this->figVoid = $this->checkAndCropAttr($figNamespace, $attributes, 'void');
+	    $this->figWalk = $this->checkAndCropAttr($figNamespace, $attributes, 'walk');
 
+	    // Now take care of the remaining non-fig attributes
 		$this->parseAttributes($attributes);
 	}
 	protected function parseAttributes(array $attributes)
     {
+        // TODO: split the attributes by adhoc parts
         $this->attributes = $attributes;
     }
 
@@ -889,8 +879,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//TODO: Currently the filtering works only on non-slot tags.
 		//If applied on a slot tag, the transform is made on the special placeholder /==SLOT=.../
 		//rather than the future contents of the slot.
-		if(isset($this->attributes[$context->figNamespace . 'filter'])) {
-			$filterClass = $this->attributes[$context->figNamespace . 'filter'];
+		if($this->figFilter) {
+			$filterClass = $this->figFilter;
 			$filter = $this->instantiateFilter($context, $filterClass);
 			$buffer = $filter->transform($buffer);
 		}
@@ -1156,6 +1146,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         if ($this->figCall) $data['call'] = $this->figCall;
         if ($this->figCase) $data['case'] = $this->figCase;
         if ($this->figCond) $data['cond'] = $this->figCond;
+        if ($this->figFilter) $data['filter'] = $this->figFilter;
         if ($this->figMacro) $data['macro'] = $this->figMacro;
         if ($this->figMute) $data['mute'] = $this->figMute;
         if ($this->figText) $data['text'] = $this->figText;
@@ -1177,6 +1168,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $this->figCall = isset($data['call']) ? $data['call'] : null;
         $this->figCase = isset($data['case']) ? $data['case'] : null;
         $this->figCond = isset($data['cond']) ? $data['cond'] : null;
+        $this->figFilter = isset($data['filter']) ? $data['filter'] : null;
         $this->figMacro = isset($data['macro']) ? $data['macro'] : null;
         $this->figMute = isset($data['mute']) ? $data['mute'] : null;
         $this->figText = isset($data['text']) ? $data['text'] : null;
