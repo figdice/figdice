@@ -22,22 +22,22 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenAnd extends TokenBinop {
 	public function __construct() {
 		parent::__construct(self::PRIORITY_AND_OR);
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
 		$opL = $this->operands[0];
-		if(true == $opL->evaluate($viewElement)) {
+		if(true == $opL->evaluate($context)) {
 			$opR = $this->operands[1];
-			return (true == $opR->evaluate($viewElement));
+			return (true == $opR->evaluate($context));
 		}
 		return false;
 	}

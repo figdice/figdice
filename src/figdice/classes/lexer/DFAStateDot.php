@@ -38,7 +38,9 @@ class DFAStateDot extends DFAState {
 		// - any digit, means that we are talking about a Decimal,
 		// - dot, means that we are talking about the Path Element: Parent.
 		// - comma, means that the current argument of a function is the Current path.
-		//TODO: and also closing parenthesis, closing square bracket, blank.
+        // - closing paren, means that this dot is the last arg in a func call
+        // - blank, means that we close the path and it's a dot.
+		//TODO: and also closing square bracket.
 
 		if($char == '/') {
 			$lexer->pushPath(new PathElementCurrent());

@@ -22,9 +22,7 @@
  */
 
 use figdice\classes\lexer\Lexer;
-use figdice\exceptions\LexerUnexpectedCharException;
 use figdice\View;
-use figdice\classes\File;
 use figdice\classes\ViewElementTag;
 
 /**
@@ -53,18 +51,16 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		// it embeds a real NativeFunctionFactory instance.
 		$view = $this->view;
 
-		$viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
 		$viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
-		$viewElement->expects($this->any())
-			->method('getCurrentFile')
-			->will($this->returnValue($viewFile));
 
 		// Make sure that the passed expression is successfully parsed,
 		// before asserting stuff on its evaluation.
-		$parseResult = $lexer->parse($viewElement);
+        $context = new \figdice\classes\Context($view);
+        $context->pushTag(new ViewElementTag('test', 0));
+		$parseResult = $lexer->parse($context);
 		$this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
-		return $lexer->evaluate($viewElement);
+		return $lexer->evaluate($context);
 	}
 
 

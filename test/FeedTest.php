@@ -43,6 +43,18 @@ class FeedTest extends PHPUnit_Framework_TestCase
     '</fig:template>');
     $this->assertEquals('ab', $view->render());
   }
+
+    /**
+     * @expectedException figdice\exceptions\RequiredAttributeException
+     */
+  public function testFeedTagWithoutClassRaisesExceptionAtParseTime()
+  {
+      $view = new \figdice\View();
+      $view->loadString('<fig:feed target="some" />');
+      $view->parse();
+
+      $this->assertTrue(false);
+  }
 }
 
 class ParamTest1Feed extends \figdice\Feed

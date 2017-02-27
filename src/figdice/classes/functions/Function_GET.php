@@ -23,20 +23,20 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 
 class Function_GET implements FigFunction {
 	function __construct() {
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return bool|mixed
+     */
+    public function evaluate(Context $context, $arity, $arguments) {
 		if(isset($_GET)) {
 			$varName = $arguments[0];
 			if(isset($_GET[$varName])) {

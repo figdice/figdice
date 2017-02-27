@@ -23,24 +23,26 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 use figdice\exceptions\FunctionCallException;
 
 class Function_if implements FigFunction {
 	public function __construct() {
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return mixed
+     * @throws FunctionCallException
+     */
+    public function evaluate(Context $context, $arity, $arguments) {
 		if ($arity != 3) {
 			throw new FunctionCallException('if', 'Expected 3 arguments, ' . $arity . ' received.',
-					 $viewElement->getCurrentFile()->getFilename(), $viewElement->getLineNumber());
+                $context->getFilename(),
+                $context->tag->getLineNumber());
 		}
 		return ($arguments[0] ? $arguments[1] : $arguments[2]);
 	}

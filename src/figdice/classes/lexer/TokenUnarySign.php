@@ -22,7 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenUnarySign extends TokenOperator {
 	/**
@@ -42,13 +42,13 @@ class TokenUnarySign extends TokenOperator {
 		return 1;
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
 		if($this->sign == '-')
-			return (- $this->operands[0]->evaluate($viewElement));
-		return $this->operands[0]->evaluate($viewElement);
+			return (- $this->operands[0]->evaluate($context));
+		return $this->operands[0]->evaluate($context);
 	}
 }

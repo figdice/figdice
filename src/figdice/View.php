@@ -1,55 +1,51 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2017, Gabriel Zerbib.
- * @version 2.5
  * @package FigDice
- *
- * This file is part of FigDice.
- *
- * FigDice is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * FigDice is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace figdice;
 
 use figdice\classes\AutoloadFeedFactory;
+use figdice\classes\Context;
 use figdice\classes\MagicReflector;
 use figdice\classes\NativeFunctionFactory;
-use figdice\classes\Plug;
 use figdice\classes\TagFigAttr;
-use figdice\classes\File;
+use figdice\classes\TagFigCdata;
+use figdice\classes\TagFigDictionary;
+use figdice\classes\TagFigFeed;
+use figdice\classes\TagFigInclude;
+use figdice\classes\TagFigMount;
 use figdice\classes\ViewElementTag;
+use figdice\exceptions\FeedClassNotFoundException;
+use figdice\exceptions\FeedClassNotFoundRenderingException;
 use figdice\exceptions\FileNotFoundException;
+use figdice\exceptions\RequiredAttributeException;
+use figdice\exceptions\RequiredAttributeParsingException;
+use figdice\exceptions\TagRenderingException;
 use figdice\exceptions\XMLParsingException;
 
-use Psr\Log\LoggerInterface;
 use figdice\exceptions\RenderingException;
 use figdice\classes\XMLEntityTransformer;
-use figdice\classes\Slot;
 
 /**
  * Main component of the FigDice library.
  * The View object represents the transform lifecycle from a template into a rendered document.
  *
- * After creating a View instance, you may register one or more {@link FeedFactory} objects (see {@see registerFeedFactory}),
- * and you may register one or more {@link FunctionFactory} object (see {@see registerFunctionFactory}) and one {@see FilterFactory} (see {@see setFilterFactory}).
+ * After creating a View instance, you may register one or more {@link FeedFactory} objects
+ * (see {@see registerFeedFactory}),
+ * and you may register one or more {@link FunctionFactory} object (see {@see registerFunctionFactory})
+ * and one {@see FilterFactory} (see {@see setFilterFactory}).
  *
- * Then you would {@see loadFile} an XML source file, and finally {@see render} it to obtain its final result (which you would typically output to the browser).
+ * Then you would {@see loadFile} an XML source file, and finally {@see render} it to obtain its final
+ * result (which you would typically output to the browser).
  */
-class View {
+class View implements \Serializable {
 
 	const GLOBAL_PLUGS = 'GLOBAL_PLUGS';
+
+	/** @var bool Indicates whether this object was retrieved by unserializing */
+	private $unserialized = false;
 
 	/**
 	 * Textual source of the transformation.
@@ -59,23 +55,23 @@ class View {
 	private $source;
 
 	/**
-	 * The file of the view.
-	 * A View can be actually a subview, invoked by the fig:include directive.
-	 * In this case, the View's File represents the included file.
-	 * @var File
+	 * The source filename.
+	 * @var string
 	 */
-	private $file;
-
-	/**
-	 * @var LoggerInterface
-	 */
-	public $logger;
+	private $filename;
 
 	/**
 	 * The directory where to store temporary files (results of compilation).
 	 * @var string
 	 */
-	private $tempPath;
+	private $cachePath;
+
+	/**
+     * The root folder for the templates, from which to derive the filenames of cached views.
+     * @var string
+     */
+	private $templatesRoot;
+
 	/**
 	 * The Filter Factory instance.
      * If no factory is defined, the View will consider that the filter class are already
@@ -132,36 +128,6 @@ class View {
 	 */
 	private $xmlParser;
 
-	/**
-	 * When this View is not created directly by the user
-	 * (ie when it is a sub-view of another view, invoked
-	 * by the fig:include directive), this variable refers
-	 * to the fig:include ViewElementTag of the parent view.
-	 *
-	 * Every ViewElement created subsequently during the
-	 * parsing phase of this View, is attached to the caller view,
-	 * so as to inject the parsed elements directly into the tree
-	 * of the caller view.
-	 * @var ViewElementTag
-	 */
-	public $parentViewElement;
-
-
-	/**
-	 * The array of named slots defined in the view.
-	 * A slot is a specific ViewElementTag identified
-	 * by a name, whose content is replaced by the content
-	 * of the element that has been pushed (plugged) into the slot.
-	 * @var Slot[]
-	 */
-	private $slots;
-
-	/**
-	 * Array of named elements that are used as content providers
-	 * to fill in slots by the same name.
-	 * @var Plug[]
-	 */
-	private $plugs;
 
 	/**
 	 * Associative array of the named macros.
@@ -220,8 +186,6 @@ class View {
 	 */
 	public $figNamespace = 'fig:';
 
-	private $doctype = null;
-
 	private $options = [];
 
 	/**
@@ -232,15 +196,13 @@ class View {
 	public function __construct(array $options = []) {
 		$this->options = $options;
 		$this->source = '';
-		$this->result = '';
 		$this->rootNode = null;
 		$this->stack = array();
-		$this->logger = LoggerFactory::getLogger(get_class($this));
-		$this->parentViewElement = null;
 		$this->lexers = array();
 		$this->callStackData = array(array());
 		$this->functionFactories = array(new NativeFunctionFactory());
 		$this->language = null;
+		$this->filename = null;
 	}
 
 	/**
@@ -272,21 +234,7 @@ class View {
 	public function getLanguage() {
 		return $this->language;
 	}
-	/**
-	 * When including a fig file, the included entity
-	 * is processed as a View in itself.
-	 * Yet, it is linked to the parent View.
-	 *
-	 * @param ViewElementTag $parentViewElement
-	 */
-	public function inherit(ViewElementTag &$parentViewElement) {
-		$this->parentViewElement = & $parentViewElement;
-		$this->callStackData = & $parentViewElement->view->callStackData;
-		$this->functionFactories = & $parentViewElement->view->functionFactories;
-		$this->feedFactories = & $parentViewElement->view->feedFactories;
-		$this->feedFactoryForClass = & $parentViewElement->view->feedFactoryForClass;
-		$this->replacements = $parentViewElement->view->replacements;
-	}
+
 
 	/**
 	 * Register a new Function Factory instance,
@@ -318,31 +266,43 @@ class View {
 	 * Load from source file.
 	 *
    * @param string $filename
-   * @param File|null $parent
    * @throws FileNotFoundException
    */
-	public function loadFile($filename, File $parent = null) {
-		$this->file = new File($filename, $parent);
+	public function loadFile($filename) {
+		$this->filename = $filename;
+
+
+		// If a cache directory was specified,
+        // try to load from it
+		if ($this->cachePath) {
+		    if (! $this->templatesRoot) {
+		        $this->templatesRoot = dirname($filename);
+            }
+		    $cacheFile = $this->makeCacheFilename($this->cachePath, $this->templatesRoot, $this->filename);
+            if ( file_exists($cacheFile)
+                 && (! file_exists($this->filename) || (filemtime($this->filename) < filemtime($cacheFile)) )
+            ) {
+                $this->loadFromSerialized(file_get_contents($cacheFile));
+                return;
+            }
+        }
 
 		if(file_exists($filename)) {
 			$this->source = file_get_contents($filename);
 		}
 		else {
 			$message = "File not found: $filename";
-			$this->logger->error($message);
 			throw new FileNotFoundException($message, $filename);
 		}
 	}
 
 	/**
-	 * Instead of loading a file, you can load a string, and optionally pass
-	 * a "working directory" (mainly useful for includes).
-	 * This creates a File object with no real filesystem location.
+	 * Instead of loading a file, you can load a string.
+	 * Includes and cdata files are taken relative to the working directory.
 	 * @param string $string
-	 * @param string|null $workingDirectory
 	 */
-	public function loadString($string, $workingDirectory = null) {
-	  $this->file = new File($workingDirectory . '/(null)');
+	public function loadString($string) {
+	  $this->filename = null;
 	  $this->source = $string;
 	}
 	/**
@@ -364,23 +324,24 @@ class View {
 	public function setReplacements($bool) {
 	    $this->replacements = $bool;
 	}
-	/**
-	 * Parse source.
-	 * @return void
-	 * @throws XMLParsingException
-	 */
+
+    /**
+     * Parse source.
+     * @throws RequiredAttributeException
+     * @throws XMLParsingException
+     */
 	public function parse() {
 		if($this->bParsed) {
 			return;
 		}
 
 		if ($this->replacements) {
-        // We cannot rely of html_entity_decode,
-        // because it would replace &amp; and &lt; as well,
-        // whereas we need to keep them unmodified.
-        // We must do it manually, with a modified hardcopy 
-        // of PHP 5.4+ 's get_html_translation_table(ENT_XHTML)
-        $this->source = XMLEntityTransformer::replace($this->source);
+            // We cannot rely of html_entity_decode,
+            // because it would replace &amp; and &lt; as well,
+            // whereas we need to keep them unmodified.
+            // We must do it manually, with a modified hardcopy
+            // of PHP 5.4+ 's get_html_translation_table(ENT_XHTML)
+            $this->source = XMLEntityTransformer::replace($this->source);
 		}
 		
 		$this->xmlParser = xml_parser_create('UTF-8');
@@ -392,7 +353,12 @@ class View {
 		//Prepare the detection of the very first tag, in order to compute
 		//the offset in XML string as regarded by the parser.
 		$this->firstOpening = true;
-		$bSuccess = xml_parse($this->xmlParser, $this->source);
+
+		try {
+            $bSuccess = xml_parse($this->xmlParser, $this->source);
+        } catch (RequiredAttributeParsingException $ex) {
+		    throw new RequiredAttributeException($ex->getTag(), $this->filename, $ex->getLine(), $ex->getMessage(), $ex);
+        }
 
         if ($bSuccess) {
             $errMsg = '';
@@ -407,7 +373,6 @@ class View {
 					$errMsg .= '. Last element: ' . $lastElement->getTagName();
 				}
 			}
-			$this->errorMessage($errMsg);
 		}
 
 		xml_parser_free($this->xmlParser);
@@ -416,65 +381,145 @@ class View {
 		if(! $bSuccess ) {
 			throw new XMLParsingException(
 					$errMsg,
-					($this->file ? $this->file->getFilename() : '(null)'),
+					($this->filename ? $this->filename : '(null)'),
 					$lineNumber);
 		}
-	}
 
-	/**
-	 * Process parsed source and render view,
-	 * using the data universe.
-	 *
-	 * @return string
-	 * @throws RenderingException
-	 * @throws XMLParsingException
-	 */
+		// Store a serialized version of the parsed tree, if successfully parsed,
+        // and if we've got a cache path.
+        if ( ($this->cachePath) && ($this->filename !== null) && (! $this->unserialized) ) {
+            $cacheFile = $this->makeCacheFilename($this->cachePath, $this->templatesRoot, $this->filename, true);
+            file_put_contents($cacheFile, serialize($this));
+        }
+
+
+    }
+
+    /**
+     * The compiled file is at the same subfolder location as the source file,
+     * relative to the templatesRoot directory, but under the tempPath directory.
+     * In other words, tempPath and templatesRoot correspond together.
+     *
+     * Example: if  cachePath is      /tmp/figdice
+     *          and templatesRoot is  /var/www/html/app/templates
+     *          and filename is       /var/www/html/app/templates/sub/footer.html
+     *
+     * then     cacheFile is          /tmp/figdice/figs/sub/footer.html.fig
+     *
+     * CAUTION: Relative path for the initial template file, is converted to absolute
+     * using the current working directory (the way file_get_contents works).
+     *
+     * You can work with exotic files (non local filesystem) provided that they are specified
+     * with full (valid) scheme. @see http://php.net/manual/en/function.parse-url.php
+     * @param string $cachePath
+     * @param string $templatesRoot
+     * @param string $filename
+     * @param bool $mkdir Whether to create the intermediate folder structure
+     * @return string
+     */
+    private function makeCacheFilename($cachePath, $templatesRoot, $filename, $mkdir = false)
+    {
+        // If the template filename is relative (ie. not starting by / and not specifying a scheme)
+        // then we first prefis it with the current working directory. And then we continue as if
+        // absolute.
+        if ( (substr($filename, 0, 1) != '/')  && ! parse_url($filename, PHP_URL_SCHEME)) {
+            $filename = getcwd() . '/' . $filename;
+        }
+
+        $cacheFile = str_replace($templatesRoot, $cachePath . '/figs', $filename) . '.fig';
+        if ($mkdir) {
+            // Create the intermediary folders if not exist.
+            $intermed = dirname($cacheFile);
+            if (! file_exists($intermed)) {
+                // In case of permission problems, or file already exists (and is not a directory),
+                // the regular PHP warnings will be issued.
+                mkdir($intermed, 0700, true);
+            }
+        }
+        return $cacheFile;
+    }
+
+    /**
+     * Process parsed source and render view,
+     * using the data universe.
+     * @return string
+     * @throws FeedClassNotFoundException
+     * @throws RenderingException
+     * @throws RequiredAttributeException
+     * @throws XMLParsingException
+     */
 	public function render() {
 		if(! $this->bParsed) {
 			$this->parse();
 		}
 
-
-		if (null != $this->parentViewElement) {
-			$this->rootNode->view = & $this->parentViewElement->view;
-		}
-
 		if (! $this->rootNode) {
-			throw new XMLParsingException('No template file loaded', '', 0);
+			throw new XMLParsingException('No template file loaded', 0);
 		}
-		$result = $this->rootNode->render();
+
+        $context = new Context($this);
+
+		// DOCTYPE
+        // The doctype is necessarily on the root tag, declared as an attribute, example:
+        //   fig:doctype="html"
+        // However, it can be on the root node of an included template (when using the reverse plug/slot pattern)
+        $context->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
+
+        try {
+            $result = $this->rootNode->render($context);
+        } catch (RequiredAttributeParsingException $ex) {
+            throw new RequiredAttributeException($ex->getTag(), $context->getFilename(), $ex->getLine(), $ex->getMessage(), $ex);
+        } catch (TagRenderingException $ex) {
+            throw new RenderingException($ex->getTag(), $context->getFilename(), $ex->getLine(), $ex->getMessage(), $ex);
+        } catch (FeedClassNotFoundRenderingException $ex) {
+            throw new FeedClassNotFoundException($ex->getClassname(), $context->getFilename(), $ex->getLine(), $ex);
+        }
 
 
-		if(! $this->parentViewElement) {
-			$result = $this->plugIntoSlots($result);
-		}
+		$result = $this->plugIntoSlots($context, $result);
 
 		// Take care of the doctype at top of output
-		if ($this->doctype) {
-			$result = '<!doctype ' . $this->doctype . '>' . "\n" . $result;
+		if ($context->getDoctype()) {
+			$result = '<!doctype ' . $context->getDoctype() . '>' . "\n" . $result;
 		}
 
 		return $result;
 	}
 
-	/**
-	 * Specifies the folder in which the engine will be able to produce 
-	 * temporary files, for JIT-compilation and caching purposes. The engine will 
-	 * not attempt to use cache-based optimization features if you leave 
-	 * this property blank.
-	 * @param string $path
-	 */
-	public function setTempPath($path) {
-		$this->tempPath = $path;
+    /**
+     * Specifies the folder in which the engine will be able to produce
+     * temporary files, for JIT-compilation and caching purposes. The engine will
+     * not attempt to use cache-based optimization features if you leave
+     * this property blank.
+     *
+     * @param string $path
+     * @param string $templatesRoot
+     */
+	public function setCachePath($path, $templatesRoot = null) {
+	    // Suppress the trailing slash
+		$this->cachePath = preg_replace('#/+$#', '', $path);
+		$this->templatesRoot = preg_replace('#/+$#', '', $templatesRoot);
 	}
 	/**
 	 * The folder in which FigDice can store its cache
 	 * (currently only Dictionary cache)
 	 * @return string
 	 */
-	public function getTempPath() {
-		return $this->tempPath;
+	public function getCachePath() {
+		return $this->cachePath;
 	}
+	/**
+     * The absolute root of all the tree of templates.
+     * This value is important when deriving the filename for the cache of a template or
+     * its sub-templates (included).
+     * The cache directory contains a tree similar to that of the source templates,
+     * and you must indicate what source root dir corresponds to the root cache dir.
+     * @return string
+     */
+	public function getTemplatesRoot()
+    {
+	    return $this->templatesRoot;
+    }
 	/**
 	 * Returns the Filter Factory instance attachted to the view.
 	 *
@@ -521,14 +566,6 @@ class View {
         return $result;
     }
 
-	/**
-	 * @param $doctype string
-	 */
-	public function setDoctype($doctype)
-	{
-		$this->doctype = $doctype;
-	}
-
 
 	private function openTagHandler($xmlParser, $tagName, $attributes) {
 		if($this->firstOpening) {
@@ -551,28 +588,36 @@ class View {
 
 		$lineNumber = xml_get_current_line_number($xmlParser);
 
-		if($this->parentViewElement) {
-			$view = &$this->parentViewElement->view;
-		}
-		else {
-			$view = &$this;
-		}
 
+		//
+		// Detect special tags
+        //
 		if($tagName == $this->figNamespace . TagFigAttr::TAGNAME) {
-			$newElement = new TagFigAttr($view, $tagName, $lineNumber);
+			$newElement = new TagFigAttr($tagName, $lineNumber);
 		}
+		else if ($tagName == $this->figNamespace . TagFigFeed::TAGNAME) {
+		    $newElement = new TagFigFeed($tagName, $lineNumber);
+        }
+		else if ($tagName == $this->figNamespace . TagFigInclude::TAGNAME) {
+		    $newElement = new TagFigInclude($tagName, $lineNumber);
+        }
+		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
+		    $newElement = new TagFigMount($tagName, $lineNumber);
+        }
+		else if ($tagName == $this->figNamespace . TagFigCdata::TAGNAME) {
+		    $newElement = new TagFigCdata($tagName, $lineNumber);
+        }
+		else if ($tagName == $this->figNamespace . TagFigDictionary::TAGNAME) {
+		    $newElement = new TagFigDictionary($tagName, $lineNumber);
+        }
+
+
 		else {
-			$newElement = new ViewElementTag($view, $tagName, $lineNumber);
+			$newElement = new ViewElementTag($tagName, $lineNumber);
 		}
-		$newElement->setCurrentFile($this->file);
-		$newElement->setAttributes($attributes);
 
+		$newElement->setAttributes($this->figNamespace, $attributes);
 
-		if( ($this->rootNode === null) && $this->parentViewElement )
-		{
-			$this->rootNode = &$this->parentViewElement;
-			$this->stack[] = &$this->parentViewElement;
-		}
 
 		if($this->rootNode) {
             /** @var ViewElementTag $parentElement */
@@ -614,53 +659,46 @@ class View {
 				$element->autoclose = false;
 			}
 		}
-		//TODO: Bad bad! hard-coded br tag. Just out of laziness. The only real solution will be to rewrite an XML parser (on-the-fly in the file).
-		if($tagName == 'br')
-			$element->autoclose = true;
 	}
 
-	/**
+
+    /**
 	 * XML parser handler for CDATA
 	 *
-	 * @access private
 	 * @param resource $xmlParser
 	 * @param string $cdata
 	 */
-	function cdataHandler($xmlParser, $cdata) {
+	private function cdataHandler($xmlParser, $cdata) {
 		//Last element in stack = parent element of the CDATA.
 		$currentElement = &$this->stack[count($this->stack)-1];
 		$currentElement->appendCDataChild($cdata);
 	}
 
 
-	function errorMessage($errorMessage) {
-		$lineNumber = xml_get_current_line_number($this->xmlParser);
-		$filename = ($this->file) ? $this->file->getFilename() : '(null)';
-		$this->logger->error("$filename($lineNumber): $errorMessage");
-	}
-
-	/**
-	 * Inject the content of the fig:plug nodes
-	 * into the corresponding slots.
-	 *
-	 * @param string $input
-	 * @return string
-	 */
-	private function plugIntoSlots($input) {
-		if(count($this->slots) == 0) {
+    /**
+     * Inject the content of the fig:plug nodes
+     * into the corresponding slots.
+     *
+     * @param Context $context
+     * @param string $input
+     * @return string
+     */
+	private function plugIntoSlots(Context $context, $input) {
+	    $slots = $context->getSlots();
+		if(count($slots) == 0) {
 			// Nothing to do.
 			return $input;
 		}
 
 		$result = $input;
 
-		foreach($this->slots as $slotName => $slot) {
+		foreach($slots as $slotName => $slot) {
 			$plugOutput = '';
 			$slotPos = strpos($result, $slot->getAnchorString());
 
-			if( isset($this->plugs[$slotName]) ) {
-        /** @var Plug[] $plugsForSlot */
-				$plugsForSlot = $this->plugs[$slotName];
+            $plugsForSlot = $context->getPlugs($slotName);
+
+			if( null != $plugsForSlot ) {
 
 				foreach ($plugsForSlot as $plug) {
 
@@ -668,9 +706,9 @@ class View {
 						$plugElement = $plug->getTag();
 						$plugElement->clearAttribute($this->figNamespace . 'plug');
 
-						$plugRender = $plugElement->render();
+						$plugRender = $plugElement->render($context);
 
-						if ($plugElement->evalFigAttribute('append')) {
+						if ($plugElement->evalFigAttribute($context, 'append')) {
 							$plugOutput .= $plugRender;
 						}
 						else {
@@ -708,15 +746,24 @@ class View {
 		return $result;
 	}
 
+    /**
+     * @internal
+     * @param $data
+     */
 	public function pushStackData($data) {
 		array_push($this->callStackData, $data);
 	}
-	public function popStackData() {
+
+    /**
+     * @internal
+     */
+    public function popStackData() {
 		array_pop($this->callStackData);
 	}
 	public function fetchData($name) {
 		if($name == '/') {
 			return $this->callStackData[0];
+			
 		}
 		if($name == '.') {
 			return $this->callStackData[count($this->callStackData) - 1];
@@ -765,7 +812,7 @@ class View {
 	 * @return string
 	 */
 	public function getFilename() {
-		return $this->file->getFilename();
+		return $this->filename;
 	}
 	/**
 	 * @return string
@@ -782,7 +829,7 @@ class View {
 
 	/**
 	 * Called by the ViewElementTag::fig_feed method,
-	 * to instanciate a feed by its class name.
+	 * to instantiate a feed by its class name.
 	 *
 	 * @param string $classname
 	 * @param array $attributes associative array of the extended parameters
@@ -820,17 +867,41 @@ class View {
 		return (substr($attribute, 0, strlen($this->figNamespace)) == $this->figNamespace);
 	}
 
-	/**
-	 * This method is called by ViewElementTag objects, when processing
-	 * a fig:slot item.
-	 * @param string $slotName
-	 * @param Slot $slot
-	 */
-  public function assignSlot($slotName, Slot & $slot) {
-      $this->slots[$slotName] = & $slot;
+
+  public function serialize()
+  {
+      if (! $this->bParsed) {
+          $this->parse();
+      }
+
+      return serialize([
+          'f' => $this->getFilename(),
+          'ns' => $this->figNamespace,
+          'root' => $this->rootNode
+      ]);
+  }
+  public function unserialize($serialized)
+  {
+      $data = unserialize($serialized);
+
+      $this->bParsed = true;
+      $this->filename = $data['f'];
+      $this->figNamespace = $data['ns'];
+      $this->rootNode = $data['root'];
+
+      $this->unserialized = true;
   }
 
-  public function addPlug($slotName, ViewElementTag $element, $renderedString = null, $isAppend = false) {
-    $this->plugs[$slotName] [] = new Plug($element, $renderedString, $isAppend);
-  }
+    private function loadFromSerialized($data)
+    {
+        /** @var View $view */
+        $view = unserialize($data);
+
+        $this->bParsed = true;
+        $this->filename = $view->filename;
+        $this->figNamespace = $view->figNamespace;
+        $this->rootNode = $view->rootNode;
+
+        $this->unserialized = true;
+    }
 }

@@ -23,7 +23,7 @@
 
 namespace figdice\classes\lexer;
 
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenLiteral extends Token {
 	/**
@@ -38,10 +38,10 @@ class TokenLiteral extends Token {
 		$this->value = $value;
 	}
 	/**
-	 * @param ViewElement $viewElement
+	 * @param Context $context
 	 * @return mixed
 	 */
-	public function evaluate(ViewElementTag $viewElement) {
+	public function evaluate(Context $context) {
 		return $this->value;
 	}/*
 	public function export() {

@@ -22,7 +22,7 @@
  */
 
 namespace figdice\classes\lexer;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\Context;
 
 class TokenLParen extends TokenOperator {
 	public function __construct() {
@@ -37,12 +37,11 @@ class TokenLParen extends TokenOperator {
 		return 0;
 	}
 
-	/**
-	 * @param ViewElement $viewElement
-	 * @codeCoverageIgnore
-	 * @return mixed
-	 */
-	public function evaluate(ViewElementTag $viewElement) {
+    /**
+     * @param Context $context
+     * @return mixed
+     */
+    public function evaluate(Context $context) {
 		throw new \Exception('Abnormal evaluation of left parenthesis token.');
 	}
 }

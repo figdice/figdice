@@ -23,7 +23,6 @@
 
 namespace figdice\classes;
 
-use figdice\View;
 use figdice\classes\lexer\Lexer;
 
 /**
@@ -56,31 +55,11 @@ abstract class ViewElement {
 	 * @var ViewElementTag
 	 */
 	public $parent;
-	/**
-	 * Indicates the index of this object
-	 * in the $children array of $parent object.
-	 *
-	 * @var integer
-	 */
-	public $childOffset;
 
-	/**
-	 * @var ViewElement
-	 */
-	public $previousSibling;
 	/**
 	 * @var ViewElement
 	 */
 	public $nextSibling;
-
-	/**
-	 * The View object which this ViewElement
-	 * is attached to.
-	 * @var View
-	 */
-	public $view;
-	public $data;
-	public $logger;
 
 	/**
 	 * The line in XML file where this element begins.
@@ -91,55 +70,37 @@ abstract class ViewElement {
 
 	/**
 	 * Constructor
-	 *
-	 * @param View $view The View to which this node is attached.
 	 */
-	public function __construct(View &$view) {
+	public function __construct() {
 		$this->outputBuffer = null;
 		$this->autoclose = true;
 		$this->parent = null;
-		$this->previousSibling = null;
-		$this->view = &$view;
 	}
 
 
-	/**
-	 * Evaluate the XPath-like expression
-	 * on the data object associated to the view.
-	 *
-	 * @access private
-	 * @param string $expression
-	 * @return string
-	 */
-	public function evaluate($expression) {
+    /**
+     * Evaluate the XPath-like expression
+     * on the data object associated to the view.
+     *
+     * @param Context $context
+     * @param string $expression
+     * @return string
+     */
+	public function evaluate(Context $context, $expression) {
 		if(is_numeric($expression)) {
 			$expression = (string)$expression;
 		}
-		if(! isset($this->view->lexers[$expression]) ) {
+		if(! isset($context->view->lexers[$expression]) ) {
 			$lexer = new Lexer($expression);
-			$this->view->lexers[$expression] = & $lexer;
-			$lexer->parse($this);
+			$context->view->lexers[$expression] = & $lexer;
+			$lexer->parse($context);
 		}
 		else {
-			$lexer = & $this->view->lexers[$expression];
+			$lexer = & $context->view->lexers[$expression];
 		}
 
-		$result = $lexer->evaluate($this);
+		$result = $lexer->evaluate($context);
 		return $result;
-	}
-
-	/**
-	 * Returns the data structure
-	 * behind the specified name.
-	 * Looks first in the local variables,
-	 * then in the data context of the element.
-	 *
-	 * @param string $name
-	 * @return mixed
-	 */
-	public function getData($name) {
-		//Treat plain names
-		return $this->view->fetchData($name);
 	}
 
 	/**
@@ -149,14 +110,10 @@ abstract class ViewElement {
 	public function getLineNumber() {
 		return $this->xmlLineNumber;
 	}
-	/**
-	 * @return View
-	 */
-	public function &getView() {
-		return $this->view;
-	}
-	/**
-	 * @return string
-	 */
-	abstract public function render();
+
+    /**
+     * @param Context $context
+     * @return string
+     */
+	abstract public function render(Context $context);
 }

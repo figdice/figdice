@@ -41,6 +41,8 @@ class DFAStatePath extends DFAState {
 	 */
 	private $closedSubpath;
 
+	private $dotting = false;
+
 	public function __construct() {
 		parent::__construct();
 		$this->separated = true;
@@ -58,6 +60,8 @@ class DFAStatePath extends DFAState {
 		//- opening ( if not separated,
 		//- closing ) always
 		//- , (comma) always
+        //- . (dot) if 'dotting'. The dotting state is when all the previous buffer in the path
+        //                        is only a succession of dots (or dotdots) and slashes.
 
 		if($char == ',') {
 			if( (! $this->closedSubpath) && (! $this->closed) ) {

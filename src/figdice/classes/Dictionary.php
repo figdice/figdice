@@ -132,7 +132,8 @@ class Dictionary {
 	 * @param string $source Path and name of the file to compile.
 	 * @param string $target
 	 * @return boolean
-	 * @throws DictionaryDuplicateKeyException, FileNotFoundException
+	 * @throws DictionaryDuplicateKeyException
+     * @throws FileNotFoundException
 	 * TODO: Perform some permission tests on the target folder, and throw relevant exceptions accordingly.
 	 */
 	public static function compile($source, $target) {

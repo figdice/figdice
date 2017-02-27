@@ -24,7 +24,14 @@
 namespace figdice\exceptions;
 
 class LexerSyntaxErrorException extends \Exception {
-	public function __construct($message, $file, $line) {
+    /**
+     * LexerSyntaxErrorException constructor.
+     *
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     */
+    public function __construct($message, $file, $line) {
 		parent::__construct($message, 0);
 		$this->file = $file;
 		$this->line = $line;

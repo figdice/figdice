@@ -23,14 +23,23 @@
 
 namespace figdice\classes;
 
-class ViewElementCData extends ViewElement {
-	public function __construct(&$view) {
-		parent::__construct($view);
+class ViewElementCData extends ViewElement implements \Serializable {
+	public function __construct() {
+		parent::__construct();
 	}
-	public function render() {
+	public function render(Context $context) {
 		return $this->outputBuffer;
 	}
 	public function appendCDataSibling($cdata) {
 		$this->outputBuffer .= $cdata;
 	}
+
+	public function serialize()
+    {
+        return serialize($this->outputBuffer);
+    }
+    public function unserialize($serialized)
+    {
+        $this->outputBuffer = unserialize($serialized);
+    }
 }

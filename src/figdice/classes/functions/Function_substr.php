@@ -23,30 +23,31 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 use \figdice\exceptions\FunctionCallException;
 
 class Function_substr implements FigFunction {
 	public function __construct() {
 	}
 
-	/**
-	 * Function's arguments:
-	 *  timestamp, format [, locale]
-	 * 
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    /**
+     * Function's arguments:
+     *  timestamp, format [, locale]
+     *
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return string
+     * @throws FunctionCallException
+     */
+	public function evaluate(Context $context, $arity, $arguments) {
 		if($arity <= 1) {
 			throw new FunctionCallException(
 				'substr', 
-				'Too few arguments.', 
-				$viewElement->getCurrentFile()->getFilename(), 
-				$viewElement->getLineNumber()
+				'Too few arguments.',
+                $context->getFilename(),
+                $context->tag->getLineNumber()
 			);
 		}
 

@@ -23,30 +23,30 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 
 class Function_range implements FigFunction {
 	public function __construct() {
 	}
 
-	/**
-   * This function returns an array of N elements, from 1 to N.
-   * It is useful for creating small "for" loops in your views.
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments one element: Size of the 1..N array
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+    /**
+     * This function returns an array of N elements, from 1 to N.
+     * It is useful for creating small "for" loops in your views.
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments one element: Size of the 1..N array
+     * @return array|mixed
+     */
+	public function evaluate(Context $context, $arity, $arguments) {
 
 		$rangeSize = intval($arguments[0]);
 
-    $result = array();
-    for ($i = 1; $i <= $rangeSize; ++ $i) {
-      $result []= $i;
-    }
+        $result = array();
+        for ($i = 1; $i <= $rangeSize; ++ $i) {
+            $result []= $i;
+        }
 
-    return $result;
-	}
+        return $result;
+    }
 }

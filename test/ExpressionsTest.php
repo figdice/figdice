@@ -37,21 +37,23 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
     // which must respond to the getCurrentFile method.
 
     $view = $this->getMock('\\figdice\\View');
-    $viewFile = $this->getMock('\\figdice\\classes\\File', null, array('PHPUnit'));
     $viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
-    $viewElement->expects($this->any())
-      ->method('getCurrentFile')
-      ->will($this->returnValue($viewFile));
 
-    // Make sure that the passed expression is successfully parsed,
+      $context = new \figdice\classes\Context($view);
+      $context->tag = $viewElement;
+
+      // Make sure that the passed expression is successfully parsed,
     // before asserting stuff on its evaluation.
-    $parseResult = $lexer->parse($viewElement);
+    $parseResult = $lexer->parse($context);
     $this->assertTrue($parseResult, 'parsed expression: ' . $lexer->getExpression());
 
     // Mock the mounting of root data universe into the view
     $view->expects($this->any())->method('fetchData')->will($this->returnValue($data));
+    // Root node
+    $view->expects($this->any())->method('getRootNode')->will($this->returnValue($viewElement));
 
-    return $lexer->evaluate($viewElement);
+
+    return $lexer->evaluate($context);
   }
 
 
@@ -105,5 +107,10 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
   public function testEmptyArgumentsInFunctionCallRaisesException()
   {
     $this->assertEquals(0, $this->lexExpr('some(,)'));
+  }
+
+  public function testDotDotsOutsideIterGiveEmpty()
+  {
+      $this->assertEquals('', $this->lexExpr('../x'));
   }
 }

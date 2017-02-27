@@ -26,7 +26,7 @@ namespace figdice\classes;
 class TagFigAttr extends ViewElementTag {
 	const TAGNAME = 'attr';
 
-	public function __construct(&$view, $name, $xmlLineNumber) {
-		parent::__construct($view, $name, $xmlLineNumber);
+	public function __construct($name, $xmlLineNumber) {
+		parent::__construct($name, $xmlLineNumber);
 	}
 }

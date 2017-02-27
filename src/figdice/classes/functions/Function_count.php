@@ -23,20 +23,20 @@
 
 namespace figdice\classes\functions;
 
+use figdice\classes\Context;
 use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
-use \figdice\LoggerFactory;
 
 class Function_count implements FigFunction {
 	public function __construct() {
 	}
-	
-	/**
-	 * @param ViewElement $viewElement
-	 * @param integer $arity
-	 * @param array $arguments
-	 */
-	public function evaluate(ViewElementTag $viewElement, $arity, $arguments) {
+
+    /**
+     * @param Context $context
+     * @param integer $arity
+     * @param array $arguments
+     * @return int|mixed
+     */
+    public function evaluate(Context $context, $arity, $arguments) {
 		$param = $arguments[0];
 
 		if(is_array($param))
