@@ -61,6 +61,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
      */
 	private $figMacro = null;
     /**
+     * The value for fig:mute attribute, or null if not present
+     * @var string
+     */
+	private $figMute = null;
+    /**
      * The value for fig:text attribute, or null if not present
      * @var string
      */
@@ -144,6 +149,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
             $this->figMacro = $attributes[$key];
             unset($attributes[$key]);
         }
+        if (array_key_exists($key = $figNamespace . 'mute', $attributes)) {
+            $this->figMute = $attributes[$key];
+            unset($attributes[$key]);
+        }
         if (array_key_exists($key = $figNamespace . 'text', $attributes)) {
             $this->figText = $attributes[$key];
             unset($attributes[$key]);
@@ -157,8 +166,13 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	        unset($attributes[$key]);
         }
 
-		$this->attributes = $attributes;
+		$this->parseAttributes($attributes);
 	}
+	protected function parseAttributes(array $attributes)
+    {
+        $this->attributes = $attributes;
+    }
+
 	public function clearAttribute($name) {
 		unset($this->attributes[$name]);
 	}
@@ -1064,16 +1078,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * @return bool
      */
 	private function isMute(Context $context) {
+	    // <fig:...> tag?
 		if($context->view->isFigAttribute($this->name)) {
 			return true;
 		}
 
-		$expression = '';
-		if(isset($this->attributes[$context->figNamespace . 'mute']))
-			$expression = $this->attributes[$context->figNamespace . 'mute'];
-		if($expression)
-			return $this->evaluate($context, $expression);
-		return false;
+        return ($this->figMute) ? $this->evaluate($context, $this->figMute) : false;
 	}
 
     /**
@@ -1137,6 +1147,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         if ($this->figCall) $data['call'] = $this->figCall;
         if ($this->figCond) $data['cond'] = $this->figCond;
         if ($this->figMacro) $data['macro'] = $this->figMacro;
+        if ($this->figMute) $data['mute'] = $this->figMute;
         if ($this->figText) $data['text'] = $this->figText;
         if ($this->figVoid) $data['void'] = $this->figVoid;
         if ($this->figWalk) $data['walk'] = $this->figWalk;
@@ -1156,6 +1167,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $this->figCall = isset($data['call']) ? $data['call'] : null;
         $this->figCond = isset($data['cond']) ? $data['cond'] : null;
         $this->figMacro = isset($data['macro']) ? $data['macro'] : null;
+        $this->figMute = isset($data['mute']) ? $data['mute'] : null;
         $this->figText = isset($data['text']) ? $data['text'] : null;
         $this->figVoid = isset($data['void']) ? $data['void'] : null;
         $this->figWalk = isset($data['walk']) ? $data['walk'] : null;
