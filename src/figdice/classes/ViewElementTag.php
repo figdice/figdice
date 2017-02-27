@@ -356,7 +356,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//If the tag holds a fig:walk directive as well as the fig:cond,
 		//do not take into account this fig:cond unless the rendering is inside the looping phase,
 		//because the condition pertains to every single iteration, rather than to the global loop.
-		// TODO: contradictory with the Wiki doc. Missing a unit test here to prove the point.
+        // See WalkTest::testCondOnWalkAppliesToEachIter() for proof.
 		if(null !== $this->figCond) {
 			if((null === $this->figWalk) || $context->isBypassWalk()) {
 				if(! $this->evalCondition($context)) {

@@ -38,4 +38,24 @@ ENDXML;
         $actual = $view->render();
         $this->assertEquals($expected, $actual);
     }
+
+    public function testCondOnWalkAppliesToEachIter()
+    {
+        $template =
+            '<fig:w fig:walk="/arr" fig:cond="x == 2" fig:text="y"/>';
+
+        $view = new View();
+        $view->loadString($template);
+        $view->mount('arr', [
+           [ 'x' => 1, 'y' => 'A'],
+           [ 'x' => 2, 'y' => 'B'],
+           [ 'x' => 3, 'y' => 'C'],
+           [ 'x' => 2, 'y' => 'D'],
+        ]);
+
+        $expected = 'BD';
+
+        $rendered = $view->render();
+        $this->assertEquals($expected, $rendered);
+    }
 }
