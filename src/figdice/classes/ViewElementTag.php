@@ -270,8 +270,16 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		foreach($attributes as $attribute=>$value) {
 
 			if( ! $context->view->isFigAttribute($attribute)) {
-        // a flag attribute is to be processed differently because it isn't a key=value pair.
-				if ( !($value instanceof Flag) ) {
+                // a flag attribute is to be processed differently because
+                // it isn't a key=value pair.
+
+                if ($value instanceof Flag) {
+                    // Flag attribute: there is no value. We print only the name of the flag.
+                    $result .= " $attribute";
+                }
+
+
+                else {
 
 				    // We're potentially in presence of:
                     // - a plain scalar
@@ -327,17 +335,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
                     }
                     $value = $combined;
-				}
 
-
-
-                if ($value instanceof Flag) {
-                    // Flag attribute: there is no value. We print only the name of the flag.
-                    $result .= " $attribute";
-                }
-                else {
                     $result .= " $attribute=\"$value\"";
-                }
+				}
             }
 
         }
