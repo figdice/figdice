@@ -272,70 +272,75 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			if( ! $context->view->isFigAttribute($attribute)) {
         // a flag attribute is to be processed differently because it isn't a key=value pair.
 				if ( !($value instanceof Flag) ) {
-					if(preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
-						for($i = 0; $i < count($matches[0]); ++ $i) {
-							$expression = $matches[1][$i][0];
 
-							//Evaluate expression now:
+				    // We're potentially in presence of:
+                    // - a plain scalar
+                    // - an AdHoc instance
+                    // - an array of the above.
 
-							$evaluatedValue = $this->evaluate($context, $expression);
-							if($evaluatedValue instanceof ViewElement) {
-								$evaluatedValue = $evaluatedValue->render($context);
-							}
-							if(is_array($evaluatedValue)) {
-								if(empty($evaluatedValue)) {
-									$evaluatedValue = '';
-								}
-								else {
-									$message = 'Attribute ' . $attribute . '="' . $value . '" in tag "' . $this->name . '" evaluated to array.';
-									throw new TagRenderingException($this->getTagName(), $this->getLineNumber(), $message);
-								}
-							}
-							else if (is_object($evaluatedValue)
-								&& ($evaluatedValue instanceof \DOMNode)) {
+                    if (! is_array($value)) {
+                        $value = [$value];
+                    }
+                    $combined = '';
+                    foreach ($value as $part) {
+                        if ($part instanceof AdHoc) {
+                            $evaluatedValue = $this->evaluate($context, $part->string);
 
-								// Treat the special case of DOMNode descendants,
-								// for which we can evalute the text contents
-								$evaluatedValue = $evaluatedValue->nodeValue;
-							}
+                            if($evaluatedValue instanceof ViewElement) {
+                                $evaluatedValue = $evaluatedValue->render($context);
+                            }
+                            if(is_array($evaluatedValue)) {
+                                if(empty($evaluatedValue)) {
+                                    $evaluatedValue = '';
+                                }
+                                else {
+                                    $message = 'Adhoc {' . $part->string . '} of attribute ' . $attribute . ' in tag "' . $this->name . '" evaluated to array.';
+                                    throw new TagRenderingException($this->getTagName(), $this->getLineNumber(), $message);
+                                }
+                            }
+                            else if (is_object($evaluatedValue)
+                                && ($evaluatedValue instanceof \DOMNode)) {
 
-							//The outcome of the evaluatedValue, coming from DB or other, might contain non-standard HTML characters.
-							//We assume that the FIG library targets HTML rendering.
-							//Therefore, let's have the outcome comply with HTML.
-							if(is_object($evaluatedValue)) {
-								//TODO: Log some warning!
-								$evaluatedValue = '### Object of class: ' . get_class($evaluatedValue) . ' ###';
-							}
-							else {
-								$evaluatedValue = htmlspecialchars($evaluatedValue);
-							}
-	
+                                // Treat the special case of DOMNode descendants,
+                                // for which we can evalute the text contents
+                                $evaluatedValue = $evaluatedValue->nodeValue;
+                            }
 
-							//Store evaluated value in $matches structure:
-							$matches[0][$i][2] = $evaluatedValue;
-						}
+                            //The outcome of the evaluatedValue, coming from DB or other, might contain non-standard HTML characters.
+                            //We assume that the FIG library targets HTML rendering.
+                            //Therefore, let's have the outcome comply with HTML.
+                            if(is_object($evaluatedValue)) {
+                                //TODO: Log some warning!
+                                $evaluatedValue = '### Object of class: ' . get_class($evaluatedValue) . ' ###';
+                            }
+                            else {
+                                $evaluatedValue = htmlspecialchars($evaluatedValue);
+                            }
 
-						//Now replace expressions right-to-left:
-						for($i = count($matches[0]) - 1; $i >= 0; -- $i) {
-							$evaluatedValue = $matches[0][$i][2];
-							$outerExpressionPosition = $matches[0][$i][1];
-							$outerExpressionLength = strlen($matches[0][$i][0]);
-							$value = substr_replace($value, $evaluatedValue, $outerExpressionPosition, $outerExpressionLength);
-						}
-					}
+                            $part = $evaluatedValue;
+                        }
 
+                        // Append to what we had already (and if $part was a string in the first place,
+                        // we use its direct value;
+                        $combined .= $part;
+
+
+                    }
+                    $value = $combined;
 				}
 
-        if ($value instanceof Flag) {
-          // Flag attribute: there is no value. We print only the name of the flag.
-          $result .= " $attribute";
-        }
-        else {
-          $result .= " $attribute=\"$value\"";
-        }
-			}
 
-		}
+
+                if ($value instanceof Flag) {
+                    // Flag attribute: there is no value. We print only the name of the flag.
+                    $result .= " $attribute";
+                }
+                else {
+                    $result .= " $attribute=\"$value\"";
+                }
+            }
+
+        }
 		return $result;
 	}
 	function appendCDataChild($cdata)
