@@ -42,12 +42,21 @@ class FeedClassNotFoundException extends Exception {
      * @param string $classname
      * @param string $filename
      * @param int $line
-     * @param Exception $previous
      */
-	public function __construct($classname, $filename, $line, $previous) {
-		parent::__construct('Could not find factory for feed: ' . $classname, 0, $previous);
+	public function __construct($classname, $filename, $line) {
+		parent::__construct('Could not find factory for feed: ' . $classname);
 		$this->classname = $classname;
 		$this->file = $filename;
 		$this->line = $line;
 	}
+
+    /**
+     * @param string $filename
+     * @return $this
+     */
+    public function setFile($filename)
+    {
+        $this->file = $filename;
+        return $this;
+    }
 }
