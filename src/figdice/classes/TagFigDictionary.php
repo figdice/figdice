@@ -24,6 +24,7 @@
 namespace figdice\classes;
 
 use figdice\exceptions\FileNotFoundException;
+use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\RequiredAttributeParsingException;
 
 class TagFigDictionary extends ViewElementTag {
@@ -55,7 +56,7 @@ class TagFigDictionary extends ViewElementTag {
 
 
         if(null === $this->dicFile) {
-            throw new RequiredAttributeParsingException($this->getTagName(),
+            throw new RequiredAttributeException($this->getTagName(),
                 $this->xmlLineNumber,
                 'Missing "file" attribute for '.$this->getTagName().' tag (' . $this->xmlLineNumber . ')');
         }

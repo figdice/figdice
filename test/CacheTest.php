@@ -54,4 +54,40 @@ EXPECTED;
 
         $this->assertEquals($expected, $output);
     }
+
+
+    public function testDictionaryAndTransSerializing()
+    {
+        vfsStream::setup('root');
+
+        $template = <<<ENDTEMPLATE
+<html>
+    <fig:dictionary />
+    <fig:trans fig:cond="false"/>
+    <fig:trans>something</fig:trans>
+</html>
+ENDTEMPLATE;
+
+        vfsStream::newFile('template.html')->withContent($template)->at(vfsStreamWrapper::getRoot());
+        $view = new View();
+        $view->setCachePath(vfsStream::url('root'));
+        $view->loadFile(vfsStream::url('root/template.html'));
+        $output = $view->render();
+
+        $expected = <<<EXPECTED
+<html>
+</html>
+EXPECTED;
+
+        $this->assertEquals($expected, $output);
+
+        // Now remove the original file
+        unlink(vfsStream::url('root/template.html'));
+        $view = new View();
+        $view->setCachePath(vfsStream::url('root'));
+        $view->loadFile(vfsStream::url('root/template.html'));
+        $output = $view->render();
+
+        $this->assertEquals($expected, $output);
+    }
 }

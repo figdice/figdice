@@ -2,7 +2,7 @@
 namespace figdice\classes;
 
 use figdice\exceptions\FileNotFoundException;
-use figdice\exceptions\RequiredAttributeParsingException;
+use figdice\exceptions\RequiredAttributeException;
 
 class TagFigCdata extends ViewElementTag {
 	const TAGNAME = 'cdata';
@@ -23,9 +23,9 @@ class TagFigCdata extends ViewElementTag {
         $this->dataFile = isset($attributes['file']) ? $attributes['file'] : null;
 
         if(null === $this->dataFile) {
-            throw new RequiredAttributeParsingException($this->getTagName(),
+            throw new RequiredAttributeException($this->getTagName(),
                 $this->xmlLineNumber,
-                'Missing "file" attribute for '.$this->getTagName().' tag (' . $this->xmlLineNumber . ')');
+                'file');
         }
 
     }

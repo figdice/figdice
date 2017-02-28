@@ -23,6 +23,7 @@
 
 namespace figdice\classes;
 
+use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\RequiredAttributeParsingException;
 use figdice\exceptions\TagRenderingException;
 use figdice\Filter;
@@ -36,7 +37,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 * Tag name.
 	 * @var string
 	 */
-	private $name;
+	protected $name;
 
 	protected $attributes;
 
@@ -269,7 +270,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 		foreach($attributes as $attribute=>$value) {
 
-			if( ! $context->view->isFigAttribute($attribute)) {
+			if( ! $context->view->isFigPrefix($attribute)) {
                 // a flag attribute is to be processed differently because
                 // it isn't a key=value pair.
 
@@ -462,12 +463,18 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		}
 
 
-
 		//================================================================
-		//fig:trans
-		if($this->name == $context->figNamespace . 'trans') {
-			return $this->fig_trans($context);
-		}
+        // Here, we can let a special Fig Tag perform its specific treatment.
+        // Example: trans.
+        // Doing this here, lets the tag benefit from previous logic (fig directive attributes)
+        // such as cond, case etc.
+        if ($context->view->isFigPrefix($this->name)) {
+		    $specificResult = $this->doSpecific($context);
+		    if (null !== $specificResult) {
+		        return $specificResult;
+            }
+        }
+
 
 		//================================================================
 		//fig:attr
@@ -475,7 +482,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		if( $this->name == $context->figNamespace . 'attr' ) {
 			if(!isset($this->attributes['name'])) {
 				//name is a required attribute for fig:attr.
-				throw new RequiredAttributeParsingException($this->name, $this->xmlLineNumber, 'name');
+				throw new RequiredAttributeException($this->name, $this->xmlLineNumber, 'name');
 			}
             //flag attribute
             // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
@@ -800,7 +807,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * @param string $name Attribute name
      * @return mixed
      */
-	private function evalAttribute(Context $context, $name) {
+	protected function evalAttribute(Context $context, $name) {
 		$expression = $this->getAttribute($name, false);
 		if($expression) {
 			return $this->evaluate($context, $expression);
@@ -856,7 +863,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//all the non-fig: attributes, evaluated.
 		$arguments = array();
 		foreach($this->attributes as $attribName => $attribValue) {
-			if( ! $context->view->isFigAttribute($attribName) ) {
+			if( ! $context->view->isFigPrefix($attribName) ) {
 				$value = $this->evaluate($context, $attribValue);
 				$arguments[$attribName] = $value;
 			}
@@ -1029,101 +1036,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	}
 
 
-    /**
-     * Translates a caption given its key and dictionary name.
-     * @param Context $context
-     * @return string
-     */
-	private function fig_trans(Context $context) {
-
-		//If a @source attribute is specified, and is equal to
-		//the view's target language, then don't bother translating:
-		//just render the contents.
-	  $source = $this->getAttribute('source', null);
-		
-	  //The $key is also needed in logging below, even if
-	  //source = view's language, in case of missing value,
-	  //so this is a good time to read it.
-	  $key = $this->getAttribute('key', null);
-	  $dictionaryName = $this->getAttribute('dict', null);
-
-		// Do we have a dictionary ?
-		$dictionary = $context->getDictionary($dictionaryName);
-		// Maybe not, but at this stage it is not important, I only need
-		// to know its source
-		$dicSource = ($dictionary ? $dictionary->getSource() : null);
-		if (
-
-			( (null == $source) &&	//no source on the trans tag
-			 ($dicSource == $context->getView()->getLanguage()) )
-			||
-			($source == $context->getView()->getLanguage()) ) {
-		    $context->pushDoNotRenderFigParams();
-			$value = $this->renderChildren($context /*Do not render fig:param immediate children */);
-			$context->popDoNotRenderFigParams();
-		}
-
-		else {
-			//Cross-language dictionary mechanism:
-
-			if(null == $key) {
-				//Missing @key attribute : consider the text contents as the key.
-				//throw new SyntaxErrorException($this->getCurrentFile()->getFilename(), $this->xmlLineNumber, $this->name, 'Missing @key attribute.');
-				$key = $this->renderChildren($context);
-			}
-			//Ask current context to translate key:
-
-            $value = $context->translate($key, $dictionaryName, $this->xmlLineNumber);
-		}
-
-		//Fetch the parameters specified as immediate children
-		//of the macro call : <fig:param name="" value=""/>
-		//TODO: Currently, the <fig:param> of a macro call cannot hold any fig:cond or fig:case conditions.
-		$arguments = array();  
-		foreach ($this->children as $child) {
-			if($child instanceof ViewElementTag) {
-				if($child->name == $this->view->figNamespace . 'param') {
-					//If param is specified with an immediate value="" attribute :
-					if(isset($child->attributes['value'])) {
-						$arguments[$child->attributes['name']] = $this->evaluate($context, $child->attributes['value']);
-					}
-					//otherwise, the actual value is not scalar but is
-					//a nodeset in itself. Let's pre-render it and use it as text for the argument.
-					else {
-						$arguments[$child->attributes['name']] = $child->render($context);
-					}
-				}
-			}
-		}
-		
-		//We must now perform the replacements of the parameters of the translation,
-		//which are written in the shape : {paramName}
-		//and are specified as extra attributes of the fig:trans tag, or child fig:param tags
-		//(fig:params override inline attributes).
-		$matches = array();
-		while(preg_match('/{([^}]+)}/', $value, $matches)) {
-			$attributeName = $matches[1];
-			//If there is a corresponding fig:param, use it:
-			if(array_key_exists($attributeName, $arguments)) {
-				$attributeValue = $arguments[$attributeName];
-			}
-			//Otherwise, use the inline attribute.
-			else {
-				$attributeValue = $this->evalAttribute($context, $attributeName);
-			}
-			$value = str_replace('{' . $attributeName . '}', $attributeValue, $value);
-		}
-
-		//If the translated value is empty (ie. we did find an entry in the proper dictionary file,
-		//but this entry has an empty value), it means that the entry remains to be translated by the person in charge.
-		//So in the meantime we output the key.
-		if($value == '') {
-			$value = $key;
-			// TODO: One might want to be notified, either by an exception or another mechanism (Context logging?).
-		}
-		
-		return $value;
-	}
 
 
     /**
@@ -1137,7 +1049,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
      */
 	private function isMute(Context $context) {
 	    // <fig:...> tag?
-		if($context->view->isFigAttribute($this->name)) {
+		if($context->view->isFigPrefix($this->name)) {
 			return true;
 		}
 
@@ -1233,5 +1145,19 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $this->figText = isset($data['text']) ? $data['text'] : null;
         $this->figVoid = isset($data['void']) ? $data['void'] : null;
         $this->figWalk = isset($data['walk']) ? $data['walk'] : null;
+    }
+
+    /**
+     * Give room for specific tags to perform their overridden operations.
+     * The null return value indicates that it did not produce final output: the
+     * engine must continue normally.
+     * To the contrary, a non-null (strict) result shortcuts the rendering of the tag,
+     * and the result bubbles up the tree.
+     * @param Context $context
+     * @return mixed|null
+     */
+    protected function doSpecific(Context $context)
+    {
+        return null;
     }
 }

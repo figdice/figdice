@@ -31,10 +31,6 @@ class TagFigMount extends ViewElementTag {
 	private $mountTarget;
 	private $value;
 
-	public function __construct($name, $xmlLineNumber) {
-		parent::__construct($name, $xmlLineNumber);
-	}
-
     public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,

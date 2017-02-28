@@ -3,5 +3,6 @@
   <fig:dictionary name="MyDic" file="test-dic.xml" />
 
   <fig:trans dict="MyDic" key="my-key" />
+  <fig:trans fig:cond="false" dict="MyDic" key="my-key" />
 
 </fig:template>

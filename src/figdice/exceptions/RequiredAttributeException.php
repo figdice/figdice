@@ -25,22 +25,42 @@ namespace figdice\exceptions;
 
 class RequiredAttributeException extends \Exception {
 	private $tagname;
+	private $attr;
 
     /**
      * RequiredAttributeException constructor.
-     * @param string $tagname
-     * @param string $filename
+     * @param string $tag
      * @param int $line
-     * @param string $message
-     * @param \Exception $previous
+     * @param string $attr
      */
-	public function __construct($tagname, $filename, $line, $message, $previous) {
-		parent::__construct($message, 0, $previous);
-		$this->tagname = $tagname;
-		$this->file = $filename;
+	public function __construct($tag, $line, $attr) {
+		parent::__construct("Missing required attribute $attr in tag $tag.");
+		$this->tagname = $tag;
 		$this->line = $line;
+		$this->attr = $attr;
 	}
-	public function getTagName() {
+
+    /**
+     * @return string
+     */
+    public function getTagName() {
 		return $this->tagname;
 	}
+
+    /**
+     * @return string
+     */
+    public function getAttribute() {
+		return $this->attr;
+	}
+
+    /**
+     * @param string $filename
+     * @return $this
+     */
+    public function setFile($filename)
+    {
+        $this->file = $filename;
+        return $this;
+    }
 }
