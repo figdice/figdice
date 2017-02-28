@@ -57,7 +57,7 @@ class TagFigDictionary extends ViewElementTag {
         if(null === $this->dicFile) {
             throw new RequiredAttributeException($this->getTagName(),
                 $this->xmlLineNumber,
-                'Missing "file" attribute for '.$this->getTagName().' tag (' . $this->xmlLineNumber . ')');
+                'file');
         }
 
     }

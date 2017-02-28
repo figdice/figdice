@@ -34,7 +34,7 @@ class RequiredAttributeException extends \Exception {
      * @param string $attr
      */
 	public function __construct($tag, $line, $attr) {
-		parent::__construct("Missing required attribute $attr in tag $tag.");
+		parent::__construct("Missing required attribute \"$attr\" in tag \"$tag\".");
 		$this->tagname = $tag;
 		$this->line = $line;
 		$this->attr = $attr;

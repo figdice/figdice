@@ -62,7 +62,7 @@ EXPECTED;
 
         $template = <<<ENDTEMPLATE
 <html>
-    <fig:dictionary />
+    <fig:dictionary file="dic.xml" />
     <fig:trans fig:cond="false"/>
     <fig:trans>something</fig:trans>
 </html>
