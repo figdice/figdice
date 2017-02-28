@@ -17,7 +17,6 @@ use figdice\classes\TagFigFeed;
 use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
 use figdice\classes\TagFigTrans;
-use figdice\classes\ViewElementCData;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
@@ -656,31 +655,41 @@ class View implements \Serializable {
 			$pos = xml_get_current_byte_index($xmlParser);
 			//The /> sequence as the previous 2 chars of current position
 			//works on Windows XP Pro 32bits with libxml 2.6.26.
-			if(substr($this->source, $pos - 2, 2) == '/>') {
-				return;
-			}
-			//Find the opening bracket < of the closing tag:
-			$latestOpeningBracket = strrpos(substr($this->source, 0, $pos + 1), '<');
-			if(!preg_match('#^<[^>]+/>#', substr($this->source, $latestOpeningBracket))) {
-				$element->autoclose = false;
-			}
+			if(substr($this->source, $pos - 2, 2) != '/>') {
+                //Find the opening bracket < of the closing tag:
+                $latestOpeningBracket = strrpos(substr($this->source, 0, $pos + 1), '<');
+                if (!preg_match('#^<[^>]+/>#', substr($this->source, $latestOpeningBracket))) {
+                    $element->autoclose = false;
+                }
+            }
 		}
 
+		// Optimization
+		$this->tentativeSquashInertTree($element);
 
-		// We will now try to perform optimization on the tag that was just closed.
+	}
+
+	private function tentativeSquashInertTree(ViewElementTag $element)
+    {
+        // We will now try to perform optimization on the tag that was just closed.
         // If it is not a fig tag, nor contains any fig directive attributes,
         // and none of its plain attribute contains adhoc parts,
         // and all of its children are plain ViewElementCData,
         // then we can turn the whole island into plain CData.
-        if ( ! $this->isFigPrefix($tagName)
-             && ! $element->isDirective()
+        if ( ! $this->isFigPrefix($element->getTagName())
+            && ! $element->isDirective()
         ) {
-		    $cdata = $element->makeCDataFromPlainTag();
-		    if ($element->parent) {
+            $cdata = $element->makeCDataFromPlainTag();
+            // Replate the last child of parent (because it changed nature)
+            if ($element->parent) {
                 $element->parent->replaceLastChild($cdata);
             }
+            // Or if there is no parent, we're the root tag!
+            else {
+                $this->rootNode = $cdata;
+            }
         }
-	}
+    }
 
     /**
 	 * XML parser handler for CDATA

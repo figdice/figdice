@@ -1176,16 +1176,18 @@ class ViewElementTag extends ViewElement implements \Serializable {
     {
         if (! $this->isDirective) {
             // Check if any child is more than just cdata
-            if ( (count($this->children) > 1)
-                 || ((count($this->children) == 1) && ($this->children[0] instanceof ViewElementTag))
-            ) {
-                $this->isDirective = true;
+            foreach ($this->children as $child) {
+                if (! $child instanceof ViewElementCData) {
+                    $this->isDirective = true;
+                    break;
+                }
             }
         }
         return $this->isDirective;
     }
 
     /**
+     * This method should not be called on tags that contain active (directive) children.
      * @return ViewElementCData
      */
     public function makeCDataFromPlainTag()
@@ -1201,13 +1203,19 @@ class ViewElementTag extends ViewElement implements \Serializable {
             $string .= ' ' . $attrString;
         }
 
-        $string .= '>';
-
-        if (count($this->children)) {
-            $string .= $this->children[0]->outputBuffer;
+        if ($this->autoclose) {
+            $string .= ' />';
         }
+        else {
+            $string .= '>';
 
-        $string .= '</' . $this->getTagName() . '>';
+            foreach ($this->children as $child) {
+                // We can safely assume that $child is a ViewElementCData
+                $string .= $child->outputBuffer;
+            }
+
+            $string .= '</' . $this->getTagName() . '>';
+        }
 
         $cdata = new ViewElementCData();
         $cdata->outputBuffer = $string;
