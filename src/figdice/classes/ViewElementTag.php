@@ -1,24 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2017, Gabriel Zerbib.
- * @version 2.5
  * @package FigDice
- *
- * This file is part of FigDice.
- *
- * FigDice is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * FigDice is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace figdice\classes;
@@ -39,6 +22,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	protected $name;
 
 	protected $attributes;
+
+    protected $isDirective = false;
 
     /**
      * The value for fig:auto attribute, or null if not present
@@ -147,6 +132,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $value = null;
         if (array_key_exists($key = $figNamespace . $name, $attributes)) {
             $value = $attributes[$key];
+            $this->isDirective = true;
             unset($attributes[$key]);
         }
         return $value;
@@ -163,13 +149,26 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	    $this->figVoid = $this->checkAndCropAttr($figNamespace, $attributes, 'void');
 	    $this->figWalk = $this->checkAndCropAttr($figNamespace, $attributes, 'walk');
 
+	    // Temporary: TODO: take care of slot and plug, to make me directive
+        if (array_key_exists($figNamespace.'plug', $attributes)
+            || array_key_exists($figNamespace.'slot', $attributes)
+            || array_key_exists($figNamespace.'doctype', $attributes) ) {
+            $this->isDirective = true;
+        }
+
 	    // Now take care of the remaining non-fig attributes
 		$this->parseAttributes($figNamespace, $attributes);
 	}
-	protected function parseAttributes($figNamespace, array $attributes)
-    {
-        // TODO: split the attributes by adhoc parts
 
+    /**
+     * Split attributes by adhoc parts
+     * and store the resulting array in the object member.
+     *
+     * @param string $figNamespace
+     * @param array $attributes
+     */
+    protected function parseAttributes($figNamespace, array $attributes)
+    {
         // A fig:call attribute on a tag, indicates that all the other attributes
         // are arguments for the macro. They all are considered as expressions,
         // and therefore there is no need to search for adhoc inside.
@@ -185,6 +184,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
                 // TODO: not sure we already have Flags at this stage of the cycle. I think
                 // we only have plain real XML text attributes.
                 if ( $value instanceof Flag) {
+                    $this->isDirective = true;
                     continue;
                 }
 
@@ -200,6 +200,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
                             $parts []= substr($value, $previousPosition, $position - 1 - $previousPosition);
                         }
                         $parts []= new AdHoc($expression);
+                        // Mark the current tag as being an active cell in the template,
+                        // as opposed to a stupid static string with no logic.
+                        $this->isDirective = true;
+
                         // +1 because we contiunue past the trailing }
                         $previousPosition = $position + strlen($expression) + 1;
                     }
@@ -546,7 +550,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//nothing is plugged into it.
 		//In case of plug for this slot, the complete slot tag (outer) is replaced.
 		if($slotName = $this->getFigAttribute($context->figNamespace, 'slot')) {
-			//Store a reference to current node, into the View's map of slots
+
+            //Store a reference to current node, into the View's map of slots
 
 			$anchorString = '/==SLOT==' . $slotName . '==/';
 			$slot = new Slot($anchorString);
@@ -1158,5 +1163,60 @@ class ViewElementTag extends ViewElement implements \Serializable {
     protected function doSpecific(Context $context)
     {
         return null;
+    }
+
+    /**
+     * Indicates whether the tag contains a fig: attribute anyhow,
+     * or has anny adhoc parts in its plain attributes.
+     * If not, it is a good candidate for checking if it is on the whole
+     * a static string that the rendering could dump unprocessed.
+     * @return bool
+     */
+    public function isDirective()
+    {
+        if (! $this->isDirective) {
+            // Check if any child is more than just cdata
+            if ( (count($this->children) > 1)
+                 || ((count($this->children) == 1) && ($this->children[0] instanceof ViewElementTag))
+            ) {
+                $this->isDirective = true;
+            }
+        }
+        return $this->isDirective;
+    }
+
+    /**
+     * @return ViewElementCData
+     */
+    public function makeCDataFromPlainTag()
+    {
+        $string = '<' . $this->getTagName();
+        if (count($this->attributes)) {
+            $attrWithValues = [];
+            foreach ($this->attributes as $attrName => $attrValue) {
+                $attrWithValues [] = $attrName . '="' . $attrValue . '"';
+            }
+
+            $attrString = implode(' ', $attrWithValues);
+            $string .= ' ' . $attrString;
+        }
+
+        $string .= '>';
+
+        if (count($this->children)) {
+            $string .= $this->children[0]->outputBuffer;
+        }
+
+        $string .= '</' . $this->getTagName() . '>';
+
+        $cdata = new ViewElementCData();
+        $cdata->outputBuffer = $string;
+        return $cdata;
+    }
+
+    public function replaceLastChild(ViewElementCData $cdata)
+    {
+        $cdata->parent = $this;
+        $this->children[count($this->children) - 1] = $cdata;
     }
 }

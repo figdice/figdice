@@ -58,10 +58,13 @@ class TagFigInclude extends ViewElementTag
         $view->parse();
 
         // If the included template specifies a doctype, use it globally for our context.
-        $doctype = $view->getRootNode()->getAttribute($context->figNamespace . 'doctype');
-        if ($doctype) {
-            $context->setDoctype($doctype);
+        if ($view->getRootNode() instanceof ViewElementTag) {
+            $doctype = $view->getRootNode()->getAttribute($context->figNamespace . 'doctype');
+            if ($doctype) {
+                $context->setDoctype($doctype);
+            }
         }
+
 
         $result = $view->getRootNode()->render($context);
 

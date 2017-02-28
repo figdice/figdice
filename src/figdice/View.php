@@ -17,9 +17,9 @@ use figdice\classes\TagFigFeed;
 use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
 use figdice\classes\TagFigTrans;
+use figdice\classes\ViewElementCData;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;
-use figdice\exceptions\FeedClassNotFoundRenderingException;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\TagRenderingException;
@@ -463,7 +463,9 @@ class View implements \Serializable {
         // The doctype is necessarily on the root tag, declared as an attribute, example:
         //   fig:doctype="html"
         // However, it can be on the root node of an included template (when using the reverse plug/slot pattern)
-        $context->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
+        if ($this->rootNode instanceof ViewElementTag) {
+            $context->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
+        }
 
         try {
             $result = $this->rootNode->render($context);
@@ -471,8 +473,8 @@ class View implements \Serializable {
             throw $ex->setFile($context->getFilename());
         } catch (TagRenderingException $ex) {
             throw new RenderingException($ex->getTag(), $context->getFilename(), $ex->getLine(), $ex->getMessage(), $ex);
-        } catch (FeedClassNotFoundRenderingException $ex) {
-            throw new FeedClassNotFoundException($ex->getClassname(), $context->getFilename(), $ex->getLine(), $ex);
+        } catch (FeedClassNotFoundException $ex) {
+            throw $ex->setFile($context->getFilename());
         }
 
 
@@ -642,6 +644,7 @@ class View implements \Serializable {
 		$this->stack[] = & $newElement;
 	}
 	public function closeTagHandler($xmlParser, $tagName) {
+	    /** @var ViewElementTag $element */
 		$element = & $this->stack[count($this->stack) - 1];
 		array_pop($this->stack);
 
@@ -662,8 +665,22 @@ class View implements \Serializable {
 				$element->autoclose = false;
 			}
 		}
-	}
 
+
+		// We will now try to perform optimization on the tag that was just closed.
+        // If it is not a fig tag, nor contains any fig directive attributes,
+        // and none of its plain attribute contains adhoc parts,
+        // and all of its children are plain ViewElementCData,
+        // then we can turn the whole island into plain CData.
+        if ( ! $this->isFigPrefix($tagName)
+             && ! $element->isDirective()
+        ) {
+		    $cdata = $element->makeCDataFromPlainTag();
+		    if ($element->parent) {
+                $element->parent->replaceLastChild($cdata);
+            }
+        }
+	}
 
     /**
 	 * XML parser handler for CDATA
