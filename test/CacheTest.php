@@ -58,24 +58,46 @@ EXPECTED;
 
     public function testDictionaryAndTransSerializing()
     {
-        vfsStream::setup('root');
-
         $template = <<<ENDTEMPLATE
 <html>
     <fig:dictionary file="dic.xml" />
     <fig:trans fig:cond="false"/>
     <fig:trans>something</fig:trans>
+    <fig:trans fig:cond="true" key="mykey">value</fig:trans>
 </html>
 ENDTEMPLATE;
 
-        vfsStream::newFile('template.html')->withContent($template)->at(vfsStreamWrapper::getRoot());
+        $dic = <<<ENDDIC
+<dictionary language="fr">
+  <entry key="mykey">ma clé</entry>
+  <entry key="something">quelque chose</entry>
+</dictionary>
+ENDDIC;
+
+
+        vfsStream::setup('root', null, [
+            'cache' => [],
+            'i18n' => [
+                'fr' => [
+                    'dic.xml' => $dic
+                ]
+            ],
+            'template.html' => $template
+        ]);
+
         $view = new View();
+        $view->setLanguage('fr');
+        $view->setTranslationPath(vfsStream::url('root/i18n'));
         $view->setCachePath(vfsStream::url('root'));
         $view->loadFile(vfsStream::url('root/template.html'));
         $output = $view->render();
 
         $expected = <<<EXPECTED
 <html>
+    
+    
+    quelque chose
+    ma clé
 </html>
 EXPECTED;
 
@@ -84,6 +106,8 @@ EXPECTED;
         // Now remove the original file
         unlink(vfsStream::url('root/template.html'));
         $view = new View();
+        $view->setLanguage('fr');
+        // No need to specify translation path because all dics are in cache already
         $view->setCachePath(vfsStream::url('root'));
         $view->loadFile(vfsStream::url('root/template.html'));
         $output = $view->render();

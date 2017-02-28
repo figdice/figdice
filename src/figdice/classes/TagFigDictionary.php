@@ -109,7 +109,7 @@ class TagFigDictionary extends ViewElementTag {
                 //If the tmp file already exists,
                 if(file_exists($tmpFile)) {
                     //but is older than the source file,
-                    if(filemtime($tmpFile) < filemtime($filename)) {
+                    if(file_exists($filename) && (filemtime($tmpFile) < filemtime($filename)) ) {
                         Dictionary::compile($filename, $tmpFile);
                     }
                 }
