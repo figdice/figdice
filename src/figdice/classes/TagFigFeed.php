@@ -23,9 +23,8 @@
 
 namespace figdice\classes;
 
-use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FeedClassNotFoundRenderingException;
-use figdice\exceptions\RequiredAttributeParsingException;
+use figdice\exceptions\RequiredAttributeException;
 
 class TagFigFeed extends ViewElementTag {
 	const TAGNAME = 'feed';
@@ -52,7 +51,7 @@ class TagFigFeed extends ViewElementTag {
 
         $this->feedClass = isset($this->attributes['class']) ? $this->attributes['class'] : null;
         if(null === $this->feedClass) {
-            throw new RequiredAttributeParsingException(
+            throw new RequiredAttributeException(
                 $this->getTagName(),
                 $this->xmlLineNumber,
                 'class'
@@ -78,7 +77,7 @@ class TagFigFeed extends ViewElementTag {
         //class and target attributes.
         $feedParameters = array();
         foreach($this->attributes as $attribName=>$attribText) {
-            if( (! $context->view->isFigAttribute($attribName)) &&
+            if( (! $context->view->isFigPrefix($attribName)) &&
                 ($attribName != 'class') && ($attribName != 'target') ) {
                 $feedParameters[$attribName] = $this->evaluate($context, $attribText);
             }

@@ -16,12 +16,12 @@ use figdice\classes\TagFigDictionary;
 use figdice\classes\TagFigFeed;
 use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
+use figdice\classes\TagFigTrans;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FeedClassNotFoundRenderingException;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
-use figdice\exceptions\RequiredAttributeParsingException;
 use figdice\exceptions\TagRenderingException;
 use figdice\exceptions\XMLParsingException;
 
@@ -356,8 +356,8 @@ class View implements \Serializable {
 
 		try {
             $bSuccess = xml_parse($this->xmlParser, $this->source);
-        } catch (RequiredAttributeParsingException $ex) {
-		    throw new RequiredAttributeException($ex->getTag(), $this->filename, $ex->getLine(), $ex->getMessage(), $ex);
+        } catch (RequiredAttributeException $ex) {
+		    throw $ex->setFile($this->filename);
         }
 
         if ($bSuccess) {
@@ -467,8 +467,8 @@ class View implements \Serializable {
 
         try {
             $result = $this->rootNode->render($context);
-        } catch (RequiredAttributeParsingException $ex) {
-            throw new RequiredAttributeException($ex->getTag(), $context->getFilename(), $ex->getLine(), $ex->getMessage(), $ex);
+        } catch (RequiredAttributeException $ex) {
+            throw $ex->setFile($context->getFilename());
         } catch (TagRenderingException $ex) {
             throw new RenderingException($ex->getTag(), $context->getFilename(), $ex->getLine(), $ex->getMessage(), $ex);
         } catch (FeedClassNotFoundRenderingException $ex) {
@@ -595,6 +595,12 @@ class View implements \Serializable {
 		if($tagName == $this->figNamespace . TagFigAttr::TAGNAME) {
 			$newElement = new TagFigAttr($tagName, $lineNumber);
 		}
+        else if ($tagName == $this->figNamespace . TagFigCdata::TAGNAME) {
+            $newElement = new TagFigCdata($tagName, $lineNumber);
+        }
+        else if ($tagName == $this->figNamespace . TagFigDictionary::TAGNAME) {
+            $newElement = new TagFigDictionary($tagName, $lineNumber);
+        }
 		else if ($tagName == $this->figNamespace . TagFigFeed::TAGNAME) {
 		    $newElement = new TagFigFeed($tagName, $lineNumber);
         }
@@ -604,11 +610,8 @@ class View implements \Serializable {
 		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
 		    $newElement = new TagFigMount($tagName, $lineNumber);
         }
-		else if ($tagName == $this->figNamespace . TagFigCdata::TAGNAME) {
-		    $newElement = new TagFigCdata($tagName, $lineNumber);
-        }
-		else if ($tagName == $this->figNamespace . TagFigDictionary::TAGNAME) {
-		    $newElement = new TagFigDictionary($tagName, $lineNumber);
+		else if ($tagName == $this->figNamespace . TagFigTrans::TAGNAME) {
+		    $newElement = new TagFigTrans($tagName, $lineNumber);
         }
 
 
@@ -859,11 +862,11 @@ class View implements \Serializable {
 
 	/**
 	 * Checks whether specified attribute name is in the fig namespace
-	 * (whose prefix can be overriden by xmlns declaration).
+	 * (whose prefix can be overridden by xmlns declaration).
 	 * @param string $attribute
 	 * @return boolean
 	 */
-	public function isFigAttribute($attribute) {
+	public function isFigPrefix($attribute) {
 		return (substr($attribute, 0, strlen($this->figNamespace)) == $this->figNamespace);
 	}
 

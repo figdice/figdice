@@ -1,7 +1,7 @@
 <?php
 namespace figdice\classes;
 
-use figdice\exceptions\RequiredAttributeParsingException;
+use figdice\exceptions\RequiredAttributeException;
 use figdice\View;
 
 class TagFigInclude extends ViewElementTag
@@ -24,7 +24,7 @@ class TagFigInclude extends ViewElementTag
 
         $this->includedFile = isset($attributes['file']) ? $attributes['file'] : null;
         if(null === $this->includedFile) {
-            throw new RequiredAttributeParsingException(
+            throw new RequiredAttributeException(
                 $this->getTagName(),
                 $this->xmlLineNumber,
                 'file'

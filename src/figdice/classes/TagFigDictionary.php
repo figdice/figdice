@@ -24,7 +24,7 @@
 namespace figdice\classes;
 
 use figdice\exceptions\FileNotFoundException;
-use figdice\exceptions\RequiredAttributeParsingException;
+use figdice\exceptions\RequiredAttributeException;
 
 class TagFigDictionary extends ViewElementTag {
 	const TAGNAME = 'dictionary';
@@ -55,9 +55,9 @@ class TagFigDictionary extends ViewElementTag {
 
 
         if(null === $this->dicFile) {
-            throw new RequiredAttributeParsingException($this->getTagName(),
+            throw new RequiredAttributeException($this->getTagName(),
                 $this->xmlLineNumber,
-                'Missing "file" attribute for '.$this->getTagName().' tag (' . $this->xmlLineNumber . ')');
+                'file');
         }
 
     }
@@ -109,7 +109,7 @@ class TagFigDictionary extends ViewElementTag {
                 //If the tmp file already exists,
                 if(file_exists($tmpFile)) {
                     //but is older than the source file,
-                    if(filemtime($tmpFile) < filemtime($filename)) {
+                    if(file_exists($filename) && (filemtime($tmpFile) < filemtime($filename)) ) {
                         Dictionary::compile($filename, $tmpFile);
                     }
                 }

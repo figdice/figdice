@@ -1,7 +1,6 @@
 <?php
 namespace figdice\exceptions;
 
-use Exception;
 
 /**
  * Class TagRenderingException
@@ -12,7 +11,6 @@ class TagRenderingException extends \Exception
 {
     private $tag;
     /**
-     * RequiredAttributeParsingException constructor.
      * @param string $tag
      * @param int $line
      * @param string $message
