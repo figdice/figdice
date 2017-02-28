@@ -266,6 +266,110 @@ ENDTEMPLATE;
         $view->setTranslationPath(vfsStream::url('root'));
         $view->render();
     }
+
+
+    /**
+     * @expectedException \figdice\exceptions\DictionaryEntryNotFoundException
+     */
+    public function testAnonymousDictionaryLoadedInIncludedFileIsNotAvailToParent()
+    {
+        $templateOuter = <<<ENDTEMPLATE
+<fig:template>
+    <fig:include file="inner.html"/>
+    <fig:trans key="testkey1"/>
+</fig:template>
+ENDTEMPLATE;
+
+
+        $templateInner = <<<ENDTEMPLATE
+<fig:template>
+    <fig:dictionary file="dic.xml"/>
+    <fig:trans key="testkey2"/>
+</fig:template>
+ENDTEMPLATE;
+
+
+        $dictionary = <<<ENDDICTIONARY
+<fig:dictionary xmlns:fig="figdice.org" language="en">
+    <entry key="testkey1">testvalue1</entry>
+    <entry key="testkey2">testvalue2</entry>
+</fig:dictionary>
+ENDDICTIONARY;
+
+
+        vfsStream::setup('root', null, [
+            'outer.html' => $templateOuter,
+            'inner.html' => $templateInner,
+            'i18n' => [
+                'en' => [
+                    'dic.xml' => $dictionary
+                ]
+            ]
+        ]);
+
+        $view = new View();
+        $view->setTranslationPath(vfsStream::url('root/i18n'));
+        $view->setLanguage('en');
+        $view->loadFile(vfsStream::url('root/outer.html'));
+        $view->render();
+
+        $this->assertTrue(false);
+    }
+
+
+    public function testNamedDictionaryLoadedInIncludedFileIsAvailToParent()
+    {
+        $templateOuter = <<<ENDTEMPLATE
+<fig:template>
+    <fig:include file="inner.html"/>
+    <fig:trans key="testkey1" dict="namedDic"/>
+</fig:template>
+ENDTEMPLATE;
+
+
+        $templateInner = <<<ENDTEMPLATE
+<fig:template>
+    <fig:dictionary file="dic.xml" name="namedDic" />
+    <fig:trans key="testkey2" dict="namedDic"/>
+</fig:template>
+ENDTEMPLATE;
+
+
+        $dictionary = <<<ENDDICTIONARY
+<fig:dictionary xmlns:fig="figdice.org" language="en">
+    <entry key="testkey1">testvalue1</entry>
+    <entry key="testkey2">testvalue2</entry>
+</fig:dictionary>
+ENDDICTIONARY;
+
+
+        vfsStream::setup('root', null, [
+            'outer.html' => $templateOuter,
+            'inner.html' => $templateInner,
+            'i18n' => [
+                'en' => [
+                    'dic.xml' => $dictionary
+                ]
+            ]
+        ]);
+
+        $view = new View();
+        $view->setTranslationPath(vfsStream::url('root/i18n'));
+        $view->setLanguage('en');
+        $view->loadFile(vfsStream::url('root/outer.html'));
+        $output = $view->render();
+
+        $expected = <<<EXPECTED
+        
+    testvalue2
+
+    testvalue1
+
+EXPECTED;
+
+        $this->assertEquals($expected, $output);
+    }
+
 }
 
 /**
