@@ -23,7 +23,8 @@
 
 namespace figdice\classes;
 
-use figdice\exceptions\RequiredAttributeParsingException;
+
+use figdice\exceptions\RequiredAttributeException;
 
 class TagFigMount extends ViewElementTag {
 	const TAGNAME = 'mount';
@@ -46,9 +47,9 @@ class TagFigMount extends ViewElementTag {
         unset($this->attributes['value']);
 
         if(null === $this->mountTarget) {
-            throw new RequiredAttributeParsingException($this->getTagName(),
+            throw new RequiredAttributeException($this->getTagName(),
                 $this->xmlLineNumber,
-                'Missing "target" attribute for '.$this->getTagName().' tag (' . $this->xmlLineNumber . ')');
+                'target');
         }
     }
 

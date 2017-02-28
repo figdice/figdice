@@ -2,7 +2,6 @@
 namespace figdice\classes;
 
 use figdice\exceptions\RequiredAttributeException;
-use figdice\exceptions\RequiredAttributeParsingException;
 use figdice\View;
 
 class TagFigInclude extends ViewElementTag

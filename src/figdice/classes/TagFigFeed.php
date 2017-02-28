@@ -23,10 +23,8 @@
 
 namespace figdice\classes;
 
-use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FeedClassNotFoundRenderingException;
 use figdice\exceptions\RequiredAttributeException;
-use figdice\exceptions\RequiredAttributeParsingException;
 
 class TagFigFeed extends ViewElementTag {
 	const TAGNAME = 'feed';

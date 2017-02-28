@@ -25,7 +25,6 @@ namespace figdice\classes;
 
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
-use figdice\exceptions\RequiredAttributeParsingException;
 
 class TagFigDictionary extends ViewElementTag {
 	const TAGNAME = 'dictionary';
