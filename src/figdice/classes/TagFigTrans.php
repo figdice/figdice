@@ -1,7 +1,7 @@
 <?php
 namespace figdice\classes;
 
-class TagFigTrans extends ViewElementTag
+class TagFigTrans extends TagFig
 {
     const TAGNAME = 'trans';
 

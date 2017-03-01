@@ -26,14 +26,10 @@ namespace figdice\classes;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 
-class TagFigFeed extends ViewElementTag {
+class TagFigFeed extends TagFig {
 	const TAGNAME = 'feed';
 
 	private $feedClass = null;
-
-	public function __construct($name, $xmlLineNumber) {
-		parent::__construct($name, $xmlLineNumber);
-	}
 
     public function render(Context $context)
     {

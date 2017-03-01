@@ -10,6 +10,7 @@ use figdice\classes\AutoloadFeedFactory;
 use figdice\classes\Context;
 use figdice\classes\MagicReflector;
 use figdice\classes\NativeFunctionFactory;
+use figdice\classes\TagFig;
 use figdice\classes\TagFigAttr;
 use figdice\classes\TagFigCdata;
 use figdice\classes\TagFigDictionary;
@@ -17,6 +18,8 @@ use figdice\classes\TagFigFeed;
 use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
 use figdice\classes\TagFigTrans;
+use figdice\classes\ViewElementCData;
+use figdice\classes\ViewElementContainer;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
@@ -676,17 +679,17 @@ class View implements \Serializable {
         // and none of its plain attribute contains adhoc parts,
         // and all of its children are plain ViewElementCData,
         // then we can turn the whole island into plain CData.
-        if ( ! $this->isFigPrefix($element->getTagName())
-            && ! $element->isDirective()
-        ) {
-            $cdata = $element->makeCDataFromPlainTag();
-            // Replate the last child of parent (because it changed nature)
-            if ($element->parent) {
-                $element->parent->replaceLastChild($cdata);
-            }
-            // Or if there is no parent, we're the root tag!
-            else {
-                $this->rootNode = $cdata;
+        if ( ! $element instanceof TagFig) {
+            $squashedElement = $element->makeSquashedElement( $this->isFigPrefix($element->getTagName()) /*envelope yes or no*/);
+            if (null != $squashedElement) {
+
+                // Replate the last child of parent (because it changed nature)
+                if ( $element->parent ) {
+                    $element->parent->replaceLastChild($squashedElement);
+                } // Or if there is no parent, we're the root tag!
+                else {
+                    $this->rootNode = $squashedElement;
+                }
             }
         }
     }

@@ -4,14 +4,10 @@ namespace figdice\classes;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 
-class TagFigCdata extends ViewElementTag {
+class TagFigCdata extends TagFig {
 	const TAGNAME = 'cdata';
 
 	private $dataFile;
-
-	public function __construct($name, $xmlLineNumber) {
-		parent::__construct($name, $xmlLineNumber);
-	}
 
     public function setAttributes($figNamespace, array $attributes)
     {

@@ -4,7 +4,7 @@ namespace figdice\classes;
 use figdice\exceptions\RequiredAttributeException;
 use figdice\View;
 
-class TagFigInclude extends ViewElementTag
+class TagFigInclude extends TagFig
 {
     const TAGNAME = 'include';
 
