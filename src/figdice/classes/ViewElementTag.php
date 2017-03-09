@@ -1306,7 +1306,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
             }
         }
 
-        $this->children[count($this->children) - 1] = $container;
+        // The last child is a tag, and want to replace it with
+        // a container: why not just append the container's children.
+        array_splice($this->children, count($this->children) - 1, 1, $container->children);
     }
 
     public function replaceLastChild(ViewElement $element) {
