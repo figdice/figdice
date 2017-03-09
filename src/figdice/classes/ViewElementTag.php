@@ -200,13 +200,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
                     continue;
                 }
 
-                // a flag attribute is to be processed differently because it isn't a key=value pair.
-                // TODO: not sure we already have Flags at this stage of the cycle. I think
-                // we only have plain real XML text attributes.
-                if ( $value instanceof Flag) {
-                    $this->isDirective = true;
-                    continue;
-                }
 
                 // Search for adhocs
                 if (preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
@@ -538,8 +531,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 			unset($this->attributes[$context->figNamespace . 'slot']);
 			$result = $this->render($context);
-			if($result === false)
-				throw new \Exception();
+
 			$slot->setLength(strlen($result));
 			$this->attributes[$context->figNamespace . 'slot'] = $slotName;
 			return $anchorString . $result;
@@ -606,19 +598,19 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			}
 		}
 
-		//================================================================
-		//fig:text
-		//
-		//Instead of rendering current tag, replace its contents
-		//with expression.
-		//If expression is a symbol that represents an argument to
-		//a macro call, of class ViewElementTag, then do not lex-eval
-		//the expression but rather render this tag. This allows passing to a macro call
-		//a complex fig:param (a piece of xml).
-		//
-		//Only the immediate Tag children of name fig:attr are parsed,
-		//so that it is still possible to have dynamic attributes to a tag bearing fig:text.
-		if(null !== $this->figText) {
+        //================================================================
+        //fig:text
+        //
+        //Instead of rendering current tag, replace its contents
+        //with expression.
+        //If expression is a symbol that represents an argument to
+        //a macro call, of class ViewElementTag, then do not lex-eval
+        //the expression but rather render this tag. This allows passing to a macro call
+        //a complex fig:param (a piece of xml).
+        //
+        //Only the immediate Tag children of name fig:attr are parsed,
+        //so that it is still possible to have dynamic attributes to a tag bearing fig:text.
+        if(null !== $this->figText) {
             $content = $this->figText;
 
             $output = $this->evaluate($context, $content);
