@@ -38,7 +38,7 @@ Choose among the 3 methods below, which suits better your needs: Composer, Phar,
 
 Add the figdice dependency to the `require` section of your `composer.json` file:
 
-    "figdice/figdice": "~2.4"
+    "figdice/figdice": "~3.0"
 
 
 
