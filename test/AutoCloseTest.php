@@ -93,7 +93,7 @@ TEMPLATE;
 EXPECTED;
 
 
-    $this->assertEquals(trim($expected), trim($output));
+    $this->assertEquals($expected, $output);
 
 
 

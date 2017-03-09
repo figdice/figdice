@@ -21,6 +21,7 @@
  * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use figdice\classes\ViewElementCData;
 use figdice\View;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
@@ -35,8 +36,8 @@ class ViewParserTest extends PHPUnit_Framework_TestCase {
    */
   public function testRenderBeforeLoadFails() {
     $view = new View();
-    $result = $view->render();
-    $this->assertFail();
+    $view->render();
+    $this->assertTrue(false);
   }
 
   public function testSourceWithSimpleXml() {
@@ -192,7 +193,7 @@ ENDHTML;
     $view->loadFile('resources/FigXmlIncludeNotFound.xml');
 		
     // will raise an exception
-    $result = $view->render();
+    $view->render();
     $this->assertFalse(true);
   }
 	
@@ -298,5 +299,68 @@ EXPECTED;
             '</html>'."\n"
             ;
         $this->assertEquals($expected, $rendered);
+    }
+
+    public function testSquashingTreeOfInertNodesCollapsesToSingleCData()
+    {
+        $template = <<<ENDTEMPLATE
+<a>
+    <b attr1="val1" attr2="val2">
+        <c>
+            cdata
+        </c>
+        <d> xxx </d> <e attr3="val3" />
+    </b>
+</a>
+ENDTEMPLATE;
+
+        $view = new View();
+        $view->loadString($template);
+        $view->parse();
+
+        $this->assertTrue($view->getRootNode() instanceof ViewElementCData);
+
+
+    }
+
+    public function testSquashingOfComplexActiveTreeCollapsesToChildren()
+    {
+        $template = <<<ENDTEMPLATE
+<html xmlns:xx="http://figdice.org/" xx:doctype="html">
+  <head>
+    <meta name="viewport" content="value" xx:void="true"/>
+    <title xx:text="'title'"></title>
+  </head>
+  <body>
+    <div class="display">
+      <b>inert bold</b>
+      <span class="show_{adhoc}"> span </span> <div> inert div </div>
+    </div>
+  </body>
+</html>
+ENDTEMPLATE;
+
+        $view = new View();
+        $view->loadString($template);
+        $view->mount('adhoc', 'show');
+        $output = $view->render();
+
+        $expected = <<<ENDEXPECTED
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="value">
+    <title>title</title>
+  </head>
+  <body>
+    <div class="display">
+      <b>inert bold</b>
+      <span class="show_show"> span </span> <div> inert div </div>
+    </div>
+  </body>
+</html>
+ENDEXPECTED;
+
+        $this->assertEquals($expected, $output);
     }
 }

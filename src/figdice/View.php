@@ -10,16 +10,19 @@ use figdice\classes\AutoloadFeedFactory;
 use figdice\classes\Context;
 use figdice\classes\MagicReflector;
 use figdice\classes\NativeFunctionFactory;
+use figdice\classes\TagFig;
 use figdice\classes\TagFigAttr;
 use figdice\classes\TagFigCdata;
 use figdice\classes\TagFigDictionary;
 use figdice\classes\TagFigFeed;
 use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
+use figdice\classes\TagFigParam;
 use figdice\classes\TagFigTrans;
+use figdice\classes\ViewElement;
+use figdice\classes\ViewElementContainer;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;
-use figdice\exceptions\FeedClassNotFoundRenderingException;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\TagRenderingException;
@@ -99,7 +102,7 @@ class View implements \Serializable {
 	/**
 	 * Depth stack used at parse time.
 	 *
-	 * @var array
+	 * @var ViewElementTag[]|ViewElementContainer[]
 	 */
 	private $stack;
 
@@ -188,7 +191,13 @@ class View implements \Serializable {
 
 	private $options = [];
 
-	/**
+    /**
+     * Used during parsing, to keep track of the last CData piece that was processed just before opening a tag.
+     * @var string
+     */
+    private $previousCData = null;
+
+    /**
 	 * View constructor.
 	 * @param array $options Optional indexed array of options, for specific behavior of the library.
 	 * Introduced in 2.3 for the remodeling of the plug execution context.
@@ -463,7 +472,9 @@ class View implements \Serializable {
         // The doctype is necessarily on the root tag, declared as an attribute, example:
         //   fig:doctype="html"
         // However, it can be on the root node of an included template (when using the reverse plug/slot pattern)
-        $context->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
+        if ($this->rootNode instanceof ViewElementTag) {
+            $context->setDoctype($this->rootNode->getAttribute($this->figNamespace . 'doctype'));
+        }
 
         try {
             $result = $this->rootNode->render($context);
@@ -471,8 +482,8 @@ class View implements \Serializable {
             throw $ex->setFile($context->getFilename());
         } catch (TagRenderingException $ex) {
             throw new RenderingException($ex->getTag(), $context->getFilename(), $ex->getLine(), $ex->getMessage(), $ex);
-        } catch (FeedClassNotFoundRenderingException $ex) {
-            throw new FeedClassNotFoundException($ex->getClassname(), $context->getFilename(), $ex->getLine(), $ex);
+        } catch (FeedClassNotFoundException $ex) {
+            throw $ex->setFile($context->getFilename());
         }
 
 
@@ -610,14 +621,19 @@ class View implements \Serializable {
 		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
 		    $newElement = new TagFigMount($tagName, $lineNumber);
         }
+		else if ($tagName == $this->figNamespace . TagFigParam::TAGNAME) {
+		    $newElement = new TagFigParam($tagName, $lineNumber);
+        }
 		else if ($tagName == $this->figNamespace . TagFigTrans::TAGNAME) {
 		    $newElement = new TagFigTrans($tagName, $lineNumber);
         }
 
 
 		else {
-			$newElement = new ViewElementTag($tagName, $lineNumber);
+			$newElement = new ViewElementTag($tagName, $lineNumber, $this->previousCData);
 		}
+
+		$this->previousCData = null;
 
 		$newElement->setAttributes($this->figNamespace, $attributes);
 
@@ -642,6 +658,7 @@ class View implements \Serializable {
 		$this->stack[] = & $newElement;
 	}
 	public function closeTagHandler($xmlParser, $tagName) {
+	    /** @var ViewElementTag $element */
 		$element = & $this->stack[count($this->stack) - 1];
 		array_pop($this->stack);
 
@@ -653,17 +670,41 @@ class View implements \Serializable {
 			$pos = xml_get_current_byte_index($xmlParser);
 			//The /> sequence as the previous 2 chars of current position
 			//works on Windows XP Pro 32bits with libxml 2.6.26.
-			if(substr($this->source, $pos - 2, 2) == '/>') {
-				return;
-			}
-			//Find the opening bracket < of the closing tag:
-			$latestOpeningBracket = strrpos(substr($this->source, 0, $pos + 1), '<');
-			if(!preg_match('#^<[^>]+/>#', substr($this->source, $latestOpeningBracket))) {
-				$element->autoclose = false;
-			}
+			if(substr($this->source, $pos - 2, 2) != '/>') {
+                //Find the opening bracket < of the closing tag:
+                $latestOpeningBracket = strrpos(substr($this->source, 0, $pos + 1), '<');
+                if (!preg_match('#^<[^>]+/>#', substr($this->source, $latestOpeningBracket))) {
+                    $element->autoclose = false;
+                }
+            }
 		}
+
+		// Optimization
+		$this->tentativeSquashInertTree($element);
+
 	}
 
+	private function tentativeSquashInertTree(ViewElementTag $element)
+    {
+        // We will now try to perform optimization on the tag that was just closed.
+        // If it is not a fig tag, nor contains any fig directive attributes,
+        // and none of its plain attribute contains adhoc parts,
+        // and all of its children are plain ViewElementCData,
+        // then we can turn the whole island into plain CData.
+        if ( ! $element instanceof TagFig) {
+            $squashedElement = $element->makeSquashedElement( $this->isFigPrefix($element->getTagName()) /*envelope yes or no*/);
+            if (null != $squashedElement) {
+
+                // Replate the last child of parent (because it changed nature)
+                if ( $element->parent ) {
+                    $element->parent->replaceLastChild($squashedElement);
+                } // Or if there is no parent, we're the root tag!
+                else {
+                    $this->rootNode = $squashedElement;
+                }
+            }
+        }
+    }
 
     /**
 	 * XML parser handler for CDATA
@@ -673,8 +714,10 @@ class View implements \Serializable {
 	 */
 	private function cdataHandler($xmlParser, $cdata) {
 		//Last element in stack = parent element of the CDATA.
-		$currentElement = &$this->stack[count($this->stack)-1];
+		$currentElement = $this->stack[count($this->stack)-1];
 		$currentElement->appendCDataChild($cdata);
+
+        $this->previousCData = $cdata;
 	}
 
 

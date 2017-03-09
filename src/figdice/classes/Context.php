@@ -388,20 +388,4 @@ class Context
         $this->runtimeAttributes[count($this->runtimeAttributes) - 2][$name] = $value;
     }
 
-    /**
-     * Retain a reference to the element just before, when rendering the children.
-     * @param ViewElement|null $previousSilbing
-     */
-    public function setPreviousSibling(ViewElement $previousSilbing = null)
-    {
-        $this->previousSibling[count($this->previousSibling) - 1] = $previousSilbing;
-    }
-
-    /**
-     * @return ViewElement|null
-     */
-    public function getPreviousSibling()
-    {
-        return (count($this->previousSibling) - 2 > 0) ? $this->previousSibling[count($this->previousSibling) - 2] : null;
-    }
 }

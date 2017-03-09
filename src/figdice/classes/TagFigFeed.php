@@ -23,17 +23,13 @@
 
 namespace figdice\classes;
 
-use figdice\exceptions\FeedClassNotFoundRenderingException;
+use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 
-class TagFigFeed extends ViewElementTag {
+class TagFigFeed extends TagFig {
 	const TAGNAME = 'feed';
 
 	private $feedClass = null;
-
-	public function __construct($name, $xmlLineNumber) {
-		parent::__construct($name, $xmlLineNumber);
-	}
 
     public function render(Context $context)
     {
@@ -67,7 +63,7 @@ class TagFigFeed extends ViewElementTag {
      *  - target = the mount point in the global universe.
      *
      * @param Context $context
-     * @throws FeedClassNotFoundRenderingException
+     * @throws FeedClassNotFoundException
      */
     private function fig_feed(Context $context) {
 
@@ -89,7 +85,7 @@ class TagFigFeed extends ViewElementTag {
         //At this point the feed instance must be created.
         //If not, there was no factory to handle its loading.
         if(! $feedInstance) {
-            throw new FeedClassNotFoundRenderingException($this->feedClass, $this->getTagName(), $this->xmlLineNumber);
+            throw new FeedClassNotFoundException($this->feedClass, null, $this->xmlLineNumber);
         }
 
         //It is possible to simply invoke a Feed class and

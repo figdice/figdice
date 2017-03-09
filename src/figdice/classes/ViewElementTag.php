@@ -1,24 +1,7 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2017, Gabriel Zerbib.
- * @version 2.5
  * @package FigDice
- *
- * This file is part of FigDice.
- *
- * FigDice is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * FigDice is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with FigDice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace figdice\classes;
@@ -39,6 +22,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	protected $name;
 
 	protected $attributes;
+
+    protected $isDirective = false;
 
     /**
      * The value for fig:auto attribute, or null if not present
@@ -98,6 +83,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
    */
 	protected $children;
 
+    /**
+     * The LF & blank chars preceding the tag, if any.
+     * @var null|string
+     */
+	private $blank;
 
 	/**
 	 * Indicates whether the XML tag must be rendered as html-void.
@@ -123,17 +113,20 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 */
 	private $transientFlags = [];
 
-	/**
-	 * 
-	 * @param string $name
-	 * @param integer $xmlLineNumber
-	 */
-	public function __construct($name, $xmlLineNumber) {
+    /**
+     *
+     * @param string  $name
+     * @param integer $xmlLineNumber
+     * @param string|null    $previousBlank
+     */
+	public function __construct($name, $xmlLineNumber, $previousBlank = null) {
 		parent::__construct();
 		$this->name = $name;
 		$this->attributes = array();
 		$this->children = array();
 		$this->xmlLineNumber = $xmlLineNumber;
+
+		$this->blank = $previousBlank;
 	}
 
 	/**
@@ -147,6 +140,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $value = null;
         if (array_key_exists($key = $figNamespace . $name, $attributes)) {
             $value = $attributes[$key];
+            $this->isDirective = true;
             unset($attributes[$key]);
         }
         return $value;
@@ -163,13 +157,38 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	    $this->figVoid = $this->checkAndCropAttr($figNamespace, $attributes, 'void');
 	    $this->figWalk = $this->checkAndCropAttr($figNamespace, $attributes, 'walk');
 
+	    // Temporary: TODO: take care of slot and plug, to make me directive
+        if (array_key_exists($figNamespace.'plug', $attributes)
+            || array_key_exists($figNamespace.'slot', $attributes)
+            || array_key_exists($figNamespace.'doctype', $attributes) ) {
+            $this->isDirective = true;
+        }
+
+        if ($this->figWalk && ($this->blank !== null)) {
+            if (preg_match('#(\n\s+)$#', $this->blank, $matches)) {
+                $this->blank = $matches[1];
+            }
+            else {
+                $this->blank = null;
+            }
+        }
+        else {
+            $this->blank = null;
+        }
+
 	    // Now take care of the remaining non-fig attributes
 		$this->parseAttributes($figNamespace, $attributes);
 	}
-	protected function parseAttributes($figNamespace, array $attributes)
-    {
-        // TODO: split the attributes by adhoc parts
 
+    /**
+     * Split attributes by adhoc parts
+     * and store the resulting array in the object member.
+     *
+     * @param string $figNamespace
+     * @param array $attributes
+     */
+    protected function parseAttributes($figNamespace, array $attributes)
+    {
         // A fig:call attribute on a tag, indicates that all the other attributes
         // are arguments for the macro. They all are considered as expressions,
         // and therefore there is no need to search for adhoc inside.
@@ -185,6 +204,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
                 // TODO: not sure we already have Flags at this stage of the cycle. I think
                 // we only have plain real XML text attributes.
                 if ( $value instanceof Flag) {
+                    $this->isDirective = true;
                     continue;
                 }
 
@@ -200,6 +220,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
                             $parts []= substr($value, $previousPosition, $position - 1 - $previousPosition);
                         }
                         $parts []= new AdHoc($expression);
+                        // Mark the current tag as being an active cell in the template,
+                        // as opposed to a stupid static string with no logic.
+                        $this->isDirective = true;
+
                         // +1 because we contiunue past the trailing }
                         $previousPosition = $position + strlen($expression) + 1;
                     }
@@ -343,7 +367,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         }
 		return $result;
 	}
-	function appendCDataChild($cdata)
+	public function appendCDataChild($cdata)
 	{
 		if (trim($cdata) != '') {
 			$this->autoclose = false;
@@ -475,47 +499,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
         }
 
 
-		//================================================================
-		//fig:attr
-		//Add to the parent tag the given attribute. Do not render.
-		if( $this->name == $context->figNamespace . 'attr' ) {
-			if(!isset($this->attributes['name'])) {
-				//name is a required attribute for fig:attr.
-				throw new RequiredAttributeException($this->name, $this->xmlLineNumber, 'name');
-			}
-            //flag attribute
-            // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
-            if(isset($this->attributes['flag']) && $this->evaluate($context, $this->attributes['flag'])) {
-			    $context->setParentRuntimeAttribute($this->attributes['name'], new Flag());
-            }
-            else {
-                if ($this->hasAttribute('value')) {
-                    $value = $this->evaluate($context, $this->attributes['value']);
-                    if (is_string($value)) {
-                        $value = htmlspecialchars($value);
-                    }
-                    $context->setParentRuntimeAttribute($this->attributes['name'],  $value);
-                } else {
-                    $value = '';
-                    /**
-                     * @var ViewElement
-                     */
-                    $child = null;
-                    foreach ($this->children as $child) {
-                        $renderChild = $child->render($context);
-                        if ($renderChild === false) {
-                            throw new \Exception();
-                        }
-                        $value .= $renderChild;
-                    }
-                    //An XML attribute should not span accross several lines.
-                    $value = trim(preg_replace("#[\n\r\t]+#", ' ', $value));
-                    $context->setParentRuntimeAttribute($this->attributes['name'], $value);
-                }
-            }
-            return '';
-        }
-
 
 
 		//================================================================
@@ -546,7 +529,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//nothing is plugged into it.
 		//In case of plug for this slot, the complete slot tag (outer) is replaced.
 		if($slotName = $this->getFigAttribute($context->figNamespace, 'slot')) {
-			//Store a reference to current node, into the View's map of slots
+
+            //Store a reference to current node, into the View's map of slots
 
 			$anchorString = '/==SLOT==' . $slotName . '==/';
 			$slot = new Slot($anchorString);
@@ -702,8 +686,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//If this attribute is set and true,
 		//then the current element is rendered withouts its
 		//outer tag.
-		//Use short-circuit test if no fig:mute attribute, in order not
-		//to evaluate needlessly.
 		//Every fig: tag is mute by nature.
 		if(! $this->isMute($context)) {
 			$xmlAttributesString = $this->buildXMLAttributesString($context);
@@ -766,8 +748,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				}
 			}
 
-            $context->setPreviousSibling(null);
-
 			for($iChild = 0; $iChild < count($this->children); ++$iChild) {
 				$child = & $this->children[$iChild];
 				if($doNotRenderFigParam && ($child instanceof ViewElementTag) && ($child->getTagName() == $context->figNamespace . 'param') ) {
@@ -788,9 +768,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				}
 				$result .= $subRender;
 
-                $context->setPreviousSibling($child);
 			}
-			$context->setPreviousSibling(null);
 		}
 		else {
 			$result = $this->outputBuffer;
@@ -1006,18 +984,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				//so that the proper indenting is kept, and carriage returns
 				//between each iteration, if applies.
 				if(! $bFirstIteration) {
-					if($previousSibling = $context->getPreviousSibling()) {
-						if($previousSibling instanceof ViewElementCData) {
-							if(($rtrim = rtrim($previousSibling->outputBuffer)) < $previousSibling->outputBuffer) {
-								$blankRPart = substr($previousSibling->outputBuffer, strlen($rtrim));
-								$precedingBlank = strrchr($blankRPart, "\n");
-								if($precedingBlank === false) {
-									$precedingBlank = $blankRPart;
-								}
-								$nextContent = $precedingBlank . $nextContent;
-								$bFirstIteration = false;
-							}
-						}
+					if($this->blank !== null) {
+                        $nextContent = $this->blank . $nextContent;
+                        $bFirstIteration = false;
 					}
 				}
 				//But only do this for subsequent iterations, not the first one,
@@ -1100,8 +1069,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	const TRANSIENT_PLUG_RENDERING = 'TRANSIENT_PLUG_RENDERING';
 
 
-	// TODO: this is just a attempt at serializing the View object (and its tree of tags)
-    // do not use in production.
 	public function serialize()
     {
         $data = [
@@ -1111,6 +1078,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
             'ac' => $this->autoclose,
             'tree' => $this->children,
         ];
+
+        if ($this->blank !== null) {
+            $data['blank'] = $this->blank;
+        }
 
         if ($this->figAuto) $data['auto'] = $this->figAuto;
         if ($this->figCall) $data['call'] = $this->figCall;
@@ -1133,6 +1104,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $this->xmlLineNumber = $data['line'];
         $this->autoclose = $data['ac'];
         $this->children = $data['tree'];
+        $this->blank = isset($data['blank']) ? $data['blank'] : null;
 
         $this->figAuto = isset($data['auto']) ? $data['auto'] : null;
         $this->figCall = isset($data['call']) ? $data['call'] : null;
@@ -1158,5 +1130,191 @@ class ViewElementTag extends ViewElement implements \Serializable {
     protected function doSpecific(Context $context)
     {
         return null;
+    }
+
+    /**
+     * Indicates whether the tag contains a fig: attribute anyhow,
+     * or has anny adhoc parts in its plain attributes.
+     * If not, it is a good candidate for checking if it is on the whole
+     * a static string that the rendering could dump unprocessed.
+     * @return bool
+     */
+    public function isDirective()
+    {
+        return $this->isDirective;
+    }
+
+    /**
+     * This method attempts to simplify the current element.
+     * If optimizations apply, as far as squashing everything down to a single CData item, returns this new cdata item.
+     * If it leads to a simplified tree, with the outer envelope made static, an new array of children is returned.
+     * If no optimizations were possible, returns null.
+     *
+     * @param bool $noEnvelope
+     *
+     * @return ViewElementContainer|ViewElementCData|null
+     */
+    public function makeSquashedElement($noEnvelope) {
+        // First, check I am holding a fig attribute
+        // of any adhoc part in a plain attribute
+        if ($this->isDirective())
+            return null;
+
+        // Now, check if I contain only CData children,
+        // all the while preparing my envelope string
+
+        if ($noEnvelope) {
+            $envelope = '';
+        }
+        else {
+            $envelope = '<' . $this->getTagName();
+            if ( count($this->attributes) ) {
+                $attrWithValues = [];
+                foreach ( $this->attributes as $attrName => $attrValue ) {
+                    $attrWithValues [] = $attrName . '="' . $attrValue . '"';
+                }
+
+                $attrString = implode(' ', $attrWithValues);
+                $envelope .= ' ' . $attrString;
+            }
+
+            if ( $this->autoclose ) {
+                $envelope .= ' />';
+
+                return new ViewElementCData($envelope, $this->parent);
+            }
+
+            $envelope .= '>';
+        }
+
+        // The array of immediate children cannot contain two consecutive CData items
+        // If there are :attr items, they must be the first active child (ie 0 or 1 if 0 is cdata)
+
+        if (count($this->children) > 0) {
+            if ($this->children[0] instanceof TagFigAttr) {
+                // The first useful child is fig:attr  : no simplifications can be done.
+                return null;
+            }
+            if ( (count($this->children) > 1)
+                 && ($this->children[0] instanceof ViewElementCData)
+                 && ($this->children[1] instanceof TagFigAttr) ) {
+                // First child is cdata, but immediately followed by a fig:attr
+                return null;
+            }
+        }
+
+        // At this point, we may have tags in the children array, but they won't
+        // change my outer envelope.
+        // I can substitute myself with a starting cdata (containing my opening tag and my leading cdata)
+        // then the tree (except the first and/or last child if they're cdata)
+        // then the trailing cdata and the closing tag.
+
+        $ending = '';
+
+        $nbChildren = count($this->children);
+        $newChildren = [];
+        $iChild = 0;
+        foreach ($this->children as $child) {
+            if ( ($iChild == 0) && ($child instanceof ViewElementCData) ) {
+                if ($noEnvelope) {
+                    // For a mute tag, if the first child is plain string,
+                    // we will discard the part from the end of the opening tag, till the linefeed (included).
+                    $envelope .= preg_replace('#^[ \\t]*\\n#', '', $child->outputBuffer);
+                }
+                else {
+                    $envelope .= $child->outputBuffer;
+                }
+            }
+            else if ( ($iChild == $nbChildren - 1) && ($child instanceof ViewElementCData) ) {
+                $ending = $child->outputBuffer;
+            }
+            else {
+                // In case one of the children has a fig:case directive,
+                // we're compelled to cancel the squashing,
+                // because the parent tag (even inert!) of fig:case children must be isolated at render time
+                // and becomes active.
+                if ( ($child instanceof ViewElementTag) && ($child->figCase !== null) ) {
+                    return null;
+                }
+                $newChildren []= $child;
+            }
+            ++ $iChild;
+        }
+
+        if (! $noEnvelope) {
+            $ending .= '</' . $this->getTagName() . '>';
+        }
+
+        if ( (count($newChildren) == 0) && ($envelope . $ending)) {
+            return new ViewElementCData($envelope . $ending, $this->parent);
+        }
+
+        if ($envelope) {
+            array_unshift($newChildren, new ViewElementCData($envelope, $this->parent));
+        }
+        if ($ending) {
+            $newChildren [] = new ViewElementCData($ending, $this->parent);
+        }
+        if (count($newChildren)) {
+            return new ViewElementContainer($newChildren, $this->parent);
+        }
+        return null;
+
+    }
+
+
+    /**
+     * If the last but one child is already a CData,
+     * squash them together.
+     */
+    private function replaceLastChild_cdata(ViewElementCData $cdata)
+    {
+        $n = count($this->children);
+        if ( ($n > 1) && ($this->children[$n - 2] instanceof ViewElementCData) ) {
+            // Group the last-but-one cdata with this new cdata
+            $this->children[$n - 2]->outputBuffer .= $cdata->outputBuffer;
+            // and chop the final element off the children array.
+            array_pop($this->children);
+        }
+        else {
+            $cdata->parent        = $this;
+            $this->children[$n - 1] = $cdata;
+        }
+    }
+
+    private function replaceLastChild_container(ViewElementContainer $container) {
+        $container->parent = $this;
+
+        // If last-but-one child is cdata, and container starts with cdata,
+        // combine the cdata into the first child of container and suppress the
+        // last-but-one cdata child of this.
+        $n = count($this->children);
+        if ($n > 1) {
+
+            if ( ($this->children[$n - 2] instanceof ViewElementCData)
+                 && ($container->children[0] instanceof ViewElementCData) ) {
+
+                $container->children[0]->outputBuffer =
+                    $this->children[ $n - 2 ]->outputBuffer . $container->children[0]->outputBuffer;
+                array_splice($this->children, $n - 2, 1);
+            }
+            else if ($this->children[$n - 2] instanceof ViewElementContainer) {
+                // We will merge 2 containers
+                $this->children[$n - 2]->children = array_merge($this->children[$n - 2]->children, $container->children);
+                array_splice($this->children, $n - 1, 1);
+                return;
+            }
+        }
+
+        $this->children[count($this->children) - 1] = $container;
+    }
+
+    public function replaceLastChild(ViewElement $element) {
+        if ($element instanceof ViewElementCData) {
+            $this->replaceLastChild_cdata($element);
+        }
+        else if($element instanceof ViewElementContainer) {
+            $this->replaceLastChild_container($element);
+        }
     }
 }

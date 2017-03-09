@@ -22,6 +22,7 @@
  */
 
 
+use figdice\classes\ViewElement;
 use figdice\View;
 use figdice\classes\ViewElementTag;
 use \org\bovigo\vfs\vfsStream;
@@ -376,22 +377,26 @@ EXPECTED;
  * This class is used as a spoof for Root Node in View.
  * It captures the instance of Context that it is passed, when asked to render.
  */
-class ContextCheaterViewElementTag extends ViewElementTag
+class ContextCheaterViewElementTag extends ViewElement
 {
-    public function __construct(ViewElementTag $realRootNode)
+    public function __construct(ViewElement $realRootNode)
     {
-        parent::__construct($realRootNode->getTagName(), $realRootNode->xmlLineNumber);
+        parent::__construct();
         $this->realRootNode = $realRootNode;
     }
 
     /** @var \figdice\classes\Context */
     public $context;
-    /** @var ViewElementTag */
+    /** @var ViewElement */
     private $realRootNode;
 
     public function render(\figdice\classes\Context $context)
     {
         $this->context = $context;
         return $this->realRootNode->render($context);
+    }
+
+    public function appendCDataSibling($cdata)
+    {
     }
 }
