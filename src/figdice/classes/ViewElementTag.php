@@ -824,47 +824,47 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * @param Context $context
      * @return string
      */
-	private function fig_call(Context $context) {
-		//Retrieve the name of the macro to call.
-		$macroName = $this->figCall;
+    private function fig_call(Context $context) {
+        //Retrieve the name of the macro to call.
+        $macroName = $this->figCall;
 
-		//Prepare the arguments to pass to the macro:
-		//all the non-fig: attributes, evaluated.
-		$arguments = array();
-		foreach($this->attributes as $attribName => $attribValue) {
-			if( ! $context->view->isFigPrefix($attribName) ) {
-				$value = $this->evaluate($context, $attribValue);
-				$arguments[$attribName] = $value;
-			}
-		}
+        //Prepare the arguments to pass to the macro:
+        //all the non-fig: attributes, evaluated.
+        $arguments = array();
+        foreach($this->attributes as $attribName => $attribValue) {
+            if( ! $context->view->isFigPrefix($attribName) ) {
+                $value = $this->evaluate($context, $attribValue);
+                $arguments[$attribName] = $value;
+            }
+        }
 
 
-		//Fetch the parameters specified as immediate children
-		//of the macro call : <fig:param name="" value=""/>
-		$arguments = array_merge($arguments, $this->collectParamChildren($context));
+        //Fetch the parameters specified as immediate children
+        //of the macro call : <fig:param name="" value=""/>
+        $arguments = array_merge($arguments, $this->collectParamChildren($context));
 
-		//Retrieve the macro contents.
-		if(isset($context->view->macros[$macroName])) {
-		    /** @var ViewElementTag $macroElement */
-			$macroElement = & $context->view->macros[$macroName];
-			$context->view->pushStackData($arguments);
+        //Retrieve the macro contents.
+        if(isset($context->view->macros[$macroName])) {
+            /** @var ViewElementTag $macroElement */
+            $macroElement = & $context->view->macros[$macroName];
+            $context->view->pushStackData($arguments);
 
-			// Hide any current iteration during macro invocation
+            // Hide any current iteration during macro invocation
             $context->pushIteration(new Iteration(0));
 
-			//Now render the macro contents, but do not take into account the fig:macro
-			//that its root tag holds.
-			$result = $macroElement->renderNoMacro($context);
+            //Now render the macro contents, but do not take into account the fig:macro
+            //that its root tag holds.
+            $result = $macroElement->renderNoMacro($context);
 
-			// Restore the previous iteration context
+            // Restore the previous iteration context
             $context->popIteration();
 
-			$context->view->popStackData();
-			return $result;
-			//unset($macroElement->iteration);
-		}
-		return '';
-	}
+            $context->view->popStackData();
+            return $result;
+        }
+        // Macro not yet defined: empty result for call.
+        return '';
+    }
 
     /**
      * Returns an array of named values obtained by the immediate :param children of the tag.
