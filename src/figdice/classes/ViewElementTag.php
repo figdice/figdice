@@ -200,13 +200,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
                     continue;
                 }
 
-                // a flag attribute is to be processed differently because it isn't a key=value pair.
-                // TODO: not sure we already have Flags at this stage of the cycle. I think
-                // we only have plain real XML text attributes.
-                if ( $value instanceof Flag) {
-                    $this->isDirective = true;
-                    continue;
-                }
 
                 // Search for adhocs
                 if (preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
@@ -538,8 +531,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 			unset($this->attributes[$context->figNamespace . 'slot']);
 			$result = $this->render($context);
-			if($result === false)
-				throw new \Exception();
+
 			$slot->setLength(strlen($result));
 			$this->attributes[$context->figNamespace . 'slot'] = $slotName;
 			return $anchorString . $result;
@@ -606,19 +598,19 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			}
 		}
 
-		//================================================================
-		//fig:text
-		//
-		//Instead of rendering current tag, replace its contents
-		//with expression.
-		//If expression is a symbol that represents an argument to
-		//a macro call, of class ViewElementTag, then do not lex-eval
-		//the expression but rather render this tag. This allows passing to a macro call
-		//a complex fig:param (a piece of xml).
-		//
-		//Only the immediate Tag children of name fig:attr are parsed,
-		//so that it is still possible to have dynamic attributes to a tag bearing fig:text.
-		if(null !== $this->figText) {
+        //================================================================
+        //fig:text
+        //
+        //Instead of rendering current tag, replace its contents
+        //with expression.
+        //If expression is a symbol that represents an argument to
+        //a macro call, of class ViewElementTag, then do not lex-eval
+        //the expression but rather render this tag. This allows passing to a macro call
+        //a complex fig:param (a piece of xml).
+        //
+        //Only the immediate Tag children of name fig:attr are parsed,
+        //so that it is still possible to have dynamic attributes to a tag bearing fig:text.
+        if(null !== $this->figText) {
             $content = $this->figText;
 
             $output = $this->evaluate($context, $content);
@@ -832,47 +824,47 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * @param Context $context
      * @return string
      */
-	private function fig_call(Context $context) {
-		//Retrieve the name of the macro to call.
-		$macroName = $this->figCall;
+    private function fig_call(Context $context) {
+        //Retrieve the name of the macro to call.
+        $macroName = $this->figCall;
 
-		//Prepare the arguments to pass to the macro:
-		//all the non-fig: attributes, evaluated.
-		$arguments = array();
-		foreach($this->attributes as $attribName => $attribValue) {
-			if( ! $context->view->isFigPrefix($attribName) ) {
-				$value = $this->evaluate($context, $attribValue);
-				$arguments[$attribName] = $value;
-			}
-		}
+        //Prepare the arguments to pass to the macro:
+        //all the non-fig: attributes, evaluated.
+        $arguments = array();
+        foreach($this->attributes as $attribName => $attribValue) {
+            if( ! $context->view->isFigPrefix($attribName) ) {
+                $value = $this->evaluate($context, $attribValue);
+                $arguments[$attribName] = $value;
+            }
+        }
 
 
-		//Fetch the parameters specified as immediate children
-		//of the macro call : <fig:param name="" value=""/>
-		$arguments = array_merge($arguments, $this->collectParamChildren($context));
+        //Fetch the parameters specified as immediate children
+        //of the macro call : <fig:param name="" value=""/>
+        $arguments = array_merge($arguments, $this->collectParamChildren($context));
 
-		//Retrieve the macro contents.
-		if(isset($context->view->macros[$macroName])) {
-		    /** @var ViewElementTag $macroElement */
-			$macroElement = & $context->view->macros[$macroName];
-			$context->view->pushStackData($arguments);
+        //Retrieve the macro contents.
+        if(isset($context->view->macros[$macroName])) {
+            /** @var ViewElementTag $macroElement */
+            $macroElement = & $context->view->macros[$macroName];
+            $context->view->pushStackData($arguments);
 
-			// Hide any current iteration during macro invocation
+            // Hide any current iteration during macro invocation
             $context->pushIteration(new Iteration(0));
 
-			//Now render the macro contents, but do not take into account the fig:macro
-			//that its root tag holds.
-			$result = $macroElement->renderNoMacro($context);
+            //Now render the macro contents, but do not take into account the fig:macro
+            //that its root tag holds.
+            $result = $macroElement->renderNoMacro($context);
 
-			// Restore the previous iteration context
+            // Restore the previous iteration context
             $context->popIteration();
 
-			$context->view->popStackData();
-			return $result;
-			//unset($macroElement->iteration);
-		}
-		return '';
-	}
+            $context->view->popStackData();
+            return $result;
+        }
+        // Macro not yet defined: empty result for call.
+        return '';
+    }
 
     /**
      * Returns an array of named values obtained by the immediate :param children of the tag.
@@ -1306,7 +1298,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
             }
         }
 
-        $this->children[count($this->children) - 1] = $container;
+        // The last child is a tag, and want to replace it with
+        // a container: why not just append the container's children.
+        array_splice($this->children, count($this->children) - 1, 1, $container->children);
     }
 
     public function replaceLastChild(ViewElement $element) {

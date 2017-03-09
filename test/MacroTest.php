@@ -46,4 +46,25 @@ EXPECTED;
 
         $this->assertEquals($expected, $rendered);
     }
+
+    public function testCallAMacroThatDoesNotExistsGivesEmpty()
+    {
+        $template = <<<TEMPLATE
+<fig>
+  <span fig:call="macroNotFound" param1="2 + 2">
+    discarded content
+  </span>
+</fig>
+TEMPLATE;
+
+        $expected = <<<EXPECTED
+<fig>
+  
+</fig>
+EXPECTED;
+
+        $view = new View();
+        $view->loadString($template);
+        $this->assertEquals($expected, $view->render());
+    }
 }
