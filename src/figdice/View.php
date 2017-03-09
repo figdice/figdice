@@ -189,7 +189,13 @@ class View implements \Serializable {
 
 	private $options = [];
 
-	/**
+    /**
+     * Used during parsing, to keep track of the last CData piece that was processed just before opening a tag.
+     * @var string
+     */
+    private $previousCData = null;
+
+    /**
 	 * View constructor.
 	 * @param array $options Optional indexed array of options, for specific behavior of the library.
 	 * Introduced in 2.3 for the remodeling of the plug execution context.
@@ -622,8 +628,10 @@ class View implements \Serializable {
 
 
 		else {
-			$newElement = new ViewElementTag($tagName, $lineNumber);
+			$newElement = new ViewElementTag($tagName, $lineNumber, $this->previousCData);
 		}
+
+		$this->previousCData = null;
 
 		$newElement->setAttributes($this->figNamespace, $attributes);
 
@@ -706,6 +714,8 @@ class View implements \Serializable {
 		//Last element in stack = parent element of the CDATA.
 		$currentElement = &$this->stack[count($this->stack)-1];
 		$currentElement->appendCDataChild($cdata);
+
+        $this->previousCData = $cdata;
 	}
 
 

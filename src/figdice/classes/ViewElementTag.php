@@ -83,6 +83,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
    */
 	protected $children;
 
+    /**
+     * The LF & blank chars preceding the tag, if any.
+     * @var null|string
+     */
+	private $blank;
 
 	/**
 	 * Indicates whether the XML tag must be rendered as html-void.
@@ -108,17 +113,20 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	 */
 	private $transientFlags = [];
 
-	/**
-	 * 
-	 * @param string $name
-	 * @param integer $xmlLineNumber
-	 */
-	public function __construct($name, $xmlLineNumber) {
+    /**
+     *
+     * @param string  $name
+     * @param integer $xmlLineNumber
+     * @param string|null    $previousBlank
+     */
+	public function __construct($name, $xmlLineNumber, $previousBlank = null) {
 		parent::__construct();
 		$this->name = $name;
 		$this->attributes = array();
 		$this->children = array();
 		$this->xmlLineNumber = $xmlLineNumber;
+
+		$this->blank = $previousBlank;
 	}
 
 	/**
@@ -154,6 +162,18 @@ class ViewElementTag extends ViewElement implements \Serializable {
             || array_key_exists($figNamespace.'slot', $attributes)
             || array_key_exists($figNamespace.'doctype', $attributes) ) {
             $this->isDirective = true;
+        }
+
+        if ($this->figWalk && ($this->blank !== null)) {
+            if (preg_match('#(\n\s+)$#', $this->blank, $matches)) {
+                $this->blank = $matches[1];
+            }
+            else {
+                $this->blank = null;
+            }
+        }
+        else {
+            $this->blank = null;
         }
 
 	    // Now take care of the remaining non-fig attributes
@@ -968,18 +988,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				//so that the proper indenting is kept, and carriage returns
 				//between each iteration, if applies.
 				if(! $bFirstIteration) {
-					if($previousSibling = $context->getPreviousSibling()) {
-						if($previousSibling instanceof ViewElementCData) {
-							if(($rtrim = rtrim($previousSibling->outputBuffer)) < $previousSibling->outputBuffer) {
-								$blankRPart = substr($previousSibling->outputBuffer, strlen($rtrim));
-								$precedingBlank = strrchr($blankRPart, "\n");
-								if($precedingBlank === false) {
-									$precedingBlank = $blankRPart;
-								}
-								$nextContent = $precedingBlank . $nextContent;
-								$bFirstIteration = false;
-							}
-						}
+					if($this->blank !== null) {
+                        $nextContent = $this->blank . $nextContent;
+                        $bFirstIteration = false;
 					}
 				}
 				//But only do this for subsequent iterations, not the first one,
@@ -1072,6 +1083,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
             'tree' => $this->children,
         ];
 
+        if ($this->blank !== null) {
+            $data['blank'] = $this->blank;
+        }
+
         if ($this->figAuto) $data['auto'] = $this->figAuto;
         if ($this->figCall) $data['call'] = $this->figCall;
         if ($this->figCase) $data['case'] = $this->figCase;
@@ -1093,6 +1108,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $this->xmlLineNumber = $data['line'];
         $this->autoclose = $data['ac'];
         $this->children = $data['tree'];
+        $this->blank = isset($data['blank']) ? $data['blank'] : null;
 
         $this->figAuto = isset($data['auto']) ? $data['auto'] : null;
         $this->figCall = isset($data['call']) ? $data['call'] : null;
