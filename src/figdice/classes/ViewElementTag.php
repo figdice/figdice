@@ -367,7 +367,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
         }
 		return $result;
 	}
-	function appendCDataChild($cdata)
+	public function appendCDataChild($cdata)
 	{
 		if (trim($cdata) != '') {
 			$this->autoclose = false;
@@ -748,8 +748,6 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				}
 			}
 
-            $context->setPreviousSibling(null);
-
 			for($iChild = 0; $iChild < count($this->children); ++$iChild) {
 				$child = & $this->children[$iChild];
 				if($doNotRenderFigParam && ($child instanceof ViewElementTag) && ($child->getTagName() == $context->figNamespace . 'param') ) {
@@ -770,9 +768,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				}
 				$result .= $subRender;
 
-                $context->setPreviousSibling($child);
 			}
-			$context->setPreviousSibling(null);
 		}
 		else {
 			$result = $this->outputBuffer;

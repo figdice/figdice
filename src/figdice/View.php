@@ -19,6 +19,8 @@ use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
 use figdice\classes\TagFigParam;
 use figdice\classes\TagFigTrans;
+use figdice\classes\ViewElement;
+use figdice\classes\ViewElementContainer;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
@@ -100,7 +102,7 @@ class View implements \Serializable {
 	/**
 	 * Depth stack used at parse time.
 	 *
-	 * @var array
+	 * @var ViewElementTag[]|ViewElementContainer[]
 	 */
 	private $stack;
 
@@ -712,7 +714,7 @@ class View implements \Serializable {
 	 */
 	private function cdataHandler($xmlParser, $cdata) {
 		//Last element in stack = parent element of the CDATA.
-		$currentElement = &$this->stack[count($this->stack)-1];
+		$currentElement = $this->stack[count($this->stack)-1];
 		$currentElement->appendCDataChild($cdata);
 
         $this->previousCData = $cdata;
