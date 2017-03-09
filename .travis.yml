@@ -23,7 +23,7 @@ before_script:
 
 script:
   - mkdir -p build/logs
-  - if [ $(phpenv version-name) = "7" ]; then vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml test; else phpunit --bootstrap vendor/autoload.php test; fi
+  - if [ $(phpenv version-name) = "7" ]; then vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml test; else vendor/bin/phpunit test; fi
 
 after_script:
   - if [ $(phpenv version-name) = "7" ]; then composer require psr/log ; fi
