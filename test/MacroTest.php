@@ -8,33 +8,42 @@ class MacroTest extends PHPUnit_Framework_TestCase
     {
         $view = new View();
 
-        $template =
-            '<fig:x>'."\n".
-            '  <fig:m fig:macro="myMacro">'."\n".
-            '    <fig:t fig:text="currentValue"/>=<fig:t fig:text="position()"/>'."\n".
-            '  </fig:m>'."\n".
-            ''."\n".
-            '  <fig:w fig:walk="/arr">'."\n".
-            '    <fig:c fig:call="myMacro" currentValue="."/>'."\n".
-            '  </fig:w>'."\n".
-            '</fig:x>'."\n";
+        $template = <<<ENDTEMPLATE
+<fig:x>
+  <fig:m fig:macro="myMacro">
+    <fig:t fig:text="currentValue"/>=<fig:t fig:text="position()"/>
+  </fig:m>
+
+  <fig:w fig:walk="/arr">
+    <fig:c fig:call="myMacro" currentValue="."/>
+  </fig:w>
+</fig:x>
+ENDTEMPLATE;
+
 
         $view->loadString($template);
 
         $view->mount('arr', [1, 2, 3]);
-        $rendered = /*trim(*/ $view->render() /*)*/;
+        $rendered = $view->render();
 
-        $expected =
-            "  \n".
-            "\n".
-            "          1=0\n".
-            "  \n".
-            "          2=0\n".
-            "  \n".
-            "          3=0\n".
-            "  \n".
-            "  \n"
-        ;
+        $expected = <<<EXPECTED
+  
+
+          1=0
+  
+  
+
+          2=0
+  
+  
+
+          3=0
+  
+  
+
+EXPECTED;
+
+
         $this->assertEquals($expected, $rendered);
     }
 }

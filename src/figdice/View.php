@@ -10,13 +10,17 @@ use figdice\classes\AutoloadFeedFactory;
 use figdice\classes\Context;
 use figdice\classes\MagicReflector;
 use figdice\classes\NativeFunctionFactory;
+use figdice\classes\TagFig;
 use figdice\classes\TagFigAttr;
 use figdice\classes\TagFigCdata;
 use figdice\classes\TagFigDictionary;
 use figdice\classes\TagFigFeed;
 use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
+use figdice\classes\TagFigParam;
 use figdice\classes\TagFigTrans;
+use figdice\classes\ViewElement;
+use figdice\classes\ViewElementContainer;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\FileNotFoundException;
@@ -98,7 +102,7 @@ class View implements \Serializable {
 	/**
 	 * Depth stack used at parse time.
 	 *
-	 * @var array
+	 * @var ViewElementTag[]|ViewElementContainer[]
 	 */
 	private $stack;
 
@@ -187,7 +191,13 @@ class View implements \Serializable {
 
 	private $options = [];
 
-	/**
+    /**
+     * Used during parsing, to keep track of the last CData piece that was processed just before opening a tag.
+     * @var string
+     */
+    private $previousCData = null;
+
+    /**
 	 * View constructor.
 	 * @param array $options Optional indexed array of options, for specific behavior of the library.
 	 * Introduced in 2.3 for the remodeling of the plug execution context.
@@ -611,14 +621,19 @@ class View implements \Serializable {
 		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
 		    $newElement = new TagFigMount($tagName, $lineNumber);
         }
+		else if ($tagName == $this->figNamespace . TagFigParam::TAGNAME) {
+		    $newElement = new TagFigParam($tagName, $lineNumber);
+        }
 		else if ($tagName == $this->figNamespace . TagFigTrans::TAGNAME) {
 		    $newElement = new TagFigTrans($tagName, $lineNumber);
         }
 
 
 		else {
-			$newElement = new ViewElementTag($tagName, $lineNumber);
+			$newElement = new ViewElementTag($tagName, $lineNumber, $this->previousCData);
 		}
+
+		$this->previousCData = null;
 
 		$newElement->setAttributes($this->figNamespace, $attributes);
 
@@ -676,17 +691,17 @@ class View implements \Serializable {
         // and none of its plain attribute contains adhoc parts,
         // and all of its children are plain ViewElementCData,
         // then we can turn the whole island into plain CData.
-        if ( ! $this->isFigPrefix($element->getTagName())
-            && ! $element->isDirective()
-        ) {
-            $cdata = $element->makeCDataFromPlainTag();
-            // Replate the last child of parent (because it changed nature)
-            if ($element->parent) {
-                $element->parent->replaceLastChild($cdata);
-            }
-            // Or if there is no parent, we're the root tag!
-            else {
-                $this->rootNode = $cdata;
+        if ( ! $element instanceof TagFig) {
+            $squashedElement = $element->makeSquashedElement( $this->isFigPrefix($element->getTagName()) /*envelope yes or no*/);
+            if (null != $squashedElement) {
+
+                // Replate the last child of parent (because it changed nature)
+                if ( $element->parent ) {
+                    $element->parent->replaceLastChild($squashedElement);
+                } // Or if there is no parent, we're the root tag!
+                else {
+                    $this->rootNode = $squashedElement;
+                }
             }
         }
     }
@@ -699,8 +714,10 @@ class View implements \Serializable {
 	 */
 	private function cdataHandler($xmlParser, $cdata) {
 		//Last element in stack = parent element of the CDATA.
-		$currentElement = &$this->stack[count($this->stack)-1];
+		$currentElement = $this->stack[count($this->stack)-1];
 		$currentElement->appendCDataChild($cdata);
+
+        $this->previousCData = $cdata;
 	}
 
 

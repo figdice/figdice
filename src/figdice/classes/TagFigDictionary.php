@@ -26,16 +26,12 @@ namespace figdice\classes;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 
-class TagFigDictionary extends ViewElementTag {
+class TagFigDictionary extends TagFig {
 	const TAGNAME = 'dictionary';
 
 	private $dicFile;
 	private $dicName;
 	private $source;
-
-	public function __construct($name, $xmlLineNumber) {
-		parent::__construct($name, $xmlLineNumber);
-	}
 
     public function setAttributes($figNamespace, array $attributes)
     {

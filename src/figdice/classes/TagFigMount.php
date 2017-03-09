@@ -26,7 +26,8 @@ namespace figdice\classes;
 
 use figdice\exceptions\RequiredAttributeException;
 
-class TagFigMount extends ViewElementTag {
+class TagFigMount extends TagFig
+{
 	const TAGNAME = 'mount';
 
 	private $mountTarget;
