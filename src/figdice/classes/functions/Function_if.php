@@ -39,11 +39,15 @@ class Function_if implements FigFunction {
      * @throws FunctionCallException
      */
     public function evaluate(Context $context, $arity, $arguments) {
-		if ($arity != 3) {
-			throw new FunctionCallException('if', 'Expected 3 arguments, ' . $arity . ' received.',
+		if ( ($arity != 2) && ($arity != 3) ) {
+			throw new FunctionCallException('if', 'Expected 2 or 3 arguments, ' . $arity . ' received.',
                 $context->getFilename(),
                 $context->tag->getLineNumber());
 		}
+		// The 2-arg version simply uses empty as the "else" value.
+		if ($arity == 2)
+		    $arguments[2] = '';
+
 		return ($arguments[0] ? $arguments[1] : $arguments[2]);
 	}
 }

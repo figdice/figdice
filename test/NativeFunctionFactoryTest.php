@@ -82,7 +82,13 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 	 * @expectedException \figdice\exceptions\FunctionCallException
 	 */
 	public function testIfFuncWithMissingArgsThrowsException() {
-	  $this->assertFalse( $this->lexExpr( " if(1, 2)  " ));
+	  $this->assertFalse( $this->lexExpr( " if(1)  " ));
+	}
+	public function testIfFuncWithOneFalseArgDefaultsToEmpty() {
+	  $this->assertEmpty($this->lexExpr( " if(1 == 2, 3)  " ));
+	}
+	public function testIfFuncWithOneTrueArgReturns() {
+	  $this->assertEquals(3, $this->lexExpr( " if(2 == 2, 3)  " ));
 	}
 	public function testCountOfEmptyIsZero() {
 		$this->assertEquals(0, $this->lexExpr(' count(/dummy/value) '));
