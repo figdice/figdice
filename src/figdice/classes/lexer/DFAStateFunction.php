@@ -29,7 +29,7 @@ class DFAStateFunction extends DFAState {
 	}
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	public function input(Lexer $lexer, $char) {
 		if($char == ')') {

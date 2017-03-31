@@ -40,7 +40,6 @@ class Function_php implements FigFunction {
 		$funcName = array_shift($arguments);
 		if(! function_exists($funcName)) {
 			// ('Invalid PHP function: ' . $funcName);
-			$this->error = true;
 			return false;
 		}
 
