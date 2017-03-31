@@ -7,7 +7,10 @@
 # Abstract
 
 FigDice is a templating engine for PHP.
-It differs from most of the popular template systems, in the way the presentation data are made available to templates: instead of pushing the data from Controller to View, you build Views that pull the data they need.
+It differs from most of the popular template systems, with regards to the way the presentation data are made available to the templates: instead of pushing the data from the Controller to the View, you build Views that pull the immutable data that they need.
+
+FigDice focuses on the Web Designer stand-point. Designers and Developers agree together on structure of the self-contained *beans* (called Feeds in FigDice) that Developers make available to Designers, and then the Designers may reuse them anywhere they need, and combine them with other Feeds into pages and macros. The View Controllers in FigDice become generic presenters whcih don't need to know the details of what is presented in what template, since the templates themselves will activate their favorite Feeds to pull their data.
+
 
 See **[figdice.org](http://www.figdice.org/)**
 
@@ -21,10 +24,10 @@ Presentation and Tutorial:
 ## Features
 
 - **Fast, easy** and powerful Template Engine
-- **XML syntax** for your Templates: you gain built-in validation
-- Instructions are extended attributes inside your HTML tags: you can display your templates **WYSIWYG** in your browser/editor
-- Manipulate your data with the help of a simple and powerful **expression parser**
-- Built-in **i18n**, using keys/values from cached XML dictionaries
+- **HTML syntax** for your Templates: FigDice brings a set of [extended attributes](https://github.com/figdice/figdice/wiki/The-FigDice-markup) to help you construct the logics.
+- You can display your templates **WYSIWYG** in your browser/editor
+- Manipulate your data with the help of a simple and powerful [expression parser](https://github.com/figdice/figdice/wiki/Expression)
+- Built-in [i18n](https://github.com/figdice/figdice/wiki/Internationalization), using keys/values from cached dictionaries
 - Inclusions, loops, conditions, with a **non-intrusive syntax** inside the document
 - No programming required, for the Template designers
 - Hermetic separation between the application's layers (Presentation / Logics)
