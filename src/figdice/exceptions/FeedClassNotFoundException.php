@@ -23,7 +23,7 @@
 
 namespace figdice\exceptions;
 
-use \Exception;
+use Exception;
 /**
  * This exception is raised by the engine when you import a fig:feed
  * of a class which the program cannot locate.

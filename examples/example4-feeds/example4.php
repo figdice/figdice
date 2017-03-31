@@ -33,7 +33,7 @@
 // Autoload the Figdice lib
 require_once '../../vendor/autoload.php';
 
-use \figdice\View;
+use figdice\View;
 
 $view = new View();
 $view->loadFile('template.xml');

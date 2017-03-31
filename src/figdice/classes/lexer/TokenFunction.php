@@ -25,8 +25,8 @@ namespace figdice\classes\lexer;
 
 use figdice\classes\Context;
 use figdice\FigFunction;
-use \figdice\FunctionFactory;
-use \figdice\exceptions\FunctionNotFoundException;
+use figdice\FunctionFactory;
+use figdice\exceptions\FunctionNotFoundException;
 
 class TokenFunction extends TokenOperator {
 	/**

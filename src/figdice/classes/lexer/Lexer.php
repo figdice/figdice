@@ -24,10 +24,10 @@
 namespace figdice\classes\lexer;
 
 use figdice\classes\Context;
-use \figdice\classes\ViewElementTag;
-use \figdice\exceptions\LexerUnexpectedCharException;
-use \figdice\exceptions\LexerSyntaxErrorException;
-use \figdice\exceptions\LexerUnbalancedParenthesesException;
+use figdice\classes\ViewElementTag;
+use figdice\exceptions\LexerUnexpectedCharException;
+use figdice\exceptions\LexerSyntaxErrorException;
+use figdice\exceptions\LexerUnbalancedParenthesesException;
 
 class Lexer {
 

@@ -23,9 +23,9 @@
 
 namespace figdice\classes;
 
-use \figdice\exceptions\DictionaryEntryNotFoundException;
-use \figdice\exceptions\DictionaryDuplicateKeyException;
-use \figdice\exceptions\FileNotFoundException;
+use figdice\exceptions\DictionaryEntryNotFoundException;
+use figdice\exceptions\DictionaryDuplicateKeyException;
+use figdice\exceptions\FileNotFoundException;
 
 /**
  * The dictionary XML file must be in the form:

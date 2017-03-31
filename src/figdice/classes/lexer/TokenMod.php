@@ -23,7 +23,7 @@
 
 namespace figdice\classes\lexer;
 use figdice\classes\Context;
-use \figdice\classes\ViewElementTag;
+use figdice\classes\ViewElementTag;
 
 class TokenMod extends TokenBinop {
 	/**

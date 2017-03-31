@@ -23,7 +23,7 @@
 
 namespace figdice\classes\lexer;
 
-use \figdice\exceptions\LexerUnexpectedCharException;
+use figdice\exceptions\LexerUnexpectedCharException;
 
 abstract class DFAState {
 	/**

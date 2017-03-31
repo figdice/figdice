@@ -23,8 +23,8 @@
 
 namespace figdice\classes\lexer;
 use figdice\classes\Context;
-use \figdice\classes\ViewElementTag;
-use \figdice\exceptions\LexerArrayToStringConversionException;
+use figdice\classes\ViewElementTag;
+use figdice\exceptions\LexerArrayToStringConversionException;
 
 
 class TokenComparisonBinop extends TokenBinop {
