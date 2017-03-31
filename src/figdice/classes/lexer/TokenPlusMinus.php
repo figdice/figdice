@@ -28,7 +28,6 @@ class TokenPlusMinus extends TokenOperator {
 	public $sign;
 
 	/**
-	 * @param Lexer $lexer
 	 * @param string $sign
 	 */
 	public function __construct($sign) {

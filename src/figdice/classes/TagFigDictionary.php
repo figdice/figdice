@@ -69,6 +69,11 @@ class TagFigDictionary extends TagFig {
      * If a Temp path was specified in the View,
      * we try to compile (serialize) the XML key-value collection and store
      * the serialized form in a 'Dictionary/(langcode)' subfolder of the temp path.
+     *
+     * @param Context $context
+     *
+     * @return string
+     * @throws FileNotFoundException
      */
     private function fig_dictionary(Context $context) {
         //If a @source attribute is specified,

@@ -38,7 +38,9 @@ class Function_format_timestamp implements FigFunction {
      * @param Context $context
      * @param integer $arity
      * @param array $arguments
+     *
      * @return string
+     * @throws FunctionCallException
      */
 	public function evaluate(Context $context, $arity, $arguments) {
 		if($arity < 2) {

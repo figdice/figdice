@@ -27,7 +27,6 @@ class XMLParsingException extends \Exception {
     /**
      * XMLParsingException constructor.
      * @param string $message
-     * @param string $filename
      * @param int $line
      */
     public function __construct($message, $line) {

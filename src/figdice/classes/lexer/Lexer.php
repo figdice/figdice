@@ -143,10 +143,14 @@ class Lexer {
 		return $this->stackRP[0];
 	}
 
-	/**
-	 * @param Context $context
-	 * @return boolean
-	 */
+    /**
+     * @param Context $context
+     *
+     * @return bool
+     * @throws LexerSyntaxErrorException
+     * @throws LexerUnbalancedParenthesesException
+     * @throws LexerUnexpectedCharException
+     */
 	public function parse(Context $context) {
 	    $this->context = $context;
 		$this->viewElement = $context->tag;
@@ -280,9 +284,12 @@ class Lexer {
 	public function pushOperand($tokenOperand) {
 		$this->stackRP[] = $tokenOperand;
 	}
-	/**
-	 * @param TokenOperator $tokenOperator
-	 */
+
+    /**
+     * @param TokenOperator $tokenOperator
+     *
+     * @throws LexerSyntaxErrorException
+     */
 	public function pushOperator($tokenOperator) {
 		//If priority of the new operator
 		//is lower than or equal to that of the previous, if any,

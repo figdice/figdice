@@ -1257,6 +1257,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
     /**
      * If the last but one child is already a CData,
      * squash them together.
+     *
+     * @param ViewElementCData $cdata
      */
     private function replaceLastChild_cdata(ViewElementCData $cdata)
     {

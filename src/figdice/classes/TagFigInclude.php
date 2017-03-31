@@ -36,6 +36,9 @@ class TagFigInclude extends TagFig
     /**
      * Creates a sub-view object, invokes its parsing phase,
      * and renders it as the child of the current tag.
+     *
+     * @param Context $context
+     *
      * @return string or false
      */
     private function fig_include(Context $context) {

@@ -25,9 +25,6 @@ namespace figdice\classes\lexer;
 use figdice\classes\Context;
 
 class TokenNot extends TokenOperator {
-	/**
-	 * @param string $sign
-	 */
 	public function __construct() {
 		parent::__construct(self::PRIORITY_MINUS);
 	}

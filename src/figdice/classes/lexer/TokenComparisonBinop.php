@@ -36,9 +36,12 @@ class TokenComparisonBinop extends TokenBinop {
 		parent::__construct(self::PRIORITY_COMPARATOR);
 		$this->comparator = $comparator;
 	}
+
     /**
      * @param Context $context
+     *
      * @return mixed
+     * @throws LexerArrayToStringConversionException
      */
     public function evaluate(Context $context) {
 		$opL = $this->operands[0]->evaluate($context);

@@ -23,6 +23,7 @@
 
 namespace figdice\classes;
 
+use figdice\FigFunction;
 use figdice\FunctionFactory;
 
 class NativeFunctionFactory extends FunctionFactory {
@@ -35,7 +36,7 @@ class NativeFunctionFactory extends FunctionFactory {
 	 * handles the requested function.
 	 *
 	 * @param string $funcName
-	 * @return Function
+	 * @return FigFunction|null
 	 */
 	public function create($funcName) {
 		
@@ -50,6 +51,7 @@ class NativeFunctionFactory extends FunctionFactory {
 		$funcClassName = '\\figdice\\classes\\functions\\Function_'.$funcName;
 
 		$reflection = new \ReflectionClass($funcClassName);
+		/** @var FigFunction $function */
 		$function = $reflection->newInstance();
 		return $function;
 	}

@@ -25,9 +25,6 @@ namespace figdice\classes\lexer;
 use figdice\classes\Context;
 
 class TokenMod extends TokenBinop {
-	/**
-	 * @param Lexer $lexer
-	 */
 	public function __construct() {
 		parent::__construct(self::PRIORITY_MUL_DIV );
 	}
