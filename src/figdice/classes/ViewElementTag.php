@@ -137,7 +137,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	private function checkAndCropAttr($figNamespace, array & $attributes, $name)
     {
         $value = null;
-        if (array_key_exists($key = $figNamespace . $name, $attributes)) {
+        $key = $figNamespace . $name;
+        if (array_key_exists($key, $attributes)) {
             $value = $attributes[$key];
             $this->isDirective = true;
             unset($attributes[$key]);
