@@ -188,6 +188,14 @@ class Lexer {
 					array_pop($this->stackFunctions);
 			}
 		}
+
+		// Enrich the Lexer parsing and tokenizing exceptions with template file and line
+		catch (LexerUnbalancedParenthesesException $exception) {
+		    throw new LexerUnbalancedParenthesesException($exception->getMessage(), $this->getViewFile(), $this->getViewLine());
+        }
+		catch (LexerSyntaxErrorException $exception) {
+		    throw new LexerSyntaxErrorException($exception->getMessage(), $this->getViewFile(), $this->getViewLine());
+        }
 		catch (Exception $exception) {
 			$errorMsg = "Unexpected character: $char at position: {$this->parsingPosition} in expression: {$this->expression}.";
 			throw new LexerUnexpectedCharException($errorMsg, $this->getViewFile(), $this->getViewLine());
