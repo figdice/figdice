@@ -32,9 +32,6 @@ use figdice\FigFunction;
  * 0 arg is: inside an iteration, it returns the total count of the iterating collection.
  */
 class Function_count implements FigFunction {
-	public function __construct() {
-	}
-
     /**
      * @param Context $context
      * @param integer $arity

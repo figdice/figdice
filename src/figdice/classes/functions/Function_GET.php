@@ -27,9 +27,6 @@ use figdice\classes\Context;
 use figdice\FigFunction;
 
 class Function_GET implements FigFunction {
-	function __construct() {
-	}
-
     /**
      * @param Context $context
      * @param integer $arity

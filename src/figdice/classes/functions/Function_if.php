@@ -28,9 +28,6 @@ use figdice\FigFunction;
 use figdice\exceptions\FunctionCallException;
 
 class Function_if implements FigFunction {
-	public function __construct() {
-	}
-
     /**
      * @param Context $context
      * @param integer $arity

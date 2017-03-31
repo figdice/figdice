@@ -28,9 +28,6 @@ use figdice\exceptions\FunctionCallException;
 use figdice\FigFunction;
 
 class Function_format_timestamp implements FigFunction {
-	public function __construct() {
-	}
-
     /**
      * Function's arguments:
      *  timestamp, format [, locale]

@@ -16,9 +16,6 @@ use figdice\FigFunction;
 use figdice\exceptions\FunctionCallException;
 
 class Function_htmlentities implements FigFunction {
-	public function __construct() {
-	}
-
     /**
      * Function's arguments:
      *  string to escape
