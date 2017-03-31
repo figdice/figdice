@@ -36,8 +36,6 @@ namespace figdice\exceptions;
  * catch this exception and propose an alternate output.
  */
 class FunctionCallException extends \Exception {
-	private $funcName;
-
     /**
      * FunctionCallException constructor.
      * @param string $funcName

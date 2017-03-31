@@ -6,7 +6,6 @@
 
 namespace figdice\classes;
 
-use figdice\exceptions\RequiredAttributeException;
 use figdice\exceptions\TagRenderingException;
 use figdice\Filter;
 use figdice\View;

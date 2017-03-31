@@ -24,7 +24,6 @@
 
 use figdice\classes\ViewElement;
 use figdice\View;
-use figdice\classes\ViewElementTag;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
 use figdice\classes\Dictionary;

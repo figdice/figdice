@@ -23,8 +23,6 @@
 
 namespace figdice\test;
 
-use figdice\exceptions\FeedClassNotFoundException;
-use figdice\exceptions\RequiredAttributeException;
 use figdice\Feed;
 use figdice\Filter;
 use figdice\FilterFactory;
