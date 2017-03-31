@@ -27,9 +27,6 @@ use figdice\classes\Context;
 use figdice\FigFunction;
 
 class Function_range implements FigFunction {
-	public function __construct() {
-	}
-
     /**
      * This function returns an array of N elements, from 1 to N.
      * It is useful for creating small "for" loops in your views.

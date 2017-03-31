@@ -28,9 +28,6 @@ use figdice\FigFunction;
 use figdice\exceptions\FunctionCallException;
 
 class Function_substr implements FigFunction {
-	public function __construct() {
-	}
-
     /**
      * Function's arguments:
      *  timestamp, format [, locale]

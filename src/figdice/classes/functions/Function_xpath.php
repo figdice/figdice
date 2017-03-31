@@ -31,9 +31,6 @@ use figdice\FigFunction;
 use figdice\classes\FigDOMNodeList;
 
 class Function_xpath implements FigFunction {
-	public function __construct() {
-	}
-
     /**
      * @param Context $context
      * @param integer $arity

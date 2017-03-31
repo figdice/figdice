@@ -107,7 +107,9 @@ class Dictionary {
 		//initialized by restore rather than load)
 		//throw an Entry Not Found Exception.
 		if(null == $this->domDocument) {
-			throw ($this->cache[$key] = new DictionaryEntryNotFoundException($key));
+		    $exception = new DictionaryEntryNotFoundException($key);
+			$this->cache[$key] = $exception;
+			throw $exception;
 		}
 
 		$xpath = new \DOMXPath($this->domDocument);
@@ -117,7 +119,9 @@ class Dictionary {
 
 		if($domNodeList->length == 0) {
 			//The translation for this key was not found in the current dictionary.
-			throw ($this->cache[$key] = new DictionaryEntryNotFoundException($key));
+            $exception = new DictionaryEntryNotFoundException($key);
+			$this->cache[$key] = $exception;
+			throw $exception;
 		}
 
 		//The Value part is the inner contents of the entry tag.

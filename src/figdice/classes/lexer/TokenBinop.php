@@ -27,12 +27,12 @@ abstract class TokenBinop extends TokenOperator {
 	/**
 	 * @param integer $priority
 	 */
-	function __construct($priority)
+	public function __construct($priority)
 	{
 		parent::__construct($priority);
 	}
 
-	function getNumOperands()
+	public function getNumOperands()
 	{
 		return 2;
 	}
