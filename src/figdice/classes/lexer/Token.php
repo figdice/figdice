@@ -33,5 +33,5 @@ abstract class Token {
      * @param Context $context
      * @return mixed
      */
-	abstract function evaluate(Context $context);
+	public abstract function evaluate(Context $context);
 }

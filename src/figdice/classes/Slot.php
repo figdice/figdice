@@ -36,14 +36,14 @@ class Slot {
 	/**
 	 * @return string
 	 */
-	function getAnchorString()
+	public function getAnchorString()
 	{
 		return $this->anchorString;
 	}
 	/**
 	 * @return integer
 	 */
-	function getLength()
+	public function getLength()
 	{
 		return $this->length;
 	}

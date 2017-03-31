@@ -204,7 +204,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
                 if (preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
                     $parts = [];
                     $previousPosition = 0;
-                    for($i = 0; $i < count($matches[0]); ++ $i) {
+
+                    $nMatches = count($matches[0]);
+                    for($i = 0; $i < $nMatches; ++ $i) {
                         $expression = $matches[1][$i][0];
                         $position = $matches[1][$i][1];
                         if ($position > $previousPosition + 1) {
@@ -653,7 +655,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
             if(! $this->isMute($context)) {
                 //Take care of inner fig:attr
-                for($iChild = 0; $iChild < count($this->children); ++$iChild) {
+                $nChildren = count($this->children);
+                for($iChild = 0; $iChild < $nChildren; ++$iChild) {
                     $child = & $this->children[$iChild];
                     if($child instanceof TagFigAttr) {
                         $child->render($context);
@@ -739,7 +742,8 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				}
 			}
 
-			for($iChild = 0; $iChild < count($this->children); ++$iChild) {
+			$nChildren = count($this->children);
+			for($iChild = 0; $iChild < $nChildren; ++$iChild) {
 				$child = & $this->children[$iChild];
 				if($doNotRenderFigParam && ($child instanceof ViewElementTag) && ($child->getTagName() == $context->figNamespace . 'param') ) {
 					//This situation is encountered when a sourced fig:trans tag has a fig:param immediate child:

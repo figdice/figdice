@@ -173,15 +173,15 @@ class Lexer {
 
 			$this->currentState->endOfInput($this);
 
-			while(sizeof($this->stackOperators)) {
+			while(count($this->stackOperators)) {
 				$operator = array_pop($this->stackOperators);
 				$nbOperands = $operator->getNumOperands();
 				if($nbOperands) {
 					// Check that we have enough operands on the stack.
-					if (sizeof($this->stackRP) < $nbOperands) {
+					if (count($this->stackRP) < $nbOperands) {
 						throw new LexerSyntaxErrorException('Missing operand', $this->getViewFile(), $this->getViewLine());
 					}
-					$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
+					$operator->setOperands(array_splice($this->stackRP, count($this->stackRP) - $nbOperands, $nbOperands));
 				}
 				$this->stackRP[] = $operator;
 				if($operator instanceof TokenFunction)
@@ -307,8 +307,8 @@ class Lexer {
 		 		(! $tokenOperator instanceof TokenFunction) &&
 		 		(! $tokenOperator instanceof TokenLBracket)
 			) {
-			while(sizeof($this->stackOperators) > 0) {
-				$operator = $this->stackOperators[sizeof($this->stackOperators) - 1];	
+			while(count($this->stackOperators) > 0) {
+				$operator = $this->stackOperators[count($this->stackOperators) - 1];
 				if($operator instanceof TokenLParen) {
 					break;
 				}
@@ -323,11 +323,11 @@ class Lexer {
 					$nbOperands = $operator->getNumOperands();
 					if($nbOperands) {
             // Check that we have enough operands on the stack.
-            if (sizeof($this->stackRP) < $nbOperands) {
+            if (count($this->stackRP) < $nbOperands) {
               $message = 'Missing operand in expression: ' . $this->expression;
               throw new LexerSyntaxErrorException($message, $this->getViewFile(), $this->getViewLine());
             }
-						$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
+						$operator->setOperands(array_splice($this->stackRP, count($this->stackRP) - $nbOperands, $nbOperands));
 					}
 					$this->stackRP[] = $operator;
 
@@ -350,7 +350,7 @@ class Lexer {
 	}
 
 	public function closeParenthesis() {
-		while(0 < sizeof($this->stackOperators)) {
+		while(0 < count($this->stackOperators)) {
 			$operator = array_pop($this->stackOperators);
 			if($operator instanceof TokenLParen) {
 				break;
@@ -361,7 +361,7 @@ class Lexer {
 				if (count($this->stackRP) < $nbOperands) {
 					throw new LexerSyntaxErrorException('Not enough arguments in: ' . $this->getExpression(), $this->getViewFile(), $this->getViewLine());
 				}
-				$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
+				$operator->setOperands(array_splice($this->stackRP, count($this->stackRP) - $nbOperands, $nbOperands));
 			}
 			$this->stackRP[] = $operator;
 
@@ -390,7 +390,7 @@ class Lexer {
 			// The square bracket expression contains operators. ex: [i + 1]
 			$nbOperands = $operator->getNumOperands();
 			if($nbOperands) {
-				$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
+				$operator->setOperands(array_splice($this->stackRP, count($this->stackRP) - $nbOperands, $nbOperands));
 			}
 			$this->stackRP[] = $operator;
 
@@ -446,7 +446,7 @@ class Lexer {
 			$operator = array_pop($this->stackOperators);
 			$nbOperands = $operator->getNumOperands();
 			if($nbOperands) {
-				$operator->setOperands(array_splice($this->stackRP, sizeof($this->stackRP) - $nbOperands, $nbOperands));
+				$operator->setOperands(array_splice($this->stackRP, count($this->stackRP) - $nbOperands, $nbOperands));
 			}
 			$this->stackRP[] = $operator;
 		}
