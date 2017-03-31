@@ -29,7 +29,7 @@ class DFAStateFunction extends DFAState {
 	}
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	public function input(Lexer $lexer, $char) {
 		if($char == ')') {
@@ -54,6 +54,6 @@ class DFAStateFunction extends DFAState {
 	}
 
 	public function endOfInput($lexer) {
-		return $this->throwErrorWithMessage($lexer, 'Unexpected end of expression inside function call');
+		$this->throwErrorWithMessage($lexer, 'Unexpected end of expression inside function call');
 	}
 }

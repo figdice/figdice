@@ -27,8 +27,8 @@ use DOMAttr;
 use DOMNodeList;
 use DOMText;
 use figdice\classes\Context;
-use \figdice\FigFunction;
-use \figdice\classes\FigDOMNodeList;
+use figdice\FigFunction;
+use figdice\classes\FigDOMNodeList;
 
 class Function_xpath implements FigFunction {
 	public function __construct() {

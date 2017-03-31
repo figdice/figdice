@@ -31,7 +31,6 @@ interface FeedFactory {
 	 * @param string $className
 	 * @param array $attributes associative array of the extended parameters
 	 * @return Feed Returns null if factory does not handle specified class.
-	 * @throws appropriate exceptions upon loading/instanciating errors.
 	 */
 	public function create($className, array $attributes);
 

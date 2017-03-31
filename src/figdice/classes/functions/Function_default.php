@@ -24,7 +24,7 @@
 namespace figdice\classes\functions;
 
 use figdice\classes\Context;
-use \figdice\FigFunction;
+use figdice\FigFunction;
 
 class Function_default implements FigFunction {
 	public function __construct() {

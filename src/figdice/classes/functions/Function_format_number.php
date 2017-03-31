@@ -24,8 +24,7 @@
 namespace figdice\classes\functions;
 
 use figdice\classes\Context;
-use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
+use figdice\FigFunction;
 
 class Function_format_number implements FigFunction {
 	public function __construct() {

@@ -25,8 +25,7 @@ namespace figdice\classes\functions;
 
 use figdice\classes\Context;
 use figdice\exceptions\XMLParsingException;
-use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
+use figdice\FigFunction;
 
 /**
  * Class Function_xml

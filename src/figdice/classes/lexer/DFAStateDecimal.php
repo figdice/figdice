@@ -26,7 +26,7 @@ namespace figdice\classes\lexer;
 class DFAStateDecimal extends DFAStateNumeric {
 	/**
 	 * @param Lexer $lexer
-	 * @param char $char
+	 * @param string $char
 	 */
 	public function input(Lexer $lexer, $char) {
 		if(self::isDigit($char)) {
@@ -43,7 +43,7 @@ class DFAStateDecimal extends DFAStateNumeric {
 			$lexer->incrementLastFunctionArity();
 		}
 		else if(self::isAlpha($char)) {
-		    return $this->pushAlpha($lexer, $char);
+		    $this->pushAlpha($lexer, $char);
 		}
 		else if('*' == $char) {
 			$this->pushStar($lexer);

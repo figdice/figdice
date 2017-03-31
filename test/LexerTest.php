@@ -23,7 +23,6 @@
 
 use figdice\classes\lexer\Lexer;
 use figdice\View;
-use figdice\classes\ViewElementTag;
 
 /**
  * Unit Test Class for basic Lexer expressions

@@ -24,7 +24,7 @@
 namespace figdice\classes\functions;
 
 use figdice\classes\Context;
-use \figdice\FigFunction;
+use figdice\FigFunction;
 
 /**
  * The count function can be invoked with 0 or 1 arguments.

@@ -41,8 +41,6 @@ class DFAStatePath extends DFAState {
 	 */
 	private $closedSubpath;
 
-	private $dotting = false;
-
 	public function __construct() {
 		parent::__construct();
 		$this->separated = true;

@@ -24,7 +24,7 @@
 namespace figdice\classes\functions;
 
 use figdice\classes\Context;
-use \figdice\FigFunction;
+use figdice\FigFunction;
 use figdice\exceptions\FunctionCallException;
 
 class Function_if implements FigFunction {

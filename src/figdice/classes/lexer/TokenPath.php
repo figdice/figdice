@@ -11,7 +11,7 @@ class TokenPath extends Token {
 	private $path;
 
 	/**
-	 * @param PathElement $pathElement
+	 * @param PathElement|string $pathElement
 	 */
 	public function __construct($pathElement) {
 		parent::__construct();

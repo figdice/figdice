@@ -23,7 +23,7 @@
 
 namespace figdice\exceptions;
 
-use \Exception;
+use Exception;
 
 class RenderingException extends \Exception {
 	private $tagname;

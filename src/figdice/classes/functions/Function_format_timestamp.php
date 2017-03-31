@@ -25,8 +25,7 @@ namespace figdice\classes\functions;
 
 use figdice\classes\Context;
 use figdice\exceptions\FunctionCallException;
-use \figdice\FigFunction;
-use \figdice\classes\ViewElementTag;
+use figdice\FigFunction;
 
 class Function_format_timestamp implements FigFunction {
 	public function __construct() {
@@ -39,7 +38,9 @@ class Function_format_timestamp implements FigFunction {
      * @param Context $context
      * @param integer $arity
      * @param array $arguments
+     *
      * @return string
+     * @throws FunctionCallException
      */
 	public function evaluate(Context $context, $arity, $arguments) {
 		if($arity < 2) {

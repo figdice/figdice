@@ -19,7 +19,6 @@ use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
 use figdice\classes\TagFigParam;
 use figdice\classes\TagFigTrans;
-use figdice\classes\ViewElement;
 use figdice\classes\ViewElementContainer;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;

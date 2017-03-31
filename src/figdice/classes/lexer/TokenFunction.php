@@ -25,8 +25,8 @@ namespace figdice\classes\lexer;
 
 use figdice\classes\Context;
 use figdice\FigFunction;
-use \figdice\FunctionFactory;
-use \figdice\exceptions\FunctionNotFoundException;
+use figdice\FunctionFactory;
+use figdice\exceptions\FunctionNotFoundException;
 
 class TokenFunction extends TokenOperator {
 	/**
@@ -78,7 +78,6 @@ class TokenFunction extends TokenOperator {
      * @throws FunctionNotFoundException
      */
 	public function evaluate(Context $context) {
-	    $viewElement = $context->tag;
 		if($this->function === null) {
 			//Instantiate the Function handler:
       /** @var FunctionFactory[] $factories */

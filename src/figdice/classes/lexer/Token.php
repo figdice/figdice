@@ -24,7 +24,6 @@
 namespace figdice\classes\lexer;
 
 use figdice\classes\Context;
-use \figdice\classes\ViewElementTag;
 
 abstract class Token {
 	public function __construct() {

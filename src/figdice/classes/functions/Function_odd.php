@@ -24,7 +24,7 @@
 namespace figdice\classes\functions;
 
 use figdice\classes\Context;
-use \figdice\FigFunction;
+use figdice\FigFunction;
 
 class Function_odd implements FigFunction {
 	public function __construct() {

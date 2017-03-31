@@ -36,8 +36,8 @@
 // Autoload the Figdice lib
 require_once '../../vendor/autoload.php';
 
-use \figdice\View;
-use \figdice\exceptions\FileNotFoundException;
+use figdice\View;
+use figdice\exceptions\FileNotFoundException;
 
 // Create a Fig View object
 $view = new View();
