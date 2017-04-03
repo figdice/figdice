@@ -378,7 +378,7 @@ class View implements \Serializable {
 			if(count($this->stack)) {
 				$lastElement = $this->stack[count($this->stack) - 1];
 				if($lastElement instanceof ViewElementTag) {
-					$errMsg .= '. Last element: ' . $lastElement->getTagName();
+					$errMsg .= '. Last element: ' . $lastElement->getTagName() . '(' . $lineNumber . ')';
 				}
 			}
 		}
