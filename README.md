@@ -47,5 +47,8 @@ Browse the [examples](https://github.com/figdice/figdice/tree/master/examples)!
 See [Wiki](https://github.com/figdice/figdice/wiki) for more details.
 
 
+---
+
+Developed with <a href="https://www.jetbrains.com/phpstorm"><img align="absmiddle" src="https://pbs.twimg.com/profile_images/674918306000711680/3rPeiTKt.png" width="64" title="PhpStorm"/> PhpStorm</a>
 
 
