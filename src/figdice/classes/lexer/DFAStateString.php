@@ -30,41 +30,30 @@ class DFAStateString extends DFAState {
 		if($this->escaping) {
 			$this->buffer .= $char;
 			$this->escaping = false;
-		}
-		else if($char == "'") {
+		} else if($char == "'") {
 			$lexer->pushOperand(new TokenLiteral($this->buffer));
 			$this->closed = true;
-		}
-		else if($char == '\\') {
+		} else if($char == '\\') {
 			$this->escaping = true;
-		}
-		else if($this->closed) {
+		} else if($this->closed) {
 			if($char == ',') {
 				$lexer->incrementLastFunctionArity();
 				$lexer->setStateEmpty();
-			}
-			else if($char == ')') {
+			} else if($char == ')') {
 				$lexer->closeParenthesis();
-			}
-			else if(self::isBlank($char)) {
-			}
-			else if( ($char == '+') || ($char == '-') ) {
+			} else if(self::isBlank($char)) {
+			} else if( ($char == '+') || ($char == '-') ) {
 				$lexer->pushOperator(new TokenPlusMinus($char));
-			}
-			else if ( ($char == '=') || ($char == '!') ) {
+			} else if ( ($char == '=') || ($char == '!') ) {
 				$lexer->setStateComparison($char);
-			}
-			else if($char == '*') {
+			} else if($char == '*') {
 				$lexer->pushOperator(new TokenMul());
-			}
-			else if($char == ']') {
+			} else if($char == ']') {
 				$lexer->closeSquareBracket();
-			}
-			else {
+			} else {
 				$this->throwError($lexer, $char);
 			}
-		}
-		else {
+		} else {
 			$this->buffer .= $char;
 		}
 	}
@@ -74,7 +63,8 @@ class DFAStateString extends DFAState {
 	 */
 	public function endOfInput($lexer)
 	{
-		if(! $this->closed)
-			$this->throwErrorWithMessage($lexer, 'Unterminated string');
+		if(! $this->closed) {
+					$this->throwErrorWithMessage($lexer, 'Unterminated string');
+		}
 	}
 }

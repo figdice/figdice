@@ -32,8 +32,7 @@ class DFAStateDotdot extends DFAState {
 	public function input(Lexer $lexer, $char) {
 		if($char == '/') {
 			$lexer->pushPath(new PathElementParent());
-		}
-		else {
+		} else {
 			$this->throwError($lexer, $char);
 		}
 	}

@@ -23,45 +23,35 @@ class DFAStateInteger extends DFAStateNumeric {
 	 */
 	public function input(Lexer $lexer, $char) {
 		if(self::isDigit($char)) {
-			if($this->closed)
-				$this->throwError($lexer, $char);
-
-			else {
+			if($this->closed) {
+							$this->throwError($lexer, $char);
+			} else {
 				$this->buffer .= $char;
 			}
-		}
-		else if($char == '*') {
+		} else if($char == '*') {
 		    $this->pushStar($lexer);
-		}
-		else if($char == ')') {
+		} else if($char == ')') {
 			$this->pushRParen($lexer);
-		}
-		else if($char == ',') {
+		} else if($char == ',') {
 			$lexer->pushOperand(new TokenLiteral($this->buffer));
 			$lexer->incrementLastFunctionArity();
-		}
-		else if(self::isBlank($char)) {
+		} else if(self::isBlank($char)) {
 			$this->closed = true;
-		}
-		else if( ($char == '+') || ($char == '-') ) {
+		} else if( ($char == '+') || ($char == '-') ) {
 			$this->pushPlusMinus($lexer, $char);
-		}
-		else if ( ($char == '=') || ($char == '!') ) {
+		} else if ( ($char == '=') || ($char == '!') ) {
 		    $this->pushEqualsExclam($lexer, $char);
-		}
-		else if($char == '.')
+		} else if($char == '.')
 		{
 			$lexer->setStateDecimal($this->buffer . $char);
-		}
-		else if(self::isAlpha($char)) {
+		} else if(self::isAlpha($char)) {
 		    $this->pushAlpha($lexer, $char);
 		}
 		//Closing a subpath
 		else if($char == ']') {
 			$lexer->pushOperand(new TokenLiteral($this->buffer));
 			$lexer->closeSquareBracket();
-		}
-		else
+		} else
 		{
 			$this->throwError($lexer, $char);
 		}

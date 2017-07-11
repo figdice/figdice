@@ -66,8 +66,9 @@ abstract class Feed {
 	 * @return string
 	 */
 	function getParameterString($paramName, $defaultValue = '') {
-		if(isset($this->params[$paramName]))
-			return $this->params[$paramName];
+		if(isset($this->params[$paramName])) {
+					return $this->params[$paramName];
+		}
 		return $defaultValue;
 	}
 	/**
@@ -78,8 +79,9 @@ abstract class Feed {
 	 * @return mixed
 	 */
 	public function getParameter($paramName) {
-		if(isset($this->params[$paramName]))
-			return $this->params[$paramName];
+		if(isset($this->params[$paramName])) {
+					return $this->params[$paramName];
+		}
 		return null;
 	}
 	

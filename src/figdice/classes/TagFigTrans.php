@@ -41,9 +41,7 @@ class TagFigTrans extends TagFig
             $context->pushDoNotRenderFigParams();
             $value = $this->renderChildren($context /*Do not render fig:param immediate children */);
             $context->popDoNotRenderFigParams();
-        }
-
-        else {
+        } else {
             //Cross-language dictionary mechanism:
 
             if(null == $key) {

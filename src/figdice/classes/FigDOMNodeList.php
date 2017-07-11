@@ -46,8 +46,7 @@ class FigDOMNodeList implements \Countable, \Iterator {
 	public function next() {
 		if($this->index < $this->count() - 1) {
 			$this->current = $this->domNodeList->item(++ $this->index);
-		}
-		else {
+		} else {
 			$this->current = null;
 		}
 		return $this->current;

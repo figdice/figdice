@@ -44,9 +44,9 @@ abstract class DFAStateNumeric extends DFAState {
 	 * @param string $char
 	 */
 	protected function pushAlpha(Lexer $lexer, $char) {
-	    if(! $this->closed)
-	        $this->throwError($lexer, $char);
-	    else {
+	    if(! $this->closed) {
+	    	        $this->throwError($lexer, $char);
+	    } else {
 	        $lexer->pushOperand(new TokenLiteral($this->buffer));
 	        $lexer->setStateSymbol($char);
 	    }

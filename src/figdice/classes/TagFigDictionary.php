@@ -103,8 +103,7 @@ class TagFigDictionary extends TagFig {
                     if(file_exists($filename) && (filemtime($tmpFile) < filemtime($filename)) ) {
                         Dictionary::compile($filename, $tmpFile);
                     }
-                }
-                else {
+                } else {
                     Dictionary::compile($filename, $tmpFile);
                 }
                 $dictionary->restore($tmpFile);

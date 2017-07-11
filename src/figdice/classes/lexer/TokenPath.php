@@ -35,17 +35,13 @@ class TokenPath extends Token {
 
 			if($this->path[$i] instanceof Token) {
 				$symbolName = $this->path[$i]->evaluate($context);
-			}
-			else if($this->path[$i] instanceof PathElementRoot) {
+			} else if($this->path[$i] instanceof PathElementRoot) {
 				$symbolName = '/';
-			}
-			else if($this->path[$i] instanceof PathElementCurrent) {
+			} else if($this->path[$i] instanceof PathElementCurrent) {
 				$symbolName = '.';				 
-			}
-			else if($this->path[$i] instanceof PathElementParent) {
+			} else if($this->path[$i] instanceof PathElementParent) {
 				$symbolName = '..';
-			}
-			else {
+			} else {
 				$symbolName = $this->path[$i];
 			}
 
@@ -54,8 +50,9 @@ class TokenPath extends Token {
 			//which the first-level path element refers to.
 			if($data === null) {
 				$data = $context->getData($symbolName);
-				if( $data === null )
-					break;
+				if( $data === null ) {
+									break;
+				}
 			}
 
 			//If data is an Object,
@@ -112,15 +109,12 @@ class TokenPath extends Token {
 				foreach($data as $item) {
 					if(is_array($item) && array_key_exists($symbolName, $item)) {
 						$population[] = $item[$symbolName];
-					}
-					else if(is_object($item) && (isset($item->$symbolName))) {
+					} else if(is_object($item) && (isset($item->$symbolName))) {
 						$population[] = $item->$symbolName;
 					}
 				}
 				$data = $population;
-			}
-
-			else {
+			} else {
 				return null;
 			}
 		}

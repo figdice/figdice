@@ -36,8 +36,7 @@ class ViewElementContainer extends ViewElement
     {
         if (($n = count($this->children)) && ($this->children[$n - 1] instanceof ViewElementCData)) {
             $this->children[$n - 1]->appendCDataSibling($cdata);
-        }
-        else {
+        } else {
             $this->children []= new ViewElementCData($cdata);
         }
     }

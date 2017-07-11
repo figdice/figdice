@@ -34,26 +34,20 @@ class DFAStateDot extends DFAState {
 
 		if($char == '/') {
 			$lexer->pushPath(new PathElementCurrent());
-		}
-		else if(self::isDigit($char)) {
+		} else if(self::isDigit($char)) {
 			$lexer->setStateDecimal('0.'.$char);
-		}
-		else if($char == '.') {
+		} else if($char == '.') {
 			$lexer->setStateDotdot();
-		}
-		else if($char == ',') {
+		} else if($char == ',') {
 			$lexer->pushOperand(new TokenPath(new PathElementCurrent()));
 			$lexer->incrementLastFunctionArity();
-		}
-		else if($char == ')') {
+		} else if($char == ')') {
 			$lexer->pushOperand(new TokenPath(new PathElementCurrent()));
 			$lexer->closeParenthesis();
-		}
-		else if(self::isBlank($char)) {
+		} else if(self::isBlank($char)) {
 			$lexer->pushPath(new PathElementCurrent());
 			$lexer->setStateClosedExpression();
-		}
-		else {
+		} else {
 			$this->throwError($lexer, $char);
 		}
 	}

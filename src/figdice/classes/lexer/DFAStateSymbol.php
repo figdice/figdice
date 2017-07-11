@@ -37,83 +37,69 @@ class DFAStateSymbol extends DFAState
 			if(($this->closed) || 
 				 ( (strlen($this->buffer) > 0) && (substr($this->buffer, -1) == '.') )
 			) {
-				if(! $this->closed)
-					$lexer->pushOperand(new TokenSymbol($this->buffer));
+				if(! $this->closed) {
+									$lexer->pushOperand(new TokenSymbol($this->buffer));
+				}
 				$this->closed = false;
 				$this->buffer = $char;
-			}
-			else {
+			} else {
 				$this->buffer .= $char;
 			}
-		}
-		else if($char == '(')
+		} else if($char == '(')
 		{
 			if (in_array($this->buffer, self::$keywords)) {
 				$this->pushKeyword($lexer);
 				$lexer->pushOperator(new TokenLParen());
-			}
-			else
+			} else
 			{
 				$lexer->setStateFunction($this->buffer);
 			}
-		}
-		else if( ($char == '+') || ($char == '-')) {
+		} else if( ($char == '+') || ($char == '-')) {
 			if(! $this->closed) {
 				$lexer->pushOperand(new TokenSymbol($this->buffer));
 			}
 			$lexer->pushOperator(new TokenPlusMinus($char));
-		}
-		else if($char == '*') {
+		} else if($char == '*') {
 			$lexer->pushOperand(new TokenSymbol($this->buffer));
 			$lexer->pushOperator(new TokenMul());
-		}
-		else if($char == '!') {
+		} else if($char == '!') {
       if (! $this->closed) {
         $lexer->pushOperand(new TokenSymbol($this->buffer));
       }
 			$lexer->setStateComparison($char);
-		}
-		else if(self::isBlank($char)) {
+		} else if(self::isBlank($char)) {
 			if(! $this->closed) {
 				$this->closed = true;
 
 				if(in_array($this->buffer, self::$keywords)) {
 					$this->pushKeyword($lexer);
-				}
-				else {
+				} else {
 					$lexer->pushOperand(new TokenSymbol($this->buffer));
 				}
 
 			}
-		}
-		else if($char == ')') {
+		} else if($char == ')') {
 			$lexer->pushOperand(new TokenSymbol($this->buffer));
 			$lexer->closeParenthesis();
-		}
-		else if($char == '/') {
+		} else if($char == '/') {
 			$lexer->pushPath($this->buffer);
-		}
-		else if($char == ',') {
+		} else if($char == ',') {
 			if(in_array($this->buffer, self::$keywords)) {
 				$this->pushKeyword($lexer);
-			}
-			else {
+			} else {
 				$lexer->pushOperand(new TokenSymbol($this->buffer));
 			}
 
 			$lexer->incrementLastFunctionArity();
-		}
-		else if($char == '.') {
+		} else if($char == '.') {
 			if(($this->closed) || 
 				 ( (strlen($this->buffer) > 0) && (substr($this->buffer, -1) != '/') )
 			) {
 				$this->throwError($lexer, $char);
-			}
-			else {
+			} else {
 				$this->buffer .= $char;
 			}
-		}
-		else if($char == '=') {
+		} else if($char == '=') {
 			if(! $this->closed) {
 				$lexer->pushOperand(new TokenSymbol($this->buffer));
 			}
@@ -124,8 +110,7 @@ class DFAStateSymbol extends DFAState
 		else if($char == ']') {
 			$lexer->pushOperand(new TokenSymbol($this->buffer));
 			$lexer->closeSquareBracket();
-		}
-		else {
+		} else {
 			$this->throwError($lexer, $char);
 		}
 			
@@ -133,10 +118,11 @@ class DFAStateSymbol extends DFAState
 
 	public function endOfInput($lexer)
 	{
-		if( ! in_array($this->buffer, self::$keywords) )
-			$lexer->pushOperand(new TokenSymbol($this->buffer));
-		else
-			$this->pushKeyword($lexer);
+		if( ! in_array($this->buffer, self::$keywords) ) {
+					$lexer->pushOperand(new TokenSymbol($this->buffer));
+		} else {
+					$this->pushKeyword($lexer);
+		}
 	}
 
 	/**

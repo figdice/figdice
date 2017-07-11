@@ -27,12 +27,10 @@ class DFAStateComparison extends DFAState {
 		if($char == '=')
 		{
 			$this->buffer .= $char;
-		}
-		else if(self::isBlank($char))
+		} else if(self::isBlank($char))
 		{
 			$lexer->pushOperator(new TokenComparisonBinop($this->buffer));
-		}
-		else
+		} else
 		{
 			$lexer->pushOperator(new TokenComparisonBinop($this->buffer));
 			$lexer->forwardInput($char);

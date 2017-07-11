@@ -37,8 +37,9 @@ class TokenUnarySign extends TokenOperator {
      * @return mixed
      */
     public function evaluate(Context $context) {
-		if($this->sign == '-')
-			return (- $this->operands[0]->evaluate($context));
+		if($this->sign == '-') {
+					return (- $this->operands[0]->evaluate($context));
+		}
 		return $this->operands[0]->evaluate($context);
 	}
 }

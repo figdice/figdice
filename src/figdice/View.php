@@ -297,8 +297,7 @@ class View implements \Serializable {
 
 		if(file_exists($filename)) {
 			$this->source = file_get_contents($filename);
-		}
-		else {
+		} else {
 			$message = "File not found: $filename";
 			throw new FileNotFoundException($message, $filename);
 		}
@@ -371,8 +370,7 @@ class View implements \Serializable {
         if ($bSuccess) {
             $errMsg = '';
             $lineNumber = 0;
-        }
-		else {
+        } else {
 			$errMsg = xml_error_string(xml_get_error_code($this->xmlParser));
 			$lineNumber = xml_get_current_line_number($this->xmlParser);
 			if(count($this->stack)) {
@@ -604,31 +602,21 @@ class View implements \Serializable {
         //
 		if($tagName == $this->figNamespace . TagFigAttr::TAGNAME) {
 			$newElement = new TagFigAttr($tagName, $lineNumber);
-		}
-        else if ($tagName == $this->figNamespace . TagFigCdata::TAGNAME) {
+		} else if ($tagName == $this->figNamespace . TagFigCdata::TAGNAME) {
             $newElement = new TagFigCdata($tagName, $lineNumber);
-        }
-        else if ($tagName == $this->figNamespace . TagFigDictionary::TAGNAME) {
+        } else if ($tagName == $this->figNamespace . TagFigDictionary::TAGNAME) {
             $newElement = new TagFigDictionary($tagName, $lineNumber);
-        }
-		else if ($tagName == $this->figNamespace . TagFigFeed::TAGNAME) {
+        } else if ($tagName == $this->figNamespace . TagFigFeed::TAGNAME) {
 		    $newElement = new TagFigFeed($tagName, $lineNumber);
-        }
-		else if ($tagName == $this->figNamespace . TagFigInclude::TAGNAME) {
+        } else if ($tagName == $this->figNamespace . TagFigInclude::TAGNAME) {
 		    $newElement = new TagFigInclude($tagName, $lineNumber);
-        }
-		else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
+        } else if ($tagName == $this->figNamespace . TagFigMount::TAGNAME) {
 		    $newElement = new TagFigMount($tagName, $lineNumber);
-        }
-		else if ($tagName == $this->figNamespace . TagFigParam::TAGNAME) {
+        } else if ($tagName == $this->figNamespace . TagFigParam::TAGNAME) {
 		    $newElement = new TagFigParam($tagName, $lineNumber);
-        }
-		else if ($tagName == $this->figNamespace . TagFigTrans::TAGNAME) {
+        } else if ($tagName == $this->figNamespace . TagFigTrans::TAGNAME) {
 		    $newElement = new TagFigTrans($tagName, $lineNumber);
-        }
-
-
-		else {
+        } else {
 			$newElement = new ViewElementTag($tagName, $lineNumber, $this->previousCData);
 		}
 
@@ -646,8 +634,7 @@ class View implements \Serializable {
 			$newElement->parent->autoclose = false;
 
 			$parentElement->appendChild($newElement);
-		}
-		else
+		} else
 		{
 			//If there no root node yet, then this new element is actually
 			//the root element for the view.
@@ -755,20 +742,16 @@ class View implements \Serializable {
 
 						if ($plugElement->evalFigAttribute($context, 'append')) {
 							$plugOutput .= $plugRender;
-						}
-						else {
+						} else {
 							$plugOutput = $plugRender;
 						}
 
 						$plugElement->setAttribute($this->figNamespace . 'plug', $slotName);
-					}
-
-					else {
+					} else {
 						$plugRender = $plug->getRenderedString();
 						if ($plug->isAppend()) {
 							$plugOutput .= $plugRender;
-						}
-						else {
+						} else {
 							$plugOutput = $plugRender;
 						}
 					}
@@ -776,10 +759,7 @@ class View implements \Serializable {
 
 				}
 				$result = substr_replace( $result, $plugOutput, $slotPos, strlen($slot->getAnchorString()) + $slot->getLength() );
-			}
-
-
-			else {
+			} else {
 			  // If a slot did not receive any plugged content, we use its
 			  // hardcoded template content as default. But we still need
 			  // to clear the placeholder that was used during slots/plugs reconciliation!
@@ -831,22 +811,20 @@ class View implements \Serializable {
 			//If the object does not expose such method, try to obtain the object's property directly.
 			if(is_object($this->callStackData[$i])) {
 				$getter = 'get' . ucfirst($name);
-				if(method_exists($this->callStackData[$i], $getter))
-					return $this->callStackData[$i]->$getter();
-				else {
+				if(method_exists($this->callStackData[$i], $getter)) {
+									return $this->callStackData[$i]->$getter();
+				} else {
 					$objectVars = get_object_vars($this->callStackData[$i]);
 					if(array_key_exists($name, $objectVars)) {
 						return $objectVars[$name];
-					}
-					else {
+					} else {
                         return MagicReflector::invoke($this->callStackData[$i], $getter);
                     }
 				}
-			}
-
-			else {
-				if(is_array($this->callStackData[$i]) && array_key_exists($name, $this->callStackData[$i]))
-					return $this->callStackData[$i][$name];
+			} else {
+				if(is_array($this->callStackData[$i]) && array_key_exists($name, $this->callStackData[$i])) {
+									return $this->callStackData[$i][$name];
+				}
 			}
 
 		}
@@ -884,8 +862,7 @@ class View implements \Serializable {
 		if(in_array($classname, $this->feedFactoryForClass)) {
 			$feedFactory = $this->feedFactoryForClass[$classname];
 			return $feedFactory->create($classname, $attributes);
-		}
-		else {
+		} else {
 			// If no factory is registered,
       // let's use at least the Autoload factory
       if (0 == count($this->feedFactories)) {

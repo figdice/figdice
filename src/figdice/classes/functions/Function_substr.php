@@ -43,8 +43,7 @@ class Function_substr implements FigFunction {
 		if(3 <= $arity) {
 			$length = $arguments[2];
 			return substr($string, $start ,$length);
-		}
-		else {
+		} else {
 			return substr($string, $start);
 		}
 	}

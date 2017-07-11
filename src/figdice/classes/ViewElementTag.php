@@ -167,12 +167,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
         if ($this->figWalk && ($this->blank !== null)) {
             if (preg_match('#(\n\s+)$#', $this->blank, $matches)) {
                 $this->blank = $matches[1];
-            }
-            else {
+            } else {
                 $this->blank = null;
             }
-        }
-        else {
+        } else {
             $this->blank = null;
         }
 
@@ -295,10 +293,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
                 if ($value instanceof Flag) {
                     // Flag attribute: there is no value. We print only the name of the flag.
                     $result .= " $attribute";
-                }
-
-
-                else {
+                } else {
 
 				    // We're potentially in presence of:
                     // - a plain scalar
@@ -319,13 +314,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
                             if(is_array($evaluatedValue)) {
                                 if(empty($evaluatedValue)) {
                                     $evaluatedValue = '';
-                                }
-                                else {
+                                } else {
                                     $message = 'Adhoc {' . $part->string . '} of attribute ' . $attribute . ' in tag "' . $this->name . '" evaluated to array.';
                                     throw new TagRenderingException($this->getTagName(), $this->getLineNumber(), $message);
                                 }
-                            }
-                            else if (is_object($evaluatedValue)
+                            } else if (is_object($evaluatedValue)
                                 && ($evaluatedValue instanceof \DOMNode)) {
 
                                 // Treat the special case of DOMNode descendants,
@@ -339,8 +332,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
                             if(is_object($evaluatedValue)) {
                                 //TODO: Log some warning!
                                 $evaluatedValue = '### Object of class: ' . get_class($evaluatedValue) . ' ###';
-                            }
-                            else {
+                            } else {
                                 $evaluatedValue = htmlspecialchars($evaluatedValue);
                             }
 
@@ -371,8 +363,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		$lastChild = null;
 
 		//Position, if applies, a reference to element's a previous sibling.
-		if( count($this->children) )
-			$lastChild = $this->children[count($this->children) - 1];
+		if( count($this->children) ) {
+					$lastChild = $this->children[count($this->children) - 1];
+		}
 
 		//If lastChild exists append a sibling to it.
 		if($lastChild)
@@ -430,8 +423,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		//It can render as a regular outer tag. If needed, it must be explicitly muted.
 		if(null !== $this->figMacro) {
 		    $result = $this->fig_macro($context);
-		}
-		else {
+		} else {
             $result = $this->renderNoMacro($context);
 
             // Clear transient flags
@@ -466,14 +458,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			if($context->hasParent()) {
 				if($context->isCaseSwitched()) {
 					return '';
-				}
-				else {
+				} else {
 					$condExpr = $this->figCase;
 					$condVal = $this->evaluate($context, $condExpr);
 					if(! $condVal) {
 						return '';
-					}
-					else {
+					} else {
 						$context->setCaseSwitched();
 					}
 				}
@@ -558,8 +548,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 			if ($context->view->hasOption(View::GLOBAL_PLUGS)) {
 				//The plugs are rendered at the end of the rendering of the View.
 				$context->addPlug($slotName);
-			}
-			else {
+			} else {
 				// The plugs are rendered in their local context
 				// (but still, remain stuffed at the end of the template rendering)
 				$this->transient(self::TRANSIENT_PLUG_RENDERING);
@@ -618,8 +607,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
             $output = $this->evaluate($context, $content);
             if($output === null) {
                 $this->outputBuffer = '';
-            }
-            else {
+            } else {
 
                 // Unfortunately there is no auto __toString
                 // for DOMNode objects (not even DOMText...)
@@ -687,12 +675,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 			if ($this->voidtag) {
 				$result = '<' . $this->name . $xmlAttributesString . '>';
-			}
-			else {
+			} else {
 				if($result instanceof ViewElementTag) {
 					$innerResults = $result->render($context);
-				}
-				else {
+				} else {
 					$innerResults = $result;
 				}
 				
@@ -765,8 +751,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
 				$result .= $subRender;
 
 			}
-		}
-		else {
+		} else {
 			$result = $this->outputBuffer;
 		}
 
@@ -946,11 +931,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
 
 		if(is_object($dataset) && ($dataset instanceof \Countable) ) {
 			$datasetCount = $dataset->count();
-		}
-		else if(is_array($dataset)) {
+		} else if(is_array($dataset)) {
 			$datasetCount = count($dataset);
-		}
-		else {
+		} else {
 			//When requested to walk on a scalar or a single object,
 			//do as if walking on an array containing this single element.
 			$dataset = array($dataset);
@@ -1027,8 +1010,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * @throws RenderingException
      */
 	private function instantiateFilter(Context $context, $className) {
-		if($context->view->getFilterFactory())
-			return $context->view->getFilterFactory()->create($className);
+		if($context->view->getFilterFactory()) {
+					return $context->view->getFilterFactory()->create($className);
+		}
 
 		$reflection = new \ReflectionClass($className);
 		$instance = $reflection->newInstance();
@@ -1079,16 +1063,36 @@ class ViewElementTag extends ViewElement implements \Serializable {
             $data['blank'] = $this->blank;
         }
 
-        if ($this->figAuto) $data['auto'] = $this->figAuto;
-        if ($this->figCall) $data['call'] = $this->figCall;
-        if ($this->figCase) $data['case'] = $this->figCase;
-        if ($this->figCond) $data['cond'] = $this->figCond;
-        if ($this->figFilter) $data['filter'] = $this->figFilter;
-        if ($this->figMacro) $data['macro'] = $this->figMacro;
-        if ($this->figMute) $data['mute'] = $this->figMute;
-        if ($this->figText) $data['text'] = $this->figText;
-        if ($this->figVoid) $data['void'] = $this->figVoid;
-        if ($this->figWalk) $data['walk'] = $this->figWalk;
+        if ($this->figAuto) {
+            $data['auto'] = $this->figAuto;
+        }
+        if ($this->figCall) {
+            $data['call'] = $this->figCall;
+        }
+        if ($this->figCase) {
+            $data['case'] = $this->figCase;
+        }
+        if ($this->figCond) {
+            $data['cond'] = $this->figCond;
+        }
+        if ($this->figFilter) {
+            $data['filter'] = $this->figFilter;
+        }
+        if ($this->figMacro) {
+            $data['macro'] = $this->figMacro;
+        }
+        if ($this->figMute) {
+            $data['mute'] = $this->figMute;
+        }
+        if ($this->figText) {
+            $data['text'] = $this->figText;
+        }
+        if ($this->figVoid) {
+            $data['void'] = $this->figVoid;
+        }
+        if ($this->figWalk) {
+            $data['walk'] = $this->figWalk;
+        }
 
         return serialize($data);
     }
@@ -1153,16 +1157,16 @@ class ViewElementTag extends ViewElement implements \Serializable {
     public function makeSquashedElement($noEnvelope) {
         // First, check I am holding a fig attribute
         // of any adhoc part in a plain attribute
-        if ($this->isDirective())
-            return null;
+        if ($this->isDirective()) {
+                    return null;
+        }
 
         // Now, check if I contain only CData children,
         // all the while preparing my envelope string
 
         if ($noEnvelope) {
             $envelope = '';
-        }
-        else {
+        } else {
             $envelope = '<' . $this->getTagName();
             if ( count($this->attributes) ) {
                 $attrWithValues = [];
@@ -1216,15 +1220,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
                     // For a mute tag, if the first child is plain string,
                     // we will discard the part from the end of the opening tag, till the linefeed (included).
                     $envelope .= preg_replace('#^[ \\t]*\\n#', '', $child->outputBuffer);
-                }
-                else {
+                } else {
                     $envelope .= $child->outputBuffer;
                 }
-            }
-            else if ( ($iChild == $nbChildren - 1) && ($child instanceof ViewElementCData) ) {
+            } else if ( ($iChild == $nbChildren - 1) && ($child instanceof ViewElementCData) ) {
                 $ending = $child->outputBuffer;
-            }
-            else {
+            } else {
                 // In case one of the children has a fig:case directive,
                 // we're compelled to cancel the squashing,
                 // because the parent tag (even inert!) of fig:case children must be isolated at render time
@@ -1273,8 +1274,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
             $this->children[$n - 2]->outputBuffer .= $cdata->outputBuffer;
             // and chop the final element off the children array.
             array_pop($this->children);
-        }
-        else {
+        } else {
             $cdata->parent        = $this;
             $this->children[$n - 1] = $cdata;
         }
@@ -1295,8 +1295,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
                 $container->children[0]->outputBuffer =
                     $this->children[ $n - 2 ]->outputBuffer . $container->children[0]->outputBuffer;
                 array_splice($this->children, $n - 2, 1);
-            }
-            else if ($this->children[$n - 2] instanceof ViewElementContainer) {
+            } else if ($this->children[$n - 2] instanceof ViewElementContainer) {
                 // We will merge 2 containers
                 $this->children[$n - 2]->children = array_merge($this->children[$n - 2]->children, $container->children);
                 array_splice($this->children, $n - 1, 1);
@@ -1312,8 +1311,7 @@ class ViewElementTag extends ViewElement implements \Serializable {
     public function replaceLastChild(ViewElement $element) {
         if ($element instanceof ViewElementCData) {
             $this->replaceLastChild_cdata($element);
-        }
-        else if($element instanceof ViewElementContainer) {
+        } else if($element instanceof ViewElementContainer) {
             $this->replaceLastChild_container($element);
         }
     }

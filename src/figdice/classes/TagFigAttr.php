@@ -37,8 +37,7 @@ class TagFigAttr extends TagFig {
         // Usage: <tag><fig:attr name="ng-app" flag="true" />  will render as flag <tag ng-app> at tag level, without a value.
         if(isset($this->attributes['flag']) && $this->evaluate($context, $this->attributes['flag'])) {
             $context->setParentRuntimeAttribute($this->attributes['name'], new Flag());
-        }
-        else {
+        } else {
             if ($this->hasAttribute('value')) {
                 $value = $this->evaluate($context, $this->attributes['value']);
                 if (is_string($value)) {

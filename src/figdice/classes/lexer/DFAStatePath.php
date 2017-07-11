@@ -56,18 +56,15 @@ class DFAStatePath extends DFAState {
 				$lexer->pushPathElement($this->buffer);
 			}
 			$lexer->incrementLastFunctionArity();
-		}
-		else if($char == ')') {
+		} else if($char == ')') {
 			if( (! $this->closedSubpath) && (! $this->closed) ) {
 				$lexer->pushPathElement($this->buffer);
 			}
 			$lexer->closeParenthesis();
-		}
-		else if($char == '[') {
+		} else if($char == '[') {
 			if( (! $this->closed) && ($this->separated) && (! $this->closedSubpath)) {
 				$lexer->pushOperator(new TokenLBracket());
-			}
-			else {
+			} else {
 				$this->throwError($lexer, $char);
 			}
 		}
@@ -75,55 +72,46 @@ class DFAStatePath extends DFAState {
 		else if($char == ']') {
 			$lexer->pushPathElement($this->buffer);
 			$lexer->closeSquareBracket();
-		}
-		else if($char == '/') {
+		} else if($char == '/') {
 			if(! $this->separated) {
 				$this->separated = true;
-				if( (! $this->closed) && (! $this->closedSubpath) )
-					$lexer->pushPathElement($this->buffer);
+				if( (! $this->closed) && (! $this->closedSubpath) ) {
+									$lexer->pushPathElement($this->buffer);
+				}
 				$this->closed = false;
 				$this->buffer = '';
 				$this->closedSubpath = false;
-			}
-			else {
+			} else {
 				$this->throwError($lexer, $char);
 			}
-		}
-		else if(self::isAlphaNum($char)) {
+		} else if(self::isAlphaNum($char)) {
 			if(! $this->closedSubpath) {
 				$this->buffer .= $char;
 				$this->separated = false;
-			}
-			else {
+			} else {
 				$this->throwError($lexer, $char);
 			}
-		}
-		else if(self::isBlank($char)) {
+		} else if(self::isBlank($char)) {
 			$this->closed = true;
 			if(! $this->closedSubpath) {
 				$lexer->pushPathElement($this->buffer);
 			}
 			$lexer->setStateClosedExpression();
-		}
-		else if( ($char == '(') && (! $this->separated) ){
+		} else if( ($char == '(') && (! $this->separated) ){
 			$lexer->setStateFunction($this->buffer);
-		}
-		else if(($char == '=') || ($char == '!') ) {
+		} else if(($char == '=') || ($char == '!') ) {
 			$this->closed = true;
 			if(! $this->closedSubpath) {
 				$lexer->pushPathElement($this->buffer);
 			}
 			$lexer->setStateComparison($char);
-		}
-		else if( ($char == '+') || ($char == '-') ) {
+		} else if( ($char == '+') || ($char == '-') ) {
 			$this->closed = true;
 			if(! $this->closedSubpath) {
 				$lexer->pushPathElement($this->buffer);
 			}
 			$lexer->pushOperator(new TokenPlusMinus($char));
-		}
-
-		else {
+		} else {
 			$this->throwError($lexer, $char);
 		}
 	}

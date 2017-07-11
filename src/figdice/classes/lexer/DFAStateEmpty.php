@@ -27,46 +27,35 @@ class DFAStateEmpty extends DFAState {
     if($char == "'")
     {
       $lexer->setStateString();
-    }
-    else if(self::isAlpha($char))
+    } else if(self::isAlpha($char))
     {
       $lexer->setStateSymbol($char);
-    }
-    else if( ($char == '-') || ($char == '+') )
+    } else if( ($char == '-') || ($char == '+') )
     {
       $lexer->pushOperator(new TokenUnarySign($char));
-    }
-    else if(self::isDigit($char))
+    } else if(self::isDigit($char))
     {
       $lexer->setStateInteger($char);
-    }
-    else if($char == '(')
+    } else if($char == '(')
     {
       $lexer->pushOperator(new TokenLParen());
-    }
-    else if($char == '*')
+    } else if($char == '*')
     {
       $lexer->pushOperator(new TokenMul());
-    }
-    else if($char == ')')
+    } else if($char == ')')
     {
       $lexer->closeParenthesis();
-    }
-    else if($char == ',')
+    } else if($char == ',')
     {
       $lexer->incrementLastFunctionArity();
-    }
-    else if($char == '/') {
+    } else if($char == '/') {
       $lexer->pushPath(new PathElementRoot());
-    }
-    else if($char == '.')
+    } else if($char == '.')
     {
       $lexer->setStateDot();
-    }
-    else if(self::isBlank($char))
+    } else if(self::isBlank($char))
     {
-    }
-    else
+    } else
     {
       $this->throwError($lexer, $char);
     }

@@ -33,8 +33,7 @@ class Function_xpath implements FigFunction {
 		if($arity == 3) {
 			$context = $arguments[2];
 			$result = $domxpath->evaluate($query, $context);
-		}
-		else {
+		} else {
 			$result = $domxpath->evaluate($query);
 		}
 
@@ -50,17 +49,14 @@ class Function_xpath implements FigFunction {
 			//instead of the list:
 			else if($result->length == 1) {
 				$result = $result->item(0);
-			}
-
-			else {
+			} else {
 				return new FigDOMNodeList($result);
 			}
 		}
 
 		if($result instanceof DOMText) {
 			return $result->wholeText;
-		}
-		else if($result instanceof DOMAttr) {
+		} else if($result instanceof DOMAttr) {
 			return $result->value;
 		}
 

@@ -37,8 +37,12 @@ class TokenComparisonBinop extends TokenBinop {
 		$opL = $this->operands[0]->evaluate($context);
 		$opR = $this->operands[1]->evaluate($context);
 
-		if ($opL instanceof \DOMNode) $opL = $opL->nodeValue;
-		if ($opR instanceof \DOMNode) $opR = $opR->nodeValue;
+		if ($opL instanceof \DOMNode) {
+		    $opL = $opL->nodeValue;
+		}
+		if ($opR instanceof \DOMNode) {
+		    $opR = $opR->nodeValue;
+		}
 
 		switch($this->comparator) {
 			case 'gt' : return ($opL >  $opR);
@@ -62,20 +66,17 @@ class TokenComparisonBinop extends TokenBinop {
 						//But if the other is an array, we cannot convert Array to String
 						//to perform the comparison, so we throw an error.
 						throw new LexerArrayToStringConversionException();
-					}
-					else {
+					} else {
 						return (0 === strcmp($opL, $opR));
 					}
-				}
-				else {
+				} else {
 					return $opL == $opR;
 				}
 
 			case '!=' :
 				if(is_float($opL)) {
 					return ($opL . '' != $opR . '');
-				}
-				else {
+				} else {
 					return ($opL != $opR);
 				}
 

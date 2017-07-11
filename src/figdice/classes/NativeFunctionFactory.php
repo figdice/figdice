@@ -32,8 +32,9 @@ class NativeFunctionFactory extends FunctionFactory {
 		
 		$dirname = dirname(__FILE__).'/functions';
 		$filename = "$dirname/Function_$funcName.php";
-		if( !file_exists($filename) )
-			return null;
+		if( !file_exists($filename) ) {
+					return null;
+		}
 
 
 		require_once "$dirname/Function_$funcName.php";

@@ -35,8 +35,7 @@ class Function_count implements FigFunction {
             if (is_array($param)) {
                 return count($param);
             }
-        }
-        else if ($arity == 0) {
+        } else if ($arity == 0) {
             if ($iter = $context->getIteration()) {
                 return $iter->getCount();
             }

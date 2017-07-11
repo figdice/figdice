@@ -26,32 +26,23 @@ class DFAStateClosedExpression extends DFAState {
 	public function input(Lexer $lexer, $char)
 	{
 		if(self::isBlank($char)) {
-		}
-		else if( ($char == '+') || ($char == '-') ) {
+		} else if( ($char == '+') || ($char == '-') ) {
 			$lexer->pushOperator(new TokenPlusMinus($char));
-		}
-		else if($char == '*') {
+		} else if($char == '*') {
 			$lexer->pushOperator(new TokenMul());
-		}
-		else if($char == '!') {
+		} else if($char == '!') {
 			$lexer->setStateComparison($char);
-		}
-		else if($char == '=') {
+		} else if($char == '=') {
 			$lexer->setStateComparison($char);
-		}
-		else if(self::isAlpha($char)) {
+		} else if(self::isAlpha($char)) {
 			$lexer->setStateSymbol($char);
-		}
-		else if($char == ')') {
+		} else if($char == ')') {
 			$lexer->closeParenthesis();
-		}
-		else if($char == ']') {
+		} else if($char == ']') {
 			$lexer->closeSquareBracket();
-		}
-		else if($char == ',') {
+		} else if($char == ',') {
 			$lexer->incrementLastFunctionArity();			
-		}
-		else {
+		} else {
 			$this->throwError($lexer, $char);
 		}
 	}

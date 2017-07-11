@@ -25,19 +25,15 @@ class DFAStateFunction extends DFAState {
 		if($char == ')') {
 			$lexer->pushOperator(new TokenFunction($this->buffer, 0));
 			$lexer->closeParenthesis();
-		}
-		else if($char == '(') {
+		} else if($char == '(') {
 			$lexer->pushOperator(new TokenFunction($this->buffer, 1));
 			$lexer->pushOperator(new TokenLParen());
-		}
-		else if(self::isBlank($char)) {
+		} else if(self::isBlank($char)) {
 			
-		}
-		else if($char == "'") {
+		} else if($char == "'") {
 			$lexer->pushOperator(new TokenFunction($this->buffer, 1));
 			$lexer->setStateString();
-		}
-		else {
+		} else {
 			$lexer->pushOperator(new TokenFunction($this->buffer, 1));
 			$lexer->forwardInput($char);
 		}

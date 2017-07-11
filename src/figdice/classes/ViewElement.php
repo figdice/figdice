@@ -84,8 +84,7 @@ abstract class ViewElement {
 			$lexer = new Lexer($expression);
 			$context->view->lexers[$expression] = & $lexer;
 			$lexer->parse($context);
-		}
-		else {
+		} else {
 			$lexer = & $context->view->lexers[$expression];
 		}
 

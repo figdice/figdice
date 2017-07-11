@@ -193,8 +193,9 @@ class Context
         // and then go back until found.
         $N = count($this->dictionaries);
         for ($i = $N - 1; $i >= 0; -- $i) {
-            if (array_key_exists($name, $this->dictionaries[$i]))
-                return $this->dictionaries[$i][$name];
+            if (array_key_exists($name, $this->dictionaries[$i])) {
+                            return $this->dictionaries[$i][$name];
+            }
         }
 
         //TODO: handle error if name not found.

@@ -32,8 +32,9 @@ class Function_if implements FigFunction {
                 $context->tag->getLineNumber());
 		}
 		// The 2-arg version simply uses empty as the "else" value.
-		if ($arity == 2)
-		    $arguments[2] = '';
+		if ($arity == 2) {
+				    $arguments[2] = '';
+		}
 
 		return ($arguments[0] ? $arguments[1] : $arguments[2]);
 	}

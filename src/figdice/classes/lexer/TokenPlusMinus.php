@@ -37,8 +37,7 @@ class TokenPlusMinus extends TokenOperator {
 		if($this->sign == '+') {
 			if((!is_numeric($opL)) || (!is_numeric($opR))) {
 				return $opL . $opR;
-			}
-			else {
+			} else {
 				return $opL + $opR;
 			}
 		}

@@ -75,8 +75,9 @@ class TokenFunction extends TokenOperator {
 			if ( (null != $factories) && (is_array($factories) ) ) {
 
         foreach ($factories as $factory) {
-          if(null !== ($this->function = $factory->lookup($this->name)))
-            break;
+          if(null !== ($this->function = $factory->lookup($this->name))) {
+                      break;
+          }
         }
 			}
 

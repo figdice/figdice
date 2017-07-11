@@ -31,22 +31,19 @@ class Function_format_number implements FigFunction {
 
 		if(isset($arguments[1])) {
 			$decimals = $arguments[1];
-		}
-		else {
+		} else {
 			$decimals = 2;
 		}
 
 		if(isset($arguments[2])) {
 			$dec_point = $arguments[2];
-		}
-		else {
+		} else {
 			$dec_point = ',';
 		}
 
 		if(isset($arguments[3])) {
 			$thousands_sep = $arguments[3];
-		}
-		else {
+		} else {
 			$thousands_sep = ' ';
 		}
 
