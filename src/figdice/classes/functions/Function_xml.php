@@ -1,14 +1,11 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2016, Gabriel Zerbib.
- * @version 2.3.3
+ * @copyright 2004-2017, Gabriel Zerbib.
+ * @version 3
  * @package FigDice
  *
  * This file is part of FigDice.
- *
- *
- *
  */
 
 namespace figdice\classes\functions;
@@ -42,17 +39,33 @@ class Function_xml implements FigFunction {
     public function evaluate(Context $context, $arity, $arguments) {
 		$xmlString = $arguments[0];
 		$xml = new \DOMDocument();
+
+
+		// We suppose the specified string is valid XML, which means that it is supposed to have a wrapping root tag.
+        // Or, the user can specify an artificial one explicitly, as the second argument to the xml() function.
+        $explicitRoot = '';
+        if ($arity >= 2) {
+            // If artificial root, we just wrap our string with the specified <tagname>  </tagname>
+            $explicitRoot =  $arguments[1];
+            $xmlString = '<'.$explicitRoot.'>' . $arguments[0] . '</'.$explicitRoot.'>';
+        }
+
 		$successParse = @ $xml->loadXML($xmlString, LIBXML_NOENT);
-		if (! $successParse) {
-			$explicitRoot = $arity >= 2 ? $arguments[1] : 'xml';
-			$xmlString = '<'.$explicitRoot.'>' . $arguments[0] . '</'.$explicitRoot.'>';
-			// This time we let a warning be fired in case of invalid xml.
-			$successParse = @ $xml->loadXML($xmlString, LIBXML_NOENT);
-			if (! $successParse) {
-                $xmlError = libxml_get_last_error();
-                throw new XMLParsingException('xml() function: ' . $xmlError->message,
-                    $context->tag->getLineNumber());
-            }
+		if (! $successParse && ! $explicitRoot) {
+            // If a root was not artificially specified, and the parsing fails,
+            // let's add our own root, calling it "xml" by default.
+            $explicitRoot = 'xml';
+            $xmlString    = '<' . $explicitRoot . '>' . $arguments[0] . '</' . $explicitRoot . '>';
+
+            // This time we let a warning be fired in case of invalid xml.
+            $successParse = @ $xml->loadXML($xmlString, LIBXML_NOENT);
+        }
+        // If we failed to parse. whether after adding a default implicit root, or simply because even with an
+        // implicit or explicit root the string is no valid XML, raise an error.
+        if (! $successParse) {
+            $xmlError = libxml_get_last_error();
+            throw new XMLParsingException('xml() function: ' . $xmlError->message,
+                $context->tag->getLineNumber());
 		}
 		$xpath = new \DOMXPath($xml);
 		return $xpath;
