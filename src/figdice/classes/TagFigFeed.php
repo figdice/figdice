@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2017, Gabriel Zerbib.
- * @version 2.5
+ * @copyright 2004-2018, Gabriel Zerbib.
+ * @version 3.0
  * @package FigDice
  *
  * This file is part of FigDice.
@@ -21,12 +21,24 @@ class TagFigFeed extends TagFig {
 
 	private $feedClass = null;
 
+    /**
+     * @param Context $context
+     *
+     * @return string
+     * @throws FeedClassNotFoundException
+     */
     public function render(Context $context)
     {
         $this->fig_feed($context);
         return '';
     }
 
+    /**
+     * @param $figNamespace
+     * @param array $attributes
+     *
+     * @throws RequiredAttributeException
+     */
     public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
