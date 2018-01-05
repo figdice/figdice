@@ -188,6 +188,13 @@ class View implements \Serializable {
 	 */
 	public $figNamespace = 'fig:';
 
+    /**
+     * The default value for omitted "source" attribute on a fig:trans tag.
+     * Defined per template.
+     * @var string
+     */
+	public $defaultTransSource = null;
+
 	private $options = [];
 
     /**
@@ -592,6 +599,13 @@ class View implements \Serializable {
             // Remove the fig xmlns directive from the list of attributes of the opening root tag
             // (as it should not be rendered)
             unset($attributes['xmlns:' . substr($this->figNamespace, 0, strlen($this->figNamespace) - 1)]);
+
+			// Consume optional fig:trans directive
+            if (isset($attributes[$this->figNamespace.'trans'])) {
+                $this->defaultTransSource = $attributes[$this->figNamespace.'trans'];
+                // Remove the attribute from the list of attributes of the opening root tag
+                unset($attributes[$this->figNamespace.'trans']);
+            }
         }
 
 		$lineNumber = xml_get_current_line_number($xmlParser);
@@ -899,6 +913,7 @@ class View implements \Serializable {
       return serialize([
           'f' => $this->getFilename(),
           'ns' => $this->figNamespace,
+          'trans' => $this->defaultTransSource,
           'root' => $this->rootNode
       ]);
   }
@@ -909,6 +924,7 @@ class View implements \Serializable {
       $this->bParsed = true;
       $this->filename = $data['f'];
       $this->figNamespace = $data['ns'];
+      $this->defaultTransSource = isset($data['trans']) ? $data['trans'] : null;
       $this->rootNode = $data['root'];
 
       $this->unserialized = true;
@@ -922,6 +938,7 @@ class View implements \Serializable {
         $this->bParsed = true;
         $this->filename = $view->filename;
         $this->figNamespace = $view->figNamespace;
+        $this->defaultTransSource = $view->defaultTransSource;
         $this->rootNode = $view->rootNode;
 
         $this->unserialized = true;

@@ -1,25 +1,43 @@
 <?php
 namespace figdice\classes;
 
+use figdice\exceptions\DictionaryEntryNotFoundException;
+use figdice\exceptions\DictionaryNotFoundException;
+
 class TagFigTrans extends TagFig
 {
     const TAGNAME = 'trans';
 
+    /**
+     * @param Context $context
+     *
+     * @return mixed|null|string
+     * @throws DictionaryEntryNotFoundException
+     * @throws DictionaryNotFoundException
+     */
     protected function doSpecific(Context $context)
     {
         return $this->fig_trans($context);
     }
+
     /**
      * Translates a caption given its key and dictionary name.
+     *
      * @param Context $context
+     *
      * @return string
+     * @throws DictionaryEntryNotFoundException
+     * @throws DictionaryNotFoundException
      */
     private function fig_trans(Context $context) {
 
         //If a @source attribute is specified, and is equal to
         //the view's target language, then don't bother translating:
         //just render the contents.
-        $source = $this->getAttribute('source', null);
+        //However, even if the fig:trans tag does not specify a "source" attribute,
+        //we may look up the optional default trans source attribute
+        //defined at the template level.
+        $source = $this->getAttribute('source', $context->getView()->defaultTransSource);
 
         //The $key is also needed in logging below, even if
         //source = view's language, in case of missing value,
