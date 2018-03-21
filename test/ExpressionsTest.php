@@ -15,13 +15,22 @@ use figdice\classes\lexer\Lexer;
  */
 class ExpressionsTest extends PHPUnit_Framework_TestCase {
 
-  private function lexExpr($expression, array $data = null) {
+    /**
+     * @param $expression
+     * @param array|null $data
+     *
+     * @return mixed
+     * @throws \figdice\exceptions\LexerSyntaxErrorException
+     * @throws \figdice\exceptions\LexerUnbalancedParenthesesException
+     * @throws \figdice\exceptions\LexerUnexpectedCharException
+     */
+    private function lexExpr($expression, array $data = null) {
     $lexer = new Lexer($expression);
 
     // A Lexer object needs to live inside a View,
     // and be bound to a ViewElementTag instance.
     // They both need to be bound to a File object,
-    // which must respond to the getCurrentFile method.
+    // which must respond to getCurrentFile method.
 
       $view = $this->createMock(\figdice\View::class);
       $viewElement = $this->createMock(\figdice\classes\ViewElementTag::class);

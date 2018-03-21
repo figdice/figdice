@@ -88,16 +88,16 @@ class Lexer {
 	/**
 	 * @var array
 	 */
-	private $stackOperators;
+	private $stackOperators = [];
 	/**
 	 * @var array
 	 */
-	private $stackFunctions;
+	private $stackFunctions = [];
 
 	/**
 	 * @var array
 	 */
-	private $stackRP;
+	private $stackRP = [];
 
 	/**
 	 * The position of the character being parsed, in expression,
