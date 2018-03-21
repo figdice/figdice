@@ -9,6 +9,7 @@
  */
 
 use figdice\classes\Context;
+use figdice\classes\ViewElementTag;
 use figdice\FigFunction;
 use figdice\FunctionFactory;
 use figdice\View;
@@ -62,7 +63,7 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		$view = new View();
 		$this->view = $view;
 
-		$viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
+		$viewElement = $this->createMock(ViewElementTag::class);
 
 		$this->viewElement = $viewElement;
     }
