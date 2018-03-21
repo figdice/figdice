@@ -23,8 +23,8 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
     // They both need to be bound to a File object,
     // which must respond to the getCurrentFile method.
 
-    $view = $this->getMock('\\figdice\\View');
-    $viewElement = $this->getMock('\\figdice\\classes\\ViewElementTag', array('getCurrentFile'), array(& $view, 'testtag', 12));
+      $view = $this->createMock(\figdice\View::class);
+      $viewElement = $this->createMock(\figdice\classes\ViewElementTag::class);
 
       $context = new \figdice\classes\Context($view);
       $context->tag = $viewElement;
