@@ -1,2 +1,2 @@
-FigDice 2.5-dev
+FigDice 3.x-dev
 http://www.figdice.org/
