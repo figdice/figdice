@@ -198,6 +198,14 @@ class ViewElementTag extends ViewElement implements \Serializable {
                     continue;
                 }
 
+                // Search for inline conditional attributes
+                if (preg_match('/\|(.+)\|(.+)\|$/', $value, $matches)) {
+                    $attributes[$name] = new InlineCondAttr($matches[1], $matches[2]);
+                    //Element can no longer be squashed in optimizations, because it carries
+                    // an active runtime piece.
+                    $this->isDirective = true;
+                    continue;
+                }
 
                 // Search for adhocs
                 if (preg_match_all('/\{([^\{]+)\}/', $value, $matches, PREG_OFFSET_CAPTURE)) {
@@ -299,6 +307,18 @@ class ViewElementTag extends ViewElement implements \Serializable {
                     // - a plain scalar
                     // - an AdHoc instance
                     // - an array of the above.
+                    // - an inline conditional attribute: InlineCondAttr
+
+                    if ($value instanceof InlineCondAttr) {
+                        /** @var InlineCondAttr $inlineCondAttr */
+                        $inlineCondAttr = $value;
+                        if ($this->evaluate($context, $inlineCondAttr->cond)) {
+                            $value = $this->evaluate($context, $inlineCondAttr->val);
+                        }
+                        else {
+                            continue;
+                        }
+                    }
 
                     if (! is_array($value)) {
                         $value = [$value];
@@ -1155,10 +1175,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * @return ViewElementContainer|ViewElementCData|null
      */
     public function makeSquashedElement($noEnvelope) {
-        // First, check I am holding a fig attribute
-        // of any adhoc part in a plain attribute
+        // First, check if I am holding a fig attribute
+        // or any adhoc part in a plain attribute
         if ($this->isDirective()) {
-                    return null;
+            return null;
         }
 
         // Now, check if I contain only CData children,
