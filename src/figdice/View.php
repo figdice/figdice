@@ -717,7 +717,8 @@ class View implements \Serializable {
 		$currentElement = $this->stack[count($this->stack)-1];
 		$currentElement->appendCDataChild($cdata);
 
-        $this->previousCData = $cdata;
+		// hhvm invokes several cdata chunks if they contain \n
+        $this->previousCData .= $cdata;
 	}
 
 
