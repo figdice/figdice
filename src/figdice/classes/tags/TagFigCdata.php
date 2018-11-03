@@ -1,6 +1,8 @@
 <?php
-namespace figdice\classes;
+namespace figdice\classes\tags;
 
+use figdice\classes\Context;
+use figdice\classes\TagFig;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 
@@ -9,6 +11,12 @@ class TagFigCdata extends TagFig {
 
 	private $dataFile;
 
+    /**
+     * @param $figNamespace
+     * @param array $attributes
+     *
+     * @throws RequiredAttributeException
+     */
     public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
@@ -26,7 +34,13 @@ class TagFigCdata extends TagFig {
 
     }
 
-	public function render(Context $context) {
+    /**
+     * @param Context $context
+     *
+     * @return string
+     * @throws FileNotFoundException
+     */
+    public function render(Context $context) {
         return $this->fig_cdata($context);
     }
 

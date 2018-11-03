@@ -1,6 +1,9 @@
 <?php
-namespace figdice\classes;
+namespace figdice\classes\tags;
 
+use figdice\classes\Context;
+use figdice\classes\TagFig;
+use figdice\classes\ViewElementTag;
 use figdice\exceptions\DictionaryEntryNotFoundException;
 use figdice\exceptions\DictionaryNotFoundException;
 
@@ -14,6 +17,7 @@ class TagFigTrans extends TagFig
      * @return mixed|null|string
      * @throws DictionaryEntryNotFoundException
      * @throws DictionaryNotFoundException
+     * @throws \figdice\exceptions\RenderingException
      */
     protected function doSpecific(Context $context)
     {
@@ -28,6 +32,7 @@ class TagFigTrans extends TagFig
      * @return string
      * @throws DictionaryEntryNotFoundException
      * @throws DictionaryNotFoundException
+     * @throws \figdice\exceptions\RenderingException
      */
     private function fig_trans(Context $context) {
 

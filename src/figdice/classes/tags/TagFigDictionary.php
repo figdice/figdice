@@ -11,8 +11,11 @@
  *
  */
 
-namespace figdice\classes;
+namespace figdice\classes\tags;
 
+use figdice\classes\Context;
+use figdice\classes\Dictionary;
+use figdice\classes\TagFig;
 use figdice\exceptions\FileNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 
@@ -23,6 +26,12 @@ class TagFigDictionary extends TagFig {
 	private $dicName;
 	private $source;
 
+    /**
+     * @param $figNamespace
+     * @param array $attributes
+     *
+     * @throws RequiredAttributeException
+     */
     public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
@@ -48,7 +57,14 @@ class TagFigDictionary extends TagFig {
 
     }
 
-	public function render(Context $context) {
+    /**
+     * @param Context $context
+     *
+     * @return string
+     * @throws FileNotFoundException
+     * @throws \figdice\exceptions\DictionaryDuplicateKeyException
+     */
+    public function render(Context $context) {
         return $this->fig_dictionary($context);
     }
 
@@ -64,6 +80,7 @@ class TagFigDictionary extends TagFig {
      *
      * @return string
      * @throws FileNotFoundException
+     * @throws \figdice\exceptions\DictionaryDuplicateKeyException
      */
     private function fig_dictionary(Context $context) {
         //If a @source attribute is specified,

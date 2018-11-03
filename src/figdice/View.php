@@ -11,14 +11,14 @@ use figdice\classes\Context;
 use figdice\classes\MagicReflector;
 use figdice\classes\NativeFunctionFactory;
 use figdice\classes\TagFig;
-use figdice\classes\TagFigAttr;
-use figdice\classes\TagFigCdata;
-use figdice\classes\TagFigDictionary;
-use figdice\classes\TagFigFeed;
-use figdice\classes\TagFigInclude;
-use figdice\classes\TagFigMount;
-use figdice\classes\TagFigParam;
-use figdice\classes\TagFigTrans;
+use figdice\classes\tags\TagFigCdata;
+use figdice\classes\tags\TagFigDictionary;
+use figdice\classes\tags\TagFigFeed;
+use figdice\classes\tags\TagFigInclude;
+use figdice\classes\tags\TagFigMount;
+use figdice\classes\tags\TagFigParam;
+use figdice\classes\tags\TagFigTrans;
+use figdice\classes\tags\TagFigAttr;
 use figdice\classes\tags\TagFigVal;
 use figdice\classes\ViewElementContainer;
 use figdice\classes\ViewElementTag;
@@ -395,7 +395,6 @@ class View implements \Serializable {
 		if(! $bSuccess ) {
 			throw new XMLParsingException(
 					$errMsg,
-					($this->filename ? $this->filename : '(null)'),
 					$lineNumber);
 		}
 
@@ -583,7 +582,14 @@ class View implements \Serializable {
     }
 
 
-	private function openTagHandler($xmlParser, $tagName, $attributes) {
+    /**
+     * @param $xmlParser
+     * @param $tagName
+     * @param $attributes
+     *
+     * @throws RequiredAttributeException
+     */
+    private function openTagHandler($xmlParser, $tagName, $attributes) {
 		if($this->firstOpening) {
 			$this->firstOpening = false;
 

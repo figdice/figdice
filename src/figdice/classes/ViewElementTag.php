@@ -6,6 +6,7 @@
 
 namespace figdice\classes;
 
+use figdice\classes\tags\TagFigAttr;
 use figdice\exceptions\TagRenderingException;
 use figdice\Filter;
 use figdice\View;
@@ -428,12 +429,14 @@ class ViewElementTag extends ViewElement implements \Serializable {
 	}
 
 
-	/**
-	 * Render a node tree (recursively).
-	 *
+    /**
+     * Render a node tree (recursively).
+     *
      * @param Context $context
-	 * @return string
-	 */
+     *
+     * @return string
+     * @throws RenderingException
+     */
 	public function render(Context $context) {
 	    $context->pushTag($this);
 		//================================================================
@@ -452,7 +455,15 @@ class ViewElementTag extends ViewElement implements \Serializable {
         $context->popTag();
 		return $result;
 	}
-	private function renderNoMacro(Context $context) {
+
+    /**
+     * @param Context $context
+     *
+     * @return null|string
+     * @throws RenderingException
+     * @throws TagRenderingException
+     */
+    private function renderNoMacro(Context $context) {
 
 
 		//================================================================
@@ -732,7 +743,13 @@ class ViewElementTag extends ViewElement implements \Serializable {
 		return $result;
 	}
 
-	protected function renderChildren(Context $context) {
+    /**
+     * @param Context $context
+     *
+     * @return null|string
+     * @throws RenderingException
+     */
+    protected function renderChildren(Context $context) {
 
         $doNotRenderFigParam = $context->isDoNotRenderFigParams();
 
@@ -830,8 +847,12 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * No need to hollow the tag that bears the fig:call attribute,
      * because the output of the macro call replaces completely the
      * whole caller tag.
+     *
      * @param Context $context
+     *
      * @return string
+     * @throws RenderingException
+     * @throws TagRenderingException
      */
     private function fig_call(Context $context) {
         //Retrieve the name of the macro to call.
@@ -879,8 +900,11 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * Returns an array of named values obtained by the immediate :param children of the tag.
      * The array is to be merged with the other arguments provided by inline
      * attributes of the :call tag.
+     *
      * @param Context $context
+     *
      * @return array
+     * @throws RenderingException
      */
 	private function collectParamChildren(Context $context) {
 		$arguments = array();
@@ -917,7 +941,9 @@ class ViewElementTag extends ViewElement implements \Serializable {
      *
      * @param Context $context
      * @param string $buffer the inner contents of the element, after rendering.
+     *
      * @return string
+     * @throws RenderingException
      */
 	private function applyOutputFilter(Context $context, $buffer) {
 		//TODO: Currently the filtering works only on non-slot tags.
@@ -936,7 +962,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
      * over the data specified in the fig:walk attribute.
      *
      * @param Context $context
+     *
      * @return string
+     * @throws RenderingException
+     * @throws TagRenderingException
      */
 	private function fig_walk(Context $context) {
 		$figIterateAttribute = $this->figWalk;
@@ -1026,8 +1055,10 @@ class ViewElementTag extends ViewElement implements \Serializable {
     /**
      * @param Context $context
      * @param string $className
+     *
      * @return Filter
      * @throws RenderingException
+     * @throws \ReflectionException
      */
 	private function instantiateFilter(Context $context, $className) {
 		if($context->view->getFilterFactory()) {
