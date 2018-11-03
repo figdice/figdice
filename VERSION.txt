@@ -1,2 +1,0 @@
-FigDice 3.x-dev
-http://www.figdice.org/
