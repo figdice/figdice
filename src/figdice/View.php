@@ -19,6 +19,7 @@ use figdice\classes\TagFigInclude;
 use figdice\classes\TagFigMount;
 use figdice\classes\TagFigParam;
 use figdice\classes\TagFigTrans;
+use figdice\classes\tags\TagFigVal;
 use figdice\classes\ViewElementContainer;
 use figdice\classes\ViewElementTag;
 use figdice\exceptions\FeedClassNotFoundException;
@@ -630,6 +631,8 @@ class View implements \Serializable {
 		    $newElement = new TagFigParam($tagName, $lineNumber);
         } else if ($tagName == $this->figNamespace . TagFigTrans::TAGNAME) {
 		    $newElement = new TagFigTrans($tagName, $lineNumber);
+        } else if ($tagName == $this->figNamespace . TagFigVal::TAGNAME) {
+		    $newElement = new TagFigVal($tagName, $lineNumber);
         } else {
 			$newElement = new ViewElementTag($tagName, $lineNumber, $this->previousCData);
 		}

@@ -486,6 +486,23 @@ ENDEXPECTED;
         $this->assertTrue(false);
     }
 
+    public function testFigValReturnsEvaluatedAttribute()
+    {
+        $view = new View();
+        $view->loadString('<fig:val text="expr" />');
+        $view->mount('expr', 'value');
+        $output = $view->render();
+        $this->assertEquals('value', $output);
+    }
+
+    public function testFigValWithFalseConditionReturnsNothing()
+    {
+        $view = new View();
+        $view->loadString('<fig:val fig:cond="false" text="expr" />');
+        $view->mount('expr', 'value');
+        $output = $view->render();
+        $this->assertEquals('', $output);
+    }
 }
 
 

@@ -15,7 +15,9 @@
     }
   ],
   "require": {
-    "php": ">=5.4"
+    "php": ">=5.4",
+    "ext-xml": "*",
+    "ext-dom": "*"
   },
   "autoload": {
     "psr-4": { "figdice\\": "src/figdice" }
