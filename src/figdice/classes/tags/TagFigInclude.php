@@ -1,6 +1,9 @@
 <?php
-namespace figdice\classes;
+namespace figdice\classes\tags;
 
+use figdice\classes\Context;
+use figdice\classes\TagFig;
+use figdice\classes\ViewElementTag;
 use figdice\exceptions\RequiredAttributeException;
 use figdice\View;
 
@@ -11,11 +14,26 @@ class TagFigInclude extends TagFig
     /** @var string */
     private $includedFile;
 
+    /**
+     * @param Context $context
+     *
+     * @return string
+     * @throws RequiredAttributeException
+     * @throws \figdice\exceptions\FileNotFoundException
+     * @throws \figdice\exceptions\RenderingException
+     * @throws \figdice\exceptions\XMLParsingException
+     */
     public function render(Context $context) {
         return $this->fig_include($context);
     }
 
 
+    /**
+     * @param $figNamespace
+     * @param array $attributes
+     *
+     * @throws RequiredAttributeException
+     */
     public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
@@ -40,6 +58,10 @@ class TagFigInclude extends TagFig
      * @param Context $context
      *
      * @return string or false
+     * @throws RequiredAttributeException
+     * @throws \figdice\exceptions\FileNotFoundException
+     * @throws \figdice\exceptions\RenderingException
+     * @throws \figdice\exceptions\XMLParsingException
      */
     private function fig_include(Context $context) {
 

@@ -11,9 +11,11 @@
  *
  */
 
-namespace figdice\classes;
+namespace figdice\classes\tags;
 
 
+use figdice\classes\Context;
+use figdice\classes\TagFig;
 use figdice\exceptions\RequiredAttributeException;
 
 class TagFigMount extends TagFig
@@ -23,6 +25,12 @@ class TagFigMount extends TagFig
 	private $mountTarget;
 	private $value;
 
+    /**
+     * @param $figNamespace
+     * @param array $attributes
+     *
+     * @throws RequiredAttributeException
+     */
     public function setAttributes($figNamespace, array $attributes)
     {
         // We don't call the parent version, which does extraneous work of resolving conds and walks etc.,
@@ -48,6 +56,12 @@ class TagFigMount extends TagFig
         $this->fig_mount($context);
         return '';
     }
+
+    /**
+     * @param Context $context
+     *
+     * @throws \figdice\exceptions\RenderingException
+     */
     private function fig_mount(Context $context) {
         //When an explicit value="" attribute exists, use its contents as a Lex expression to evaluate.
         if(null !== $this->value) {

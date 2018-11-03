@@ -11,8 +11,10 @@
  *
  */
 
-namespace figdice\classes;
+namespace figdice\classes\tags;
 
+use figdice\classes\Context;
+use figdice\classes\TagFig;
 use figdice\exceptions\FeedClassNotFoundException;
 use figdice\exceptions\RequiredAttributeException;
 

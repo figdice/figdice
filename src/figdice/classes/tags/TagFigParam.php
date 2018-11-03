@@ -1,7 +1,9 @@
 <?php
 
-namespace figdice\classes;
+namespace figdice\classes\tags;
 
+
+use figdice\classes\TagFig;
 
 class TagFigParam extends TagFig
 {
