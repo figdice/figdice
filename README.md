@@ -13,9 +13,9 @@ It differs from most of the popular template systems, with regards to the way th
 FigDice focuses on the Web Designer stand-point. Designers and Developers agree together on structure of the self-contained *beans* (called Feeds in FigDice) that Developers make available to Designers, and then the Designers may reuse them anywhere they need, and combine them with other Feeds into pages and macros. The View Controllers in FigDice become generic presenters whcih don't need to know the details of what is presented in what template, since the templates themselves will activate their favorite Feeds to pull their data.
 
 
-See **[figdice.org](http://www.figdice.org/)**
+See **[figdice.org](https://www.figdice.org/)**
 
-# Try a [Live Demo](http://demo.figdice.org/) now!
+# Try a [Live Demo](https://demo.figdice.org/) now!
 
 Presentation and Tutorial:
 - [SitePoint | Getting Started With FigDice](http://www.sitepoint.com/?s=figdice) (English)
@@ -43,7 +43,7 @@ Add the figdice dependency to the `require` section of your `composer.json` file
 
 # Getting Started
 
-Browse the [examples](https://github.com/figdice/figdice/tree/master/examples)!
+Browse the [examples](https://github.com/figdice/figdice-examples)!
 
 See [Wiki](https://github.com/figdice/figdice/wiki) for more details.
 
