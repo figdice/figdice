@@ -95,7 +95,7 @@ class Lexer {
 	private $stackFunctions = [];
 
 	/**
-	 * @var array
+	 * @var Token[]
 	 */
 	private $stackRP = [];
 
