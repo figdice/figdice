@@ -75,6 +75,9 @@ abstract class ViewElement {
      * @param Context $context
      * @param string $expression
      * @return string
+     * @throws \figdice\exceptions\LexerSyntaxErrorException
+     * @throws \figdice\exceptions\LexerUnbalancedParenthesesException
+     * @throws \figdice\exceptions\LexerUnexpectedCharException
      */
 	public function evaluate(Context $context, $expression) {
 		if(is_numeric($expression)) {
