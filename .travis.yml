@@ -7,12 +7,10 @@ php:
   - 7.2
   - 7.3
   - 7.4snapshot
-  - hhvm
 
 matrix:
   allow_failures:
     - php: 7.4snapshot
-    - php: hhvm
 
 before_script:
   - composer self-update
