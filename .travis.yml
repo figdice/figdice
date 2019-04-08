@@ -22,8 +22,8 @@ script:
   - mkdir -p build/logs
   - if [ $(phpenv version-name) = "7.3" ]; then vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml test; else vendor/bin/phpunit test; fi
 
-after_script:
+after_success:
   - echo "php version name = $(phpenv version-name)"
   - if [ $(phpenv version-name) = "7.3" ]; then composer require psr/log ; fi
-  - if [ $(phpenv version-name) = "7.3" ]; then composer require satooshi/php-coveralls dev-master ; fi
-  - if [ $(phpenv version-name) = "7.3" ]; then vendor/bin/coveralls -v --exclude-no-stmt ; fi
+  - if [ $(phpenv version-name) = "7.3" ]; then composer require php-coveralls/php-coveralls '^2.1' ; fi
+  - if [ $(phpenv version-name) = "7.3" ]; then php vendor/bin/php-coveralls -v --exclude-no-stmt ; fi
