@@ -108,6 +108,23 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(3, $this->lexExpr(' count( /myArray ) '));
     }
 
+    public function testCountIfNotZeroIsCount() {
+        $this->view->mount('myArray', ['x', 'y', 'z']);
+        $this->assertEquals(3, $this->lexExpr(' countif( /myArray ) '));
+    }
+
+    public function testCountIfZeroIsEmpty() {
+        $this->view->mount('myArray', [ ]);
+        $this->assertEquals('', $this->lexExpr(' countif( /myArray ) '));
+    }
+
+    /**
+     * @expectedException \figdice\exceptions\FunctionCallException
+     */
+    public function testCountIfFuncWithMissingArgsThrowsException() {
+        $this->assertFalse($this->lexExpr(" countif() "));
+    }
+
     public function testCountWithoutArgInsideIteration()
     {
         $data = ['a', 'b', 'c'];
