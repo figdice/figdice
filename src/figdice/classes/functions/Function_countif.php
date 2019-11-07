@@ -34,6 +34,7 @@ class Function_countif implements FigFunction {
                 $count = count($param);
                 return $count > 0 ? $count : '';
             }
+            return '';
         }
 
         throw new FunctionCallException(
