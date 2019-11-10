@@ -32,6 +32,7 @@ class TokenLParen extends TokenOperator {
      *
      * @return mixed
      * @throws \Exception
+     * @codeCoverageIgnore
      */
     public function evaluate(Context $context) {
 		throw new \Exception('Abnormal evaluation of left parenthesis token.');
