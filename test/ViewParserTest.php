@@ -1,12 +1,16 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.2
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  */
+declare(strict_types=1);
+
+use figdice\exceptions\FileNotFoundException;
+use figdice\exceptions\XMLParsingException;
+use PHPUnit\Framework\TestCase;
 
 use figdice\classes\ViewElementCData;
 use figdice\View;
@@ -16,15 +20,12 @@ use org\bovigo\vfs\vfsStreamWrapper;
 /**
  * Unit Test Class for basic View loading
  */
-class ViewParserTest extends PHPUnit_Framework_TestCase {
+class ViewParserTest extends TestCase {
 
-  /**
-   * @expectedException \figdice\exceptions\XMLParsingException
-   */
   public function testRenderBeforeLoadFails() {
     $view = new View();
+    $this->expectException(XMLParsingException::class);
     $view->render();
-    $this->assertTrue(false);
   }
 
   public function testSourceWithSimpleXml() {
@@ -170,18 +171,12 @@ ENDHTML;
     $this->assertEquals($expected, $result);
   }
 
-  /**
-   * @expectedException figdice\exceptions\FileNotFoundException
-   */
   public function testIncludeWithFileNotFoundThrowsException()
   {
 
     $view = new View();
+    $this->expectException(FileNotFoundException::class);
     $view->loadFile('resources/FigXmlIncludeNotFound.xml');
-		
-    // will raise an exception
-    $view->render();
-    $this->assertFalse(true);
   }
 	
   public function testParseAfterRenderHasNoEffect() {

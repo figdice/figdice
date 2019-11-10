@@ -1,17 +1,17 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2016, Gabriel Zerbib.
- * @version 2.3
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  */
+declare(strict_types=1);
 
 namespace figdice\test;
-
+use PHPUnit\Framework\TestCase;
 use figdice\View;
 use PHPUnit_Framework_TestCase;
 
-class SlotPlugTest extends PHPUnit_Framework_TestCase
+class SlotPlugTest extends TestCase
 {
   public function testPlugExecutesInLocalContext()
   {

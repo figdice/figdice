@@ -1,8 +1,11 @@
 <?php
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
 
 use figdice\View;
 
-class WalkTest extends PHPUnit_Framework_TestCase
+class WalkTest extends TestCase
 {
     public function testWalkIndexedArray()
     {

@@ -7,12 +7,13 @@
  *
  * This file is part of FigDice.
  */
-
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
 use figdice\View;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
 
-class AutoCloseTest extends PHPUnit_Framework_TestCase
+class AutoCloseTest extends TestCase
 {
   public function testScriptTagWithoutContentIsNotForcedAutoClose()
   {

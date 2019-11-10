@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
 use figdice\View;
 
-class MacroTest extends PHPUnit_Framework_TestCase
+class MacroTest extends TestCase
 {
     public function testMacroInvokedInsideIterationDoesNotSeePosition()
     {

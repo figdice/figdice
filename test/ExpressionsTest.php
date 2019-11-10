@@ -1,19 +1,21 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2016, Gabriel Zerbib.
- * @version 2.3.4
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  */
+declare(strict_types=1);
 
+use figdice\exceptions\LexerSyntaxErrorException;
+use PHPUnit\Framework\TestCase;
 use figdice\classes\lexer\Lexer;
 
 /**
  * Unit Test Class for basic Lexer expressions
  */
-class ExpressionsTest extends PHPUnit_Framework_TestCase {
+class ExpressionsTest extends TestCase {
 
     /**
      * @param $expression
@@ -97,11 +99,9 @@ class ExpressionsTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(0, $this->lexExpr('3 mod 0'));
   }
 
-  /**
-   * @expectedException figdice\exceptions\LexerSyntaxErrorException
-   */
   public function testEmptyArgumentsInFunctionCallRaisesException()
   {
+    $this->expectException(LexerSyntaxErrorException::class);
     $this->assertEquals(0, $this->lexExpr('some(,)'));
   }
 

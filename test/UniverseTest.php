@@ -1,19 +1,21 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.1
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  */
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
 
 use figdice\View;
 
 /**
  * Unit Test Class for basic View loading
  */
-class UniverseTest extends PHPUnit_Framework_TestCase {
+class UniverseTest extends TestCase {
 
     private function symbolize($expr, $universe)
     {

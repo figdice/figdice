@@ -7,14 +7,21 @@
  *
  * This file is part of FigDice.
  */
+declare(strict_types=1);
 
+use figdice\exceptions\FunctionNotFoundException;
+use figdice\exceptions\LexerArrayToStringConversionException;
+use figdice\exceptions\LexerSyntaxErrorException;
+use figdice\exceptions\LexerUnbalancedParenthesesException;
+use figdice\exceptions\LexerUnexpectedCharException;
+use PHPUnit\Framework\TestCase;
 use figdice\classes\lexer\Lexer;
 use figdice\View;
 
 /**
  * Unit Test Class for basic Lexer expressions
  */
-class LexerTest extends PHPUnit_Framework_TestCase {
+class LexerTest extends TestCase {
 
   private function lexParse($expression) {
     $lexer = new Lexer($expression);
@@ -68,38 +75,27 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertFalse($this->lexExpr( '   ' ));
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
-  public function testParseErrorThrowsException()
-  {
+  public function testParseErrorThrowsException() {
+    $this->expectException(LexerUnexpectedCharException::class);
     $this->lexExpr( '2 == true=' );
-    $this->assertFalse(true, 'An expected exception was not thrown');
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
   public function testMissingOperatorException()
   {
+    $this->expectException(LexerUnexpectedCharException::class);
     $this->lexExpr( '2 5' );
-    $this->assertFalse(true, 'An expected exception was not thrown');
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerSyntaxErrorException
-   */
   public function testMissingOperandException()
   {
+    $this->expectException(LexerSyntaxErrorException::class);
     $this->lexExpr( '2 div' );
-    $this->assertFalse(true, 'An expected exception was not thrown');
   }
-  /**
-   * @expectedException \figdice\exceptions\LexerSyntaxErrorException
-   */
+
   public function testTwoConsecutiveBinOperatorsException()
   {
-    $this->assertEquals(2, $this->lexExpr( '* div' ));
+    $this->expectException(LexerSyntaxErrorException::class);
+    $this->lexExpr( '* div' );
   }
 
   public function test1Plus1()
@@ -121,11 +117,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertNull($this->lexExpr(' . '));
   }
 
-  /**
-   * @expectedException figdice\exceptions\LexerUnexpectedCharException
-   */
   public function testDotInvalidlyDelimitedRaisesError() {
-    $this->assertNull($this->lexExpr(' .x '));
+    $this->expectException(LexerUnexpectedCharException::class);
+    $this->lexExpr(' .x ');
   }
 
   public function testArithmeticPriority()
@@ -215,12 +209,10 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(19.47+2, $this->lexExpr(" 19.47 + 2 "));
   }
 
-  /**
-   * @expectedException \figdice\exceptions\FunctionNotFoundException
-   */
   public function testParserWithUndefinedFunction()
   {
-    $this->assertFalse($this->lexExpr( ' somefunc(12) ' ));
+    $this->expectException(FunctionNotFoundException::class);
+    $this->lexExpr( ' somefunc(12) ' );
   }
 
   public function testDecimalLiteralIsAllowedToStartWithDot()
@@ -228,11 +220,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(.14, $this->lexExpr('.14'));
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerSyntaxErrorException
-   */
   public function testTwoSymbolsOneAfterTheOtherSyntaxError() {
-    $this->assertTrue ( $this->lexExpr(' symbol1 symbol2'));
+    $this->expectException(LexerSyntaxErrorException::class);
+    $this->lexExpr(' symbol1 symbol2');
   }
   public function testDotDotPathParsing() {
 
@@ -247,35 +237,24 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertInstanceOf('figdice\classes\lexer\PathElementParent', $path[0]);
 
   }
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
   public function testDotDotAnyCharError() {
-    //Null because the said path values don't exist in Universe.
-    $this->assertNull($this->lexExpr('..invalid'));
+    $this->expectException(LexerUnexpectedCharException::class);
+    $this->lexExpr('..invalid');
   }
-  /**
-   * @expectedException \figdice\exceptions\LexerSyntaxErrorException
-   */
   public function testIllegalParenInPath() {
-    $this->assertTrue( $this->lexExpr(" a/b/c(12)") );
+    $this->expectException(LexerSyntaxErrorException::class);
+    $this->lexExpr(" a/b/c(12)");
   }
   public function testDynamicPathParsing() {
     //Null because the said path values don't exist in Universe.
     $this->assertNull($this->lexExpr('/a/b/[c]'));
   }
-  /**
-   * @expectedException \figdice\exceptions\LexerSyntaxErrorException
-   */
   public function testUnclosedDynamicPathError() {
-    //Null because the said path values don't exist in Universe.
-    $this->assertNull($this->lexExpr('/a/b/[c'));
+    $this->expectException(LexerSyntaxErrorException::class);
+    $this->lexExpr('/a/b/[c');
   }
-  /**
-   * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException
-   */
   public function testUnclosedFunctionThrowsException () {
-    //missing closing parenth.
+    $this->expectException(LexerUnbalancedParenthesesException::class);
     $this->assertFalse($this->lexExpr( "substr('abcd', 2" ) );
   }
 
@@ -311,11 +290,8 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertInstanceOf('\figdice\classes\lexer\TokenLiteral', $operands[1]);
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
-  public function testMisuseOfLParen()
-  {
+  public function testMisuseOfLParen() {
+    $this->expectException(LexerUnexpectedCharException::class);
     $this->assertTrue( $this->lexExpr(' 3 ( 7') );
   }
 
@@ -338,29 +314,21 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals( 13, $this->lexExpr("363 mod 50") );
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerArrayToStringConversionException
-   */
-  public function testArrayToStringException()
-  {
-    $this->assertFalse($this->lexExpr('aaa == 12', ['aaa' => [1, 2, 3]]));
+  public function testArrayToStringException() {
+    $this->expectException(LexerArrayToStringConversionException::class);
+    $this->lexExpr('aaa == 12', ['aaa' => [1, 2, 3]]);
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
-  public function testOpeningParenForFuncAndEOI()
-  {
-    $this->assertEquals(12, $this->lexExpr('openFunc('));
+  public function testOpeningParenForFuncAndEOI() {
+    $this->expectException(LexerUnexpectedCharException::class);
+    $this->lexExpr('openFunc(');
   }
 
-  /**
-   * @expectedException figdice\exceptions\FunctionNotFoundException
-   */
   public function testParenInsideFunc()
   {
     //TODO: what should really be done is: register myFunc and check the result.
-    $this->assertTrue($this->lexExpr('myfunc((1))'));
+    $this->expectException(FunctionNotFoundException::class);
+    $this->lexExpr('myfunc((1))');
   }
 
   public function testPathAndComparatorWithoutSpace()
@@ -372,12 +340,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($this->lexExpr('/var/www+13 == 26', ['var'=>['www'=>13]]));
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException
-   */
-  public function testCommaWithoutFuncException()
-  {
-    $this->assertTrue($this->lexExpr('1, 2, 3'));
+  public function testCommaWithoutFuncException() {
+    $this->expectException(LexerUnbalancedParenthesesException::class);
+    $this->lexExpr('1, 2, 3');
   }
 
   public function testDynamicSubpathWithOpertion()
@@ -385,12 +350,9 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(12, $this->lexExpr('/var/[/i + 1]', ['i' => 1, 'var' => ['2' => 12]]));
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
-  public function testIllegalCharacterAfterSymbolException()
-  {
-    $this->assertTrue( $this->lexExpr('illegal $') );
+  public function testIllegalCharacterAfterSymbolException() {
+    $this->expectException(LexerUnexpectedCharException::class);
+    $this->lexExpr('illegal $');
   }
 
   public function testSymbolAsNotLastArg()
@@ -433,25 +395,16 @@ class LexerTest extends PHPUnit_Framework_TestCase {
 
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
-  public function testSymbolCannotStartByNumber()
-  {
+  public function testSymbolCannotStartByNumber() {
+    $this->expectException(LexerUnexpectedCharException::class);
     $this->lexExpr( '123abc' );
   }
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
-  public function testSymbolCannotStartByDecimal()
-  {
+  public function testSymbolCannotStartByDecimal() {
+    $this->expectException(LexerUnexpectedCharException::class);
     $this->lexExpr( '12.3abc' );
   }
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
-  public function testDecimalFollowedByInvalid()
-  {
+  public function testDecimalFollowedByInvalid() {
+    $this->expectException(LexerUnexpectedCharException::class);
     $this->lexExpr( '12.3:' );
   }
 
@@ -515,33 +468,22 @@ class LexerTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue( $this->lexExpr('/a != /b', ['a' => floatval(12.5), 'b' => floatval(11.5)]));
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnbalancedParenthesesException
-   */
   public function testCommaInEmptyRaisesError()
   {
-    $this->lexExpr(',');
+      $this->expectException(LexerUnbalancedParenthesesException::class);
+      $this->lexExpr(',');
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerSyntaxErrorException
-   */
-  public function testClosingParenInEmptyRaisesError()
-  {
+  public function testClosingParenInEmptyRaisesError() {
+    $this->expectException(LexerSyntaxErrorException::class);
     $this->lexExpr(' ) ');
   }
 
-  /**
-   * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-   */
-  public function testGarbageInEmptyRaisesError()
-  {
+  public function testGarbageInEmptyRaisesError() {
+    $this->expectException(LexerUnexpectedCharException::class);
     $this->lexExpr(' : ');
   }
 
-    /**
-     * @expectedException \figdice\exceptions\LexerUnexpectedCharException
-     */
     public function testTwoManyDotDotsAreUnimplemented()
     {
         $view = new View();
@@ -552,6 +494,8 @@ class LexerTest extends PHPUnit_Framework_TestCase {
         ;
         $view->loadString($template);
         $view->mount('arr', [1, 2, [3, 'y' => 4], 'x' => 7]);
+
+        $this->expectException(LexerUnexpectedCharException::class);
         $actual = $view->render();
         $this->assertEquals('', $actual);
 
@@ -559,7 +503,6 @@ class LexerTest extends PHPUnit_Framework_TestCase {
         // nested loops, but for now I wrote only the immediate parent loop's access,
         // with simply "../something".
         // If anyone wants to contribute...
-        $this->assertTrue(false);
     }
 
 }

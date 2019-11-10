@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
 use figdice\View;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
 
-class CacheTest extends PHPUnit_Framework_TestCase
+class CacheTest extends TestCase
 {
     public function testAdhocAndFlagAreCachedAndRestored()
     {
