@@ -23,7 +23,7 @@
     "psr-4": { "figdice\\": "src/figdice" }
   },
   "require-dev": {
-    "mikey179/vfsstream": "v1.2.0"
+    "mikey179/vfsstream": "^1.6.8"
   },
   "scripts": {
     "test": "vendor/bin/phpunit test"
