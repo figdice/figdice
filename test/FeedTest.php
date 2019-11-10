@@ -1,19 +1,23 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.2
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  * http://figdice.org/
  */
+declare(strict_types=1);
 
-class FeedTest extends PHPUnit_Framework_TestCase
+use figdice\exceptions\RequiredAttributeException;
+use figdice\View;
+use PHPUnit\Framework\TestCase;
+
+class FeedTest extends TestCase
 {
   public function testGetParemeterIntWithDefaultValue()
   {
-    $view = new \figdice\View();
+    $view = new View();
     $view->loadString(
       '<fig:template>' .
         '<fig:feed class="\ParamTest1Feed" target="data" />' .
@@ -24,7 +28,7 @@ class FeedTest extends PHPUnit_Framework_TestCase
 
   public function testGetParemeterBool()
   {
-    $view = new \figdice\View();
+    $view = new View();
     $view->loadString(
       '<fig:template>' .
         '<fig:feed class="\ParamTest2Feed" param1="true" target="data" />' .
@@ -35,7 +39,7 @@ class FeedTest extends PHPUnit_Framework_TestCase
 
   public function testGetParemeterString()
   {
-    $view = new \figdice\View();
+    $view = new View();
     $view->loadString(
       '<fig:template>' .
         '<fig:feed class="\ParamTest3Feed" param1="\'a\'" target="data" />' .
@@ -44,16 +48,12 @@ class FeedTest extends PHPUnit_Framework_TestCase
     $this->assertEquals('ab', $view->render());
   }
 
-    /**
-     * @expectedException figdice\exceptions\RequiredAttributeException
-     */
   public function testFeedTagWithoutClassRaisesExceptionAtParseTime()
   {
-      $view = new \figdice\View();
+      $view = new View();
       $view->loadString('<fig:feed target="some" />');
+      $this->expectException(RequiredAttributeException::class);
       $view->parse();
-
-      $this->assertTrue(false);
   }
 }
 

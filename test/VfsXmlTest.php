@@ -1,13 +1,15 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2014, Gabriel Zerbib.
- * @version 2.0.5
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  */
 
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
 
 use figdice\View;
 use org\bovigo\vfs\vfsStream;
@@ -16,7 +18,7 @@ use org\bovigo\vfs\vfsStreamWrapper;
 /**
  * Unit Test Class for fig inclusions using the Vfs wrapper
  */
-class VfsXmlTest extends PHPUnit_Framework_TestCase {
+class VfsXmlTest extends TestCase {
 
 
   public function testVfsIncludeSameDir() {

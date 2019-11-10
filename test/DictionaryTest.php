@@ -1,32 +1,35 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.2
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  */
 
+declare(strict_types=1);
 
+use PHPUnit\Framework\TestCase;
 use figdice\classes\ViewElement;
 use figdice\View;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
 use figdice\classes\Dictionary;
+use figdice\exceptions\FileNotFoundException;
+use figdice\exceptions\DictionaryEntryNotFoundException;
 
 /**
  * Unit Test Class for fig i18n
  */
-class DictionaryTest extends PHPUnit_Framework_TestCase {
+class DictionaryTest extends TestCase {
 
     /** @var  View */
     protected $view;
 
-    protected function setUp() {
+    protected function setUp(): void {
         $this->view = new View();
     }
-    protected function tearDown() {
+    protected function tearDown(): void {
         $this->view = null;
     }
 
@@ -108,9 +111,6 @@ ENDXML;
 
     }
 
-    /**
-     * @expectedException \figdice\exceptions\FileNotFoundException
-     */
     public function testDictionaryNotFoundException()
     {
         $view = new View();
@@ -121,8 +121,8 @@ ENDXML;
         );
         $view->setLanguage('fr');
 
-        $view->render();
-        $this->assertTrue(false);
+	$this->expectException(FileNotFoundException::class);
+	$view->render();
     }
 
     public function testDictionaryCompiler()
@@ -203,9 +203,6 @@ ENDDIC;
         }
     }
 
-    /**
-     * @expectedException \figdice\exceptions\DictionaryEntryNotFoundException
-     */
     public function testWrongKeyRaisesError()
     {
         $view = new View();
@@ -229,13 +226,11 @@ ENDDIC;
 
         vfsStream::newFile('dic.xml')->withContent($dicString)->at($vDir);
 
-        $view->setTranslationPath(vfsStream::url('root'));
+	$view->setTranslationPath(vfsStream::url('root'));
+	$this->expectException(DictionaryEntryNotFoundException::class);
         $view->render();
     }
 
-    /**
-     * @expectedException \figdice\exceptions\DictionaryEntryNotFoundException
-     */
     public function testAnonTransWithoutLoadedDicRaisesError()
     {
         $view = new View();
@@ -250,14 +245,11 @@ ENDTEMPLATE;
 
         vfsStream::setup('root');
 
-        $view->setTranslationPath(vfsStream::url('root'));
+	$view->setTranslationPath(vfsStream::url('root'));
+	$this->expectException(DictionaryEntryNotFoundException::class);
         $view->render();
     }
 
-
-    /**
-     * @expectedException \figdice\exceptions\DictionaryEntryNotFoundException
-     */
     public function testAnonymousDictionaryLoadedInIncludedFileIsNotAvailToParent()
     {
         $templateOuter = <<<ENDTEMPLATE
@@ -297,10 +289,9 @@ ENDDICTIONARY;
         $view = new View();
         $view->setTranslationPath(vfsStream::url('root/i18n'));
         $view->setLanguage('en');
-        $view->loadFile(vfsStream::url('root/outer.html'));
+	$view->loadFile(vfsStream::url('root/outer.html'));
+	$this->expectException(DictionaryEntryNotFoundException::class);
         $view->render();
-
-        $this->assertTrue(false);
     }
 
 

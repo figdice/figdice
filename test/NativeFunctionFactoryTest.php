@@ -1,13 +1,16 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  */
+declare(strict_types=1);
 
+use figdice\exceptions\FunctionCallException;
+use figdice\exceptions\FunctionNotFoundException;
+use PHPUnit\Framework\TestCase;
 use figdice\classes\lexer\Lexer;
 use figdice\View;
 use figdice\classes\ViewElementTag;
@@ -15,7 +18,7 @@ use figdice\classes\ViewElementTag;
 /**
  * Unit Test Class for basic Lexer expressions
  */
-class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase
+class NativeFunctionFactoryTest extends TestCase
 {
 
     /**
@@ -23,7 +26,7 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase
      */
     private $view;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->view = new View();
     }
@@ -74,12 +77,10 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('no', $this->lexExpr(" if(false, 'yes', 'no')  "));
     }
 
-    /**
-     * @expectedException \figdice\exceptions\FunctionCallException
-     */
     public function testIfFuncWithMissingArgsThrowsException()
     {
-        $this->assertFalse($this->lexExpr(" if(1)  "));
+        $this->expectException(FunctionCallException::class);
+        $this->lexExpr(" if(1)  ");
     }
 
     public function testIfFuncWithOneFalseArgDefaultsToEmpty()
@@ -123,11 +124,9 @@ class NativeFunctionFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('', $this->lexExpr(' countif( /myString ) '));
     }
 
-    /**
-     * @expectedException \figdice\exceptions\FunctionCallException
-     */
     public function testCountIfFuncWithMissingArgsThrowsException() {
-        $this->assertFalse($this->lexExpr(" countif() "));
+        $this->expectException(FunctionCallException::class);
+        $this->lexExpr(" countif() ");
     }
 
     public function testCountWithoutArgInsideIteration()
@@ -239,20 +238,17 @@ ENDHTML;
     /**
      * This test is not the same as the one in LexerTest which expects also
      * this exception. In the situation below, we DID register a NativeFunctionFactory.
-     * @expectedException \figdice\exceptions\FunctionNotFoundException
      */
     public function testUnfedinedFunc()
     {
+        $this->expectException(FunctionNotFoundException::class);
         $this->assertEquals(false, $this->lexExpr(" someUndefinedFunc(1, 2, 3)  "));
     }
 
-    /**
-     * @expectedException \figdice\exceptions\FunctionCallException
-     */
     public function testSubstrFuncWithMissingArgumentsThrowsException()
     {
+        $this->expectException(FunctionCallException::class);
         $this->lexExpr(" substr('abcd') ");
-        $this->assertFalse(true);
     }
 
     public function testSubstrFuncWith3Args()

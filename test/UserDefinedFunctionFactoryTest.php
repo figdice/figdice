@@ -1,12 +1,15 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.0.5
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  */
+declare(strict_types=1);
+
+use figdice\exceptions\FunctionNotFoundException;
+use PHPUnit\Framework\TestCase;
 
 use figdice\classes\Context;
 use figdice\classes\ViewElementTag;
@@ -19,17 +22,17 @@ use figdice\classes\lexer\Lexer;
 /**
  * Unit Test Class for Function factory and custom Fig functions
  */
-class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
+class UserDefinedFunctionFactoryTest extends TestCase {
 
     /** @var \figdice\classes\ViewElement */
 	protected $viewElement;
 	/** @var View */
 	protected $view;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		$this->viewElement = null;
 	}
-	protected function tearDown() {
+	protected function tearDown(): void {
 		$this->viewElement = null;
 	}
 
@@ -68,13 +71,10 @@ class UserDefinedFunctionFactoryTest extends PHPUnit_Framework_TestCase {
 		$this->viewElement = $viewElement;
     }
 
-	/**
-	 * @expectedException \figdice\exceptions\FunctionNotFoundException
-	 */
 	public function testCustomFunctionBeforeRegThrowsException()
 	{
+	    $this->expectException(FunctionNotFoundException::class);
 		$this->lexExpr( "customFunc(12)" );
-		$this->assertFalse(true);
 	}
 
 	public function testRegisteredCustomFunctionExecutes()

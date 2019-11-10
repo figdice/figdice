@@ -1,14 +1,20 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2004-2015, Gabriel Zerbib.
- * @version 2.1.2
+ * @copyright 2004-2019, Gabriel Zerbib.
  * @package FigDice
  *
  * This file is part of FigDice.
  */
 
+declare(strict_types=1);
 namespace figdice\test;
+
+use figdice\exceptions\FeedClassNotFoundException;
+use figdice\exceptions\RenderingException;
+use figdice\exceptions\RequiredAttributeException;
+use figdice\exceptions\XMLParsingException;
+use PHPUnit\Framework\TestCase;
 
 use figdice\Feed;
 use figdice\Filter;
@@ -20,16 +26,16 @@ use figdice\exceptions\FileNotFoundException;
 /**
  * Unit Test Class for fig tags and attributes
  */
-class FigXmlTest extends \PHPUnit_Framework_TestCase
+class FigXmlTest extends TestCase
 {
 
     /** @var View */
     protected $view;
 
-    protected function setUp() {
+    protected function setUp(): void {
         $this->view = new View();
     }
-    protected function tearDown() {
+    protected function tearDown(): void {
         $this->view = null;
     }
 
@@ -123,9 +129,6 @@ ENDXML;
     $this->assertEquals("éà é €", trim($this->view->render()) );
   }
 
-  /**
-   * @expectedException \figdice\exceptions\XMLParsingException
-   */
   public function testUndeclaredEntitiesRaiseException()
   {
     $source = <<<ENDXML
@@ -140,7 +143,9 @@ ENDXML;
     $this->view->loadString($source);
     $this->view->mount('data', array('a', 'b', 'c'));
     $this->view->setReplacements(false);
-    $this->assertEquals("éà &eacute; € &ocirc;", trim($this->view->render()) );
+    $this->expectException(XMLParsingException::class);
+
+    $this->view->render();
   }
 	
   public function testHtmlEntitiesReplacementsByDefault() {
@@ -168,9 +173,6 @@ ENDXML;
     $this->assertEquals("ô < &lt;", trim($this->view->render()) );
   }
 
-  /**
-   * @expectedException \figdice\exceptions\RequiredAttributeException
-   */
   public function testMissingRequiredAttributeException() {
     $source = <<<ENDXML
 <xml>
@@ -178,7 +180,8 @@ ENDXML;
 </xml>
 ENDXML;
     $this->view->loadString($source);
-    $this->assertNull( $this->view->render() );
+    $this->expectException(RequiredAttributeException::class);
+    $this->view->render();
   }
 	
   public function testFilter()
@@ -259,16 +262,13 @@ ENDXML;
     }
   }
 
-  /**
-   * @expectedException \figdice\exceptions\RequiredAttributeException
-   */
   public function testMissingRequiredAttributeInFigAttr()
   {
     $source = '<xml><fig:attr value="12"/></xml>';
     $view = new View();
     $view->loadString($source);
+    $this->expectException(RequiredAttributeException::class);
     $view->render();
-    $this->assertTrue(true);
   }
 
   public function testMacro()
@@ -287,16 +287,14 @@ ENDXML;
     $this->assertEquals('', $view->render());
   }
 
-  /**
-   * @expectedException \figdice\exceptions\RenderingException
-   */
   public function testAttributeEvalsToArrayException()
   {
     $source = '<xml attr="{myArray}"></xml>';
     $view = new View();
     $view->loadString($source);
     $view->mount('myArray', array(4, 5, 6));
-    $this->assertEquals('dummy', $view->render());
+    $this->expectException(RenderingException::class);
+    $view->render();
   }
 
   public function testFeedWithParamWithoutFactoryWithPreloadedClass()
@@ -351,15 +349,12 @@ ENDXML;
     $this->assertEquals('<tag>34</tag>', $view->render());
   }
 
-  /**
-   * @expectedException \figdice\exceptions\FeedClassNotFoundException
-   */
   public function testFeedClassNotFoundException()
   {
     $view = new View();
     $view->loadString('<fig:feed class="unlikely\NotFoundFeed"/>');
+    $this->expectException(FeedClassNotFoundException::class);
     $view->render();
-    $this->assertTrue(false);
   }
 
 
@@ -463,27 +458,20 @@ ENDEXPECTED;
         $this->assertEquals($expected, $output);
     }
 
-
-    /**
-     * @expectedException \figdice\exceptions\RequiredAttributeException
-     */
     public function testFigCDataWithoutFileAttrRaisesException()
     {
         $view = new View();
         $view->loadString('<fig:cdata other-attr="dummy" />');
+        $this->expectException(RequiredAttributeException::class);
         $view->render();
-        $this->assertTrue(false);
     }
 
-    /**
-     * @expectedException \figdice\exceptions\FileNotFoundException
-     */
     public function testFigCDataOfFileNotFoundRaisesException()
     {
         $view = new View();
         $view->loadString('<fig:cdata file="not-found" />');
+        $this->expectException(FileNotFoundException::class);
         $view->render();
-        $this->assertTrue(false);
     }
 
     public function testFigValReturnsEvaluatedAttribute()

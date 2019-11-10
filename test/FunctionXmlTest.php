@@ -1,21 +1,21 @@
 <?php
 /**
  * @author Gabriel Zerbib <gabriel@figdice.org>
- * @copyright 2016, Gabriel Zerbib.
- * @version 2.3.3
+ * @copyright 2016-2019, Gabriel Zerbib.
  * @license GPLv3
  * @package FigDice
  *
  * This file is part of FigDice.
  */
 
+declare(strict_types=1);
+
+use figdice\exceptions\XMLParsingException;
+use PHPUnit\Framework\TestCase;
 use figdice\View;
 
-class FunctionXmlTest extends PHPUnit_Framework_TestCase
+class FunctionXmlTest extends TestCase
 {
-  /**
-   * @expectedException \figdice\exceptions\XMLParsingException
-   */
   public function testFunctionXmlForInvalidXmlIssuesException()
   {
     // Deliberately supplying invalid XML island,
@@ -33,9 +33,8 @@ TEMPLATE;
 
     $view = new View();
     $view->loadString($xml);
+    $this->expectException(XMLParsingException::class);
     $view->render();
-
-    $this->assertTrue(false, 'Should never occur: an exception was caught before.');
   }
 
   public function testFunctionXmlWithoutRootNodeDefaultsToXmlRootNode()
