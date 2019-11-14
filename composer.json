@@ -16,13 +16,13 @@
   "require": {
     "php": ">=7.1",
     "ext-xml": "*",
-    "ext-dom": "*",
-    "phpunit/phpunit": "^7.5.17"
+    "ext-dom": "*"
   },
   "autoload": {
     "psr-4": { "figdice\\": "src/figdice" }
   },
   "require-dev": {
+    "phpunit/phpunit": "^7.5.17",
     "mikey179/vfsstream": "^1.6.8"
   },
   "scripts": {
