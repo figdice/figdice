@@ -818,12 +818,6 @@ class View implements \Serializable {
 			return $this->callStackData[count($this->callStackData) - 1];
 		}
 		if($name == '..') {
-			//If there is no parent to the current context,
-			//stop searching.
-			if(count($this->callStackData) - 2 < 0) {
-				return null;
-			}
-
 			return $this->callStackData[count($this->callStackData) - 2];
 		}
 
