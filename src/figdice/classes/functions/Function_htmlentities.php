@@ -28,12 +28,14 @@ class Function_htmlentities implements FigFunction {
      */
 	public function evaluate(Context $context, $arity, $arguments) {
 		if($arity != 1) {
-			throw new FunctionCallException(
-				'htmlentities',
-				'Expects exactly 1 argument.',
-				$context->getFilename(),
-				$context->tag->getLineNumber()
-			);
+                    // @codeCoverageIgnoreStart
+		    throw new FunctionCallException(
+			'htmlentities',
+			'Expects exactly 1 argument.',
+			$context->getFilename(),
+			$context->tag->getLineNumber()
+		    );
+                    // @codeCoverageIgnoreEnd
 		}
 
 		$string = $arguments[0];
