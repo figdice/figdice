@@ -6,11 +6,11 @@ php:
   - 7.1
   - 7.2
   - 7.3
-  - 7.4snapshot
+  - 7.4
 
 matrix:
   allow_failures:
-    - php: 7.4snapshot
+    #- php: 7.4snapshot
 
 before_script:
   - composer self-update
@@ -22,6 +22,7 @@ script:
 
 after_success:
   - echo "php version name = $(phpenv version-name)"
-  - if [ $(phpenv version-name) = "7.3" ]; then composer require psr/log ; fi
-  - if [ $(phpenv version-name) = "7.3" ]; then composer require php-coveralls/php-coveralls '^2.1' ; fi
-  - if [ $(phpenv version-name) = "7.3" ]; then php vendor/bin/php-coveralls -v --exclude-no-stmt ; fi
+  - if [ $(phpenv version-name) = "7.4" ]; then composer require psr/log ; fi
+  - if [ $(phpenv version-name) = "7.4" ]; then composer require php-coveralls/php-coveralls '^2.1' ; fi
+  - if [ $(phpenv version-name) = "7.4" ]; then php vendor/bin/php-coveralls -v --exclude-no-stmt ; fi
+
