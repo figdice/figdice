@@ -15,13 +15,15 @@ class MagicReflector
     public static function invoke($object, $getter)
     {
         $className = get_class($object);
+        $getters = [];
+        $reflector = null;
 
         // First, check our cache for specified class.
         if (! array_key_exists($className, self::$cache)) {
-            $getters = [];
 
             // Parse the docblock for @method declarations
             $reflector = new ReflectionClass($className);
+
             $docblock = $reflector->getDocComment();
             $lines = explode("\n", $docblock);
             foreach ($lines as $line) {
@@ -42,6 +44,18 @@ class MagicReflector
             return $object->$getter();
         }
 
+        // Last chance:
+        // maybe the object implements the __get magic method
+        // /!\ The exitance of __get is tested only on the object itself, not on its parents.
+        if (method_exists($object, '__get')) {
+            if (null == $reflector) {
+                $reflector = new ReflectionClass($className);
+            }
+            $reflectorMagicGet = $reflector->getMethod('__get');
+            return $reflectorMagicGet->invoke($object);
+        }
+
         return null;
     }
 }
+
