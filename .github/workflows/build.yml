@@ -55,11 +55,11 @@ jobs:
       - run: mkdir -p build/logs
 
       - name: Download coverage result artifact
-        working-directory: build/logs
         uses: actions/download-artifact@v3
+        working-directory: build/logs
         with:
           name: code-coverage-report
-      
+
       - name: Publish coverage report
         run: |
           composer require psr/log '^2.0'
