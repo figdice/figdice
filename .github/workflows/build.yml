@@ -55,7 +55,6 @@ jobs:
     - run: mkdir -p build/logs
 
     - name: Download coverage result artifact
-      working-directory: build/logs
       uses: actions/download-artifact@v3
       with:
         name: code-coverage-report
@@ -64,4 +63,5 @@ jobs:
       run: |
         composer require psr/log '^2.0'
         composer require php-coveralls/php-coveralls '^2.5.3'
+        mv clover.xml build/logs/
         php vendor/bin/php-coveralls -v --exclude-no-stmt
