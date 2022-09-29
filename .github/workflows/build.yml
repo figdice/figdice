@@ -11,8 +11,7 @@ permissions:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
@@ -42,3 +41,13 @@ jobs:
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit --whitelist src/figdice --coverage-text --coverage-clover build/logs/clover.xml test
+
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: build/logs/clover.xml
+
+  coverage:
+    runs-on: ubuntu-22.04
+    needs: build
