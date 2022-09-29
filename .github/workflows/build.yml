@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build
     steps:
-    - run: mkdir -p build/logs
+    - uses: actions/checkout@v3
 
     - name: Download coverage result artifact
       uses: actions/download-artifact@v3
@@ -63,5 +63,6 @@ jobs:
       run: |
         composer require psr/log '^2.0'
         composer require php-coveralls/php-coveralls '^2.5.3'
+        mkdir -p build/logs
         mv clover.xml build/logs/
         php vendor/bin/php-coveralls -v --exclude-no-stmt
