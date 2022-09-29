@@ -33,6 +33,8 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Run test suite
+      env:
+        XDEBUG_MODE: covergae
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit --whitelist src/figdice --coverage-text --coverage-clover build/logs/clover.xml test
