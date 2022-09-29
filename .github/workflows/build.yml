@@ -55,8 +55,8 @@ jobs:
     - run: mkdir -p build/logs
 
     - name: Download coverage result artifact
-      uses: actions/download-artifact@v3
       working-directory: build/logs
+      uses: actions/download-artifact@v3
       with:
         name: code-coverage-report
 
