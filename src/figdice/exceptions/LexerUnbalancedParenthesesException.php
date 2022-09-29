@@ -24,6 +24,6 @@ class LexerUnbalancedParenthesesException extends \Exception {
     public function __construct($message, $file, $line) {
 		parent::__construct($message, 0);
 		$this->file = $file;
-		$this->line = $line;
+		$this->line = $line ?? 0;
 	}
 }

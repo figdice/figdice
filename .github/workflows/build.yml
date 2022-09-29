@@ -11,12 +11,17 @@ permissions:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
 
+    - name: Setup PHP with Xdebug
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        coverage: xdebug
+        
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
 
@@ -36,3 +41,33 @@ jobs:
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit --whitelist src/figdice --coverage-text --coverage-clover build/logs/clover.xml test
+
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: build/logs/clover.xml
+
+  coverage:
+    runs-on: ubuntu-22.04
+    needs: build
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download coverage result artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: code-coverage-report
+
+    - name: Install dependencies
+      run: |
+        composer require psr/log '^2.0'
+        composer require php-coveralls/php-coveralls '^2.5.3'
+        mkdir -p build/logs
+        mv clover.xml build/logs/
+
+    - name: Publish coverage report
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        php vendor/bin/php-coveralls -v --exclude-no-stmt

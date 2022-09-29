@@ -146,7 +146,7 @@ class Context
 
     public function getFilename()
     {
-        return $this->filenames[count($this->filenames) - 1];
+        return $this->filenames[count($this->filenames) - 1] ?? '';
     }
 
 
