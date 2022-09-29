@@ -67,5 +67,7 @@ jobs:
         mv clover.xml build/logs/
 
     - name: Publish coverage report
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         php vendor/bin/php-coveralls -v --exclude-no-stmt
