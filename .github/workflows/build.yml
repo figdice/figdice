@@ -59,10 +59,13 @@ jobs:
       with:
         name: code-coverage-report
 
-    - name: Publish coverage report
+    - name: Install dependencies
       run: |
         composer require psr/log '^2.0'
         composer require php-coveralls/php-coveralls '^2.5.3'
         mkdir -p build/logs
         mv clover.xml build/logs/
+
+    - name: Publish coverage report
+      run: |
         php vendor/bin/php-coveralls -v --exclude-no-stmt
