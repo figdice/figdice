@@ -17,6 +17,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Setup PHP with Xdebug
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        coverage: xdebug
+        
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
 
@@ -33,8 +39,6 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Run test suite
-      env:
-        XDEBUG_MODE: covergae
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit --whitelist src/figdice --coverage-text --coverage-clover build/logs/clover.xml test
