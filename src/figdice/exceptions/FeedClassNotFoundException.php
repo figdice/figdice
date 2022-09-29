@@ -36,7 +36,7 @@ class FeedClassNotFoundException extends Exception {
 	public function __construct($classname, $filename, $line) {
 		parent::__construct('Could not find factory for feed: ' . $classname);
 		$this->classname = $classname;
-		$this->file = $filename;
+		$this->file = $filename ?? '';
 		$this->line = $line;
 	}
 

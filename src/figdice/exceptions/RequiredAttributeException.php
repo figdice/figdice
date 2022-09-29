@@ -50,7 +50,7 @@ class RequiredAttributeException extends \Exception {
      */
     public function setFile($filename)
     {
-        $this->file = $filename;
+        $this->file = $filename ?? '';
         return $this;
     }
 }
