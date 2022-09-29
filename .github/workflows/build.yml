@@ -52,16 +52,16 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build
     steps:
-      - run: mkdir -p build/logs
+    - run: mkdir -p build/logs
 
-      - name: Download coverage result artifact
-        uses: actions/download-artifact@v3
-        working-directory: build/logs
-        with:
-          name: code-coverage-report
+    - name: Download coverage result artifact
+      uses: actions/download-artifact@v3
+      working-directory: build/logs
+      with:
+        name: code-coverage-report
 
-      - name: Publish coverage report
-        run: |
-          composer require psr/log '^2.0'
-          composer require php-coveralls/php-coveralls '^2.5.3'
-          php vendor/bin/php-coveralls -v --exclude-no-stmt
+    - name: Publish coverage report
+      run: |
+        composer require psr/log '^2.0'
+        composer require php-coveralls/php-coveralls '^2.5.3'
+        php vendor/bin/php-coveralls -v --exclude-no-stmt
