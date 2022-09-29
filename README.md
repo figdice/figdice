@@ -1,6 +1,6 @@
 ## ![Logo](http://www.figdice.org/img/fig-130-16.png) FigDice Templating System for PHP 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://travis-ci.org/figdice/figdice.svg?branch=3.x)](https://travis-ci.org/figdice/figdice)
+[![Build Status](https://github.com/figdice/figdice/actions/workflows/build.yml/badge.svg?branch=4.x)](https://github.com/figdice/figdice/actions)
 [![Latest Stable Version](https://poser.pugx.org/figdice/figdice/v/stable)](https://packagist.org/packages/figdice/figdice)
 [![Coverage Status](https://coveralls.io/repos/github/figdice/figdice/badge.svg?branch=4.x)](https://coveralls.io/github/figdice/figdice?branch=4.x)
 [![@figdice on Twitter](https://img.shields.io/badge/twitter-%40figdice-5189c7.svg)](https://twitter.com/figdice)
