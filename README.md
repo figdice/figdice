@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/figdice/figdice.svg?branch=3.x)](https://travis-ci.org/figdice/figdice)
 [![Latest Stable Version](https://poser.pugx.org/figdice/figdice/v/stable)](https://packagist.org/packages/figdice/figdice)
-[![Coverage Status](https://coveralls.io/repos/github/figdice/figdice/badge.svg?branch=3.x)](https://coveralls.io/github/figdice/figdice?branch=3.x)
+[![Coverage Status](https://coveralls.io/repos/github/figdice/figdice/badge.svg?branch=4.x)](https://coveralls.io/github/figdice/figdice?branch=4.x)
 [![@figdice on Twitter](https://img.shields.io/badge/twitter-%40figdice-5189c7.svg)](https://twitter.com/figdice)
 
 # Abstract
